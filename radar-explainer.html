@@ -408,6 +408,23 @@
 
       <details class="tech">
         <summary>The technical version, for anyone who wants it</summary>
+        <p><b>The twelve questions it asks, every run.</b> One per subject rather than one broad "travel AI" sweep, so an item arrives already filed on the right shelf instead of being sorted out afterwards.</p>
+        <div class="card" style="margin-bottom:16px">
+          <ul class="plain" style="margin-bottom:0">
+            <li><b>Mindtrip</b> · AI travel &nbsp;<span class="chip">platforms</span></li>
+            <li><b>OpenAI and ChatGPT</b> · travel booking agent &nbsp;<span class="chip">platforms</span></li>
+            <li><b>Google and Gemini</b> · AI travel booking &nbsp;<span class="chip">platforms</span></li>
+            <li><b>Perplexity</b> · travel booking &nbsp;<span class="chip">platforms</span></li>
+            <li><b>Microsoft and Copilot</b> · AI travel booking &nbsp;<span class="chip">platforms</span></li>
+            <li><b>Sabre</b> · travel AI agent &nbsp;<span class="chip">rails</span></li>
+            <li><b>Travelport</b> · AI agent &nbsp;<span class="chip">rails</span></li>
+            <li><b>Duffel</b> · flights API &nbsp;<span class="chip">rails</span></li>
+            <li><b>Navan</b> · travel AI agent &nbsp;<span class="chip">rails</span></li>
+            <li><b>Payments</b> · agentic commerce, travel checkout &nbsp;<span class="chip">payments</span></li>
+            <li><b>Protocols</b> · Model Context Protocol, travel booking &nbsp;<span class="chip">protocols</span></li>
+            <li><b>Suppliers</b> · airline direct AI agent booking &nbsp;<span class="chip">supplier direct</span></li>
+          </ul>
+        </div>
         <div class="body">Python standard library only, so it runs anywhere with no installation. Twelve Google News RSS queries, a 45 day window, a maximum of 3 items per query and 14 overall. Recency, relevance and duplicate filters run in that order. Category and trigger tagging by keyword lists. The optional triage pass calls <code>claude-opus-5</code> with a strict JSON schema so the response shape is guaranteed, checks explicitly for a refusal, and catches every exception back to keyword mode. Output is a JavaScript file the dashboard loads if present and ignores if absent.</div>
       </details>
     </section>
@@ -480,6 +497,21 @@
       <p>Layer 3 is the one that matters to everyone reading this. The same event produces a different action depending on who you are. A competitor launching in-chat booking means one thing to Product, which is a gap in the roadmap. It means something else to marketing, which is a claim to test before anyone repeats it. To a salesperson it is an objection that will come up next week. To leadership it is a threat that either changes the plan or does not. One record, four actions, written down separately.</p></div>
 
       <div class="card">
+
+        <h4>What decides that something is worth writing about</h4>
+        <p>Five things force a human to stop and look, no matter how unimportant the company seemed yesterday:</p>
+        <ol class="plain">
+          <li>Somebody raises money or gets bought.</li>
+          <li>Somebody announces a new partnership.</li>
+          <li>Somebody launches something that changes what their product can actually do.</li>
+          <li>One of our salespeople runs into a competitor in a live deal.</li>
+          <li>The same company keeps showing up. Three separate things in a week, from more than one source.</li>
+        </ol>
+        <p>The important part is what happens next, and it is easy to get wrong. <b>None of these five automatically produces a write up.</b> They force somebody to read the thing and answer one question: <b>does this change what anyone should do?</b></p>
+        <p>If yes, a draft opens with the facts already filled in and the opinion column deliberately empty, because that part is a person's job. If no, the decision gets written down, with a reason and a name against it.</p>
+        <div class="oneline"><div class="l">Why bother recording the noes</div><div class="t">From outside, "we looked at it and it was nothing" and "we completely missed it" look exactly the same. Writing down the noes is the only thing that tells them apart.</div></div>
+        <p>And nothing gets signed while the action column is empty. If nobody has to do anything differently, it was news. It goes back to being a signal.</p>
+
         <h4>The journey, step by step</h4>
         <table class="t">
           <thead><tr><th style="width:22%">Stage</th><th>What happens</th></tr></thead>
@@ -593,6 +625,11 @@
             <li>The dashboard itself. Six pages, five role views, both permission walls, night mode, sharing.</li>
             <li>All five steps of the attention scoring rule, implemented rather than described.</li>
             <li>The signing flow. Sign a draft and watch it appear for the other roles.</li>
+          <li>Grouping signals into stories, and folding repeated coverage of one announcement into a single event.</li>
+          <li>The five triggers, and the review queue they force. Nothing reaches an assessment without a person deciding it should.</li>
+          <li>The reject log. Every no is written down with a reason and a name.</li>
+          <li>The rule that an assessment cannot be signed while it asks nothing of anyone.</li>
+          <li>The roadmap board, and sorting on every list.</li>
           </ul>
         </div>
         <div class="card">
@@ -601,7 +638,8 @@
             <li>Salespeople reporting through the tool they already use. That needs an administrator, not new invention.</li>
             <li>Alerts pushed into Teams. Roughly ten lines of code once a channel exists.</li>
             <li>Saving anything permanently. Signing and logging reset when you reload the page.</li>
-            <li>Automatic detection of when the field knew something first. Curated by hand today.</li>
+            <li>Working out that two differently named things are the same story. Grouping by subject is built. Connecting across subjects is still a person.</li>
+          <li>Automatic detection of when the field knew something first. Curated by hand today.</li>
           </ul>
         </div>
       </div>

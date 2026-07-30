@@ -464,6 +464,15 @@
   body.dark .limitbox{background:#0F1530; border-color:#334064;}
   .limitbox b{color:var(--ink);}
 
+  /* ---------- sort control ---------- */
+  .sortctl{display:inline-flex; align-items:center; gap:7px; margin-left:auto; flex-shrink:0;}
+  .sortctl label{font-size:10px; text-transform:uppercase; letter-spacing:.7px; color:var(--ink3); font-weight:bold;}
+  .sortctl select{border:1px solid var(--line); background:var(--card); color:var(--ink); border-radius:8px;
+    padding:5px 9px; font-size:12.5px; font-family:inherit; cursor:pointer; transition:border-color .13s;}
+  .sortctl select:hover{border-color:var(--sky);}
+  .listhead{display:flex; align-items:center; gap:12px; flex-wrap:wrap; margin-bottom:10px;}
+  .listhead h3{margin-bottom:0;}
+
   .kbdhint{font-size:11px; color:var(--ink3); margin-top:10px;}
   .kbd{display:inline-block; border:1px solid var(--line); border-bottom-width:2px; border-radius:4px;
     padding:0 5px; font-size:10.5px; font-family:inherit; background:var(--card); color:var(--ink2);}
@@ -1552,13 +1561,15 @@ function pageSignals(){
 }
 
 function feedView(list){
+  const sorted = applySort("signals", list);
   return '<div class="resultbar"><span><b>'+list.length+'</b> of '+SIGNALS.length+' signals'
   +   (sigFilter!=="all" || catFilter!=="all" ? ' · filtered' : '')
   +   (LIVE.length ? ' · '+LIVE.length+' live' : '')+'</span>'
   +   (sigFilter!=="all" || catFilter!=="all"
         ? '<button class="minibtn" onclick="clearFilters()">Clear filters</button>' : '')
+  +   sortControl("signals")
   + '</div>'
-  + (list.length ? list.map(sigCard).join("")
+  + (sorted.length ? sorted.map(sigCard).join("")
       : '<div class="empty"><div class="eh">Nothing on this shelf yet</div>'
         + 'No signal matches '+(catFilter==="all" ? "this stream" : CATS[catFilter])
         + (sigFilter==="all" ? "" : " in the "+sigFilter+" stream")
@@ -1567,7 +1578,7 @@ function feedView(list){
 }
 
 function clustersView(list){
-  const clusters = buildClusters(list);
+  const clusters = applySort("clusters", buildClusters(list));
   window._clusters = clusters;
   const events = clusters.reduce((n,c) => n + c.eventCount, 0);
   const collapsed = clusters.reduce((n,c) => n + c.collapsed, 0);
@@ -1579,6 +1590,7 @@ function clustersView(list){
   +   (collapsed ? ' · <span class="collapsed">'+collapsed+' syndicated '+(collapsed===1?'copy':'copies')+' collapsed</span>' : '')
   + '</span>'
   + (firing.length ? '<span class="trig">⚡ '+firing.length+' assessment '+(firing.length===1?'candidate':'candidates')+'</span>' : '')
+  + sortControl("clusters")
   + '</div>'
   + (clusters.length ? clusters.map(clusterCard).join("")
       : '<div class="empty"><div class="eh">Nothing to cluster</div>Clear the filters to see the whole feed grouped.'
@@ -1617,6 +1629,77 @@ function sigCard(s){
   + '</div></div>';
 }
 
+/* =============== sorting ===============
+   One control, one state bag, per-list comparators. Every list that can grow
+   past a screenful gets one. Default for anything time-based is newest first,
+   which also fixes the feed: live and seed signals were concatenated rather
+   than merged, so dates ran down and then jumped back up. */
+
+const SORTS = {
+  signals: {def:"new",   opts:[["new","Newest first"],["old","Oldest first"],["player","Player A-Z"],["stream","Stream"],["cat","Category"]]},
+  clusters:{def:"trig",  opts:[["trig","Triggered first"],["events","Most events"],["new","Newest activity"],["player","Player A-Z"]]},
+  queue:   {def:"prio",  opts:[["prio","Trigger priority"],["new","Newest first"],["old","Oldest first"],["player","Player A-Z"]]},
+  moves:   {def:"new",   opts:[["new","Newest first"],["old","Oldest first"],["draft","Drafts first"]]},
+  rejects: {def:"new",   opts:[["new","Newest first"],["old","Oldest first"],["player","Player A-Z"]]},
+  players: {def:"score", opts:[["score","Focus score"],["player","Name A-Z"],["cat","Category"]]},
+  promos:  {def:"new",   opts:[["new","Newest first"],["old","Oldest first"],["player","Player A-Z"]]}
+};
+let sortState = {};
+function sortVal(k){ return sortState[k] || SORTS[k].def; }
+function setSort(k, v){ sortState[k] = v; keepScroll(render); }
+function sortControl(k){
+  return '<div class="sortctl"><label for="srt-'+k+'">Sort</label>'
+  + '<select id="srt-'+k+'" onchange="setSort(\''+k+'\',this.value)">'
+  + SORTS[k].opts.map(o => '<option value="'+o[0]+'"'+(sortVal(k)===o[0]?' selected':'')+'>'+o[1]+'</option>').join("")
+  + '</select></div>';
+}
+const byName = f => (a,b) => String(f(a)).localeCompare(String(f(b)));
+
+function applySort(k, arr){
+  const v = sortVal(k), out = arr.slice();
+  if(k === "signals"){
+    if(v === "new")    return out.sort((a,b) => sigDay(b) - sigDay(a));
+    if(v === "old")    return out.sort((a,b) => sigDay(a) - sigDay(b));
+    if(v === "player") return out.sort(byName(s => s.player));
+    if(v === "stream") return out.sort((a,b) => a.stream.localeCompare(b.stream) || sigDay(b) - sigDay(a));
+    if(v === "cat")    return out.sort((a,b) => CATS[a.cat].localeCompare(CATS[b.cat]) || sigDay(b) - sigDay(a));
+  }
+  if(k === "clusters"){
+    if(v === "trig")   return out.sort((a,b) => (b.trigger.fires?1:0)-(a.trigger.fires?1:0) || b.eventCount-a.eventCount || sigDay(b.latest)-sigDay(a.latest));
+    if(v === "events") return out.sort((a,b) => b.eventCount - a.eventCount || sigDay(b.latest)-sigDay(a.latest));
+    if(v === "new")    return out.sort((a,b) => sigDay(b.latest) - sigDay(a.latest));
+    if(v === "player") return out.sort(byName(c => c.subject));
+  }
+  if(k === "queue"){
+    const rank = t => t === "field" ? 0 : t === "volume" ? 1 : 2;
+    if(v === "prio")   return out.sort((a,b) => rank(a.trig)-rank(b.trig) || sigDay(b)-sigDay(a));
+    if(v === "new")    return out.sort((a,b) => sigDay(b) - sigDay(a));
+    if(v === "old")    return out.sort((a,b) => sigDay(a) - sigDay(b));
+    if(v === "player") return out.sort(byName(q => q.player));
+  }
+  if(k === "moves"){
+    if(v === "new")    return out;                      /* new drafts unshift to the front */
+    if(v === "old")    return out.reverse();
+    if(v === "draft")  return out.sort((a,b) => (a.status==="draft"?0:1) - (b.status==="draft"?0:1));
+  }
+  if(k === "rejects"){
+    if(v === "new")    return out.sort((a,b) => sigDay(b) - sigDay(a));
+    if(v === "old")    return out.sort((a,b) => sigDay(a) - sigDay(b));
+    if(v === "player") return out.sort(byName(r => r.player));
+  }
+  if(k === "players"){
+    if(v === "score")  return out.sort((a,b) => (b.sc[0]+b.sc[1]+b.sc[2]) - (a.sc[0]+a.sc[1]+a.sc[2]));
+    if(v === "player") return out.sort(byName(p => p.n));
+    if(v === "cat")    return out.sort((a,b) => CAT_SHORT[a.cat].localeCompare(CAT_SHORT[b.cat]) || byName(p=>p.n)(a,b));
+  }
+  if(k === "promos"){
+    if(v === "new")    return out.sort((a,b) => sigDay(b) - sigDay(a));
+    if(v === "old")    return out.sort((a,b) => sigDay(a) - sigDay(b));
+    if(v === "player") return out.sort(byName(p => p.n));
+  }
+  return out;
+}
+
 /* =============== clustering · pipeline stage 2 =====================
    The pipeline claimed this stage before anything implemented it, so the
    throughput argument rested on manual work. This makes it real.
@@ -1633,7 +1716,7 @@ const MONTHS = {Jan:0,Feb:1,Mar:2,Apr:3,May:4,Jun:5,Jul:6,Aug:7,Sep:8,Oct:9,Nov:
 
 function sigDay(s){
   if(s.iso) return Math.floor(Date.parse(s.iso) / 864e5);
-  if(s.date === "Now") return Math.floor(Date.UTC(2026,6,30) / 864e5);
+  if(s.date === "Now" || s.date === "Today") return Math.floor(Date.UTC(2026,6,30) / 864e5);
   const m = /^([A-Z][a-z]{2})\s+(\d+)$/.exec(s.date || "");
   if(m && MONTHS[m[1]] !== undefined) return Math.floor(Date.UTC(2026, MONTHS[m[1]], +m[2]) / 864e5);
   return 0;
@@ -1883,7 +1966,7 @@ function pageWatchlist(){
   const queue = queueTriggers();
   window._queue = queue;
   const col = t => '<div class="card"><h3>'+t.label+' <span style="text-transform:none;letter-spacing:0;color:var(--ink3);font-weight:normal">· '+t.note+'</span></h3>'
-    + t.players.map(p =>
+    + applySort("players", t.players).map(p =>
         '<div class="player" onclick="playerModal(\''+p.n.replace(/'/g,"\\'")+'\')"><div style="flex:1"><div class="nm">'+p.n+(p.depth==="lab"?' <span class="depth">LAB</span>':'')+'</div><div class="why">'+p.why+'</div></div><div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px"><span class="chip">'+(p.sc[0]+p.sc[1]+p.sc[2])+'/6</span><span class="chip">'+CAT_SHORT[p.cat]+'</span></div></div>'
       ).join("")
     + '</div>';
@@ -1898,6 +1981,7 @@ function pageWatchlist(){
       + '</div></div>'
     ).join("") : '<div style="color:var(--ink3);font-size:13px;padding:6px 0">No open triggers. The agent watches funding, partnerships, launches, and field signals around the clock; anything it flags lands here for analyst confirmation.</div>')
   + '</div>'
+  + '<div class="listhead" style="margin:16px 0 10px"><span style="font-size:11.5px;text-transform:uppercase;letter-spacing:.8px;color:var(--ink3);font-weight:bold">The three tiers</span>'+sortControl("players")+'</div>'
   + '<div class="grid3">'+col(WATCHLIST.t1)+col(WATCHLIST.t2)+col(WATCHLIST.t3)+'</div>'
   + '<div class="grid2">'
   + '<div class="card"><h3>The scoring rubric · every player, three fixed questions</h3>'
@@ -1914,8 +1998,8 @@ function pageWatchlist(){
   +   '<div class="signed" style="margin-top:8px">Full re-score quarterly · last Jul 1, 2026 · next Oct 1, 2026. Triggers catch spikes; the cycle catches slow fade and slow rise.</div>'
   + '</div>'
   + '</div>'
-  + '<div class="card"><h3>Promotion log</h3>'
-  + PROMOTIONS.map(p =>
+  + '<div class="card"><div class="listhead"><h3>Promotion log</h3>'+sortControl("promos")+'</div>'
+  + applySort("promos", PROMOTIONS).map(p =>
       '<div class="promo" onclick="playerModal(\''+p.n.replace(/'/g,"\\'")+'\')"><div class="d">'+p.d+'</div><div><b>'+p.txt+'</b><div style="color:var(--ink2);font-size:12.5px">'+p.trigger+'</div><div class="auto">'+p.auto+'</div></div></div>'
     ).join("")
   + '<div class="signed" style="margin-top:10px">The rules watch so the analyst does not have to. Every promotion is trigger-fired, analyst-confirmed.</div>'
@@ -2227,7 +2311,7 @@ function pageMoves(){
   const seesDrafts = role==="ci" || role==="leadership";
   const visible = MOVES.filter(m => m.status==="published" || seesDrafts);
   const hiddenDrafts = MOVES.some(m => m.status==="draft") && !seesDrafts;
-  const queue = role==="ci" ? reviewQueue() : [];
+  const queue = role==="ci" ? applySort("queue", reviewQueue()) : [];
   const reviewedCount = Object.keys(REVIEWED).length;
   const assessed = Object.keys(REVIEWED).filter(k => REVIEWED[k].decision === "assessment").length;
 
@@ -2236,7 +2320,7 @@ function pageMoves(){
   + '<div class="kicker">Signals are evidence. Assessments are judgment. The line between them is the product.</div>'
 
   + (role === "ci"
-      ? '<div class="card"><h3>Review queue · five events force a look, no tier exemption</h3>'
+      ? '<div class="card"><div class="listhead"><h3>Review queue · five events force a look, no tier exemption</h3>'+(queue.length?sortControl("queue"):"")+'</div>'
         + '<div style="font-size:13px;color:var(--ink2);margin-bottom:12px">A trigger forces the review, never the assessment. The question at this stage is only: does this change what anyone should do?</div>'
         + '<div class="limitbox" style="margin:0 0 14px"><b>Why this queue is mostly launches.</b> The collector can detect that a launch happened. It cannot judge whether the launch changed real capability, which is what the criterion actually asks. That gap is the reason the review stage exists rather than the trigger firing an assessment directly.</div>'
         + (queue.length ? queue.map(q =>
@@ -2256,13 +2340,14 @@ function pageMoves(){
         + '</div>'
       : '')
 
-  + visible.map(m => moveCard(m, false)).join("")
+  + (visible.length > 1 ? '<div class="listhead" style="margin:18px 0 10px">'+sortControl("moves")+'</div>' : '')
+  + applySort("moves", visible).map(m => moveCard(m, false)).join("")
   + (hiddenDrafts ? '<div class="card"><div class="lockcard">'+lockSvg+'<div><b>Draft in review · visible to the CI team only.</b> Assessments publish signed or not at all. You will see it Friday if it survives review.</div></div></div>' : '')
 
   + (seesDrafts
-      ? '<div class="card"><h3>Reject log · what we decided not to write, and why</h3>'
+      ? '<div class="card"><div class="listhead"><h3>Reject log · what we decided not to write, and why</h3>'+(REJECTS.length>1?sortControl("rejects"):"")+'</div>'
         + '<div style="font-size:13px;color:var(--ink2);margin-bottom:10px">The cheapest answer to "how do you know you are not missing things". A silent no and a miss look identical from outside. These are the nos.</div>'
-        + (REJECTS.length ? REJECTS.map(r =>
+        + (REJECTS.length ? applySort("rejects", REJECTS).map(r =>
             '<div class="promo" style="cursor:default"><div class="d">'+r.date+'</div><div>'
             + '<b>'+r.player+'</b> <span style="color:var(--ink3);font-size:12px">· '+TRIGGER_LABEL[r.trig]+'</span>'
             + '<div style="color:var(--ink2);font-size:12.5px">'+r.title+'</div>'

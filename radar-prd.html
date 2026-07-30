@@ -333,12 +333,12 @@
 
     <div class="card">
       <h4>Build status at a glance</h4>
-      <p style="font-size:13.5px; color:var(--ink2); margin-bottom:14px;">Eleven capabilities run today. Seven are specified and not built. Stated up front, because a PRD that cannot tell you which half is real is a wish list.</p>
+      <p style="font-size:13.5px; color:var(--ink2); margin-bottom:14px;">Twenty one capabilities run today. Seven are specified and not built. Stated up front, because a PRD that cannot tell you which half is real is a wish list.</p>
       <table class="t">
         <thead><tr><th style="width:40%">Capability</th><th style="width:15%">Status</th><th>Note</th></tr></thead>
         <tbody>
           <tr data-status="built"><td><b>Published stream collector</b></td><td><span class="st built">built</span></td><td>Runs against 12 watchlist queries. Last run: 14 signals.</td></tr>
-          <tr data-status="built"><td><b>Promotion trigger detection</b></td><td><span class="st built">built</span></td><td>Funding, partnership, launch. Last run flagged 7.</td></tr>
+          <tr data-status="built"><td><b>Promotion trigger detection</b></td><td><span class="st built">built</span></td><td>Five triggers: funding, partnership, launch, field hit, sustained volume. Last run flagged 7.</td></tr>
           <tr data-status="built"><td><b>LLM triage pass</b></td><td><span class="st built">built</span></td><td>Optional. Needs the SDK and a key, falls back silently without them.</td></tr>
           <tr data-status="built"><td><b>Dashboard, six pages</b></td><td><span class="st built">built</span></td><td>Self contained, no dependencies, works offline.</td></tr>
           <tr data-status="built"><td><b>Five role views</b></td><td><span class="st built">built</span></td><td>Each role lands on a different home screen.</td></tr>
@@ -348,12 +348,22 @@
           <tr data-status="built"><td><b>Sign and publish flow</b></td><td><span class="st built">built</span></td><td>Signing a draft makes it appear for every other role.</td></tr>
           <tr data-status="built"><td><b>Daily, weekly and monthly digests</b></td><td><span class="st built">built</span></td><td>Daily is machine assembled and labelled unsigned.</td></tr>
           <tr data-status="built"><td><b>Share to email</b></td><td><span class="st built">built</span></td><td>Permission aware summary, per page.</td></tr>
+          <tr data-status="built"><td><b>Signal clustering</b></td><td><span class="st built">built</span></td><td>Groups by subject and collapses syndicated coverage. 25 signals resolve to 15 clusters and 24 distinct events.</td></tr>
+          <tr data-status="built"><td><b>Syndication de-duplication</b></td><td><span class="st built">built</span></td><td>Headline similarity at 0.28, a threshold measured against the live feed rather than guessed.</td></tr>
+          <tr data-status="built"><td><b>Sustained volume trigger</b></td><td><span class="st built">built</span></td><td>Trigger 5. Counts distinct events, not items, so press pickup cannot fire a tier review.</td></tr>
+          <tr data-status="built"><td><b>Review queue, two stage gate</b></td><td><span class="st built">built</span></td><td>Any of five triggers forces a human look. The review decides whether it becomes an assessment.</td></tr>
+          <tr data-status="built"><td><b>Reject log</b></td><td><span class="st built">built</span></td><td>Structured reason and reviewer name recorded for every no. Visible to CI and Leadership.</td></tr>
+          <tr data-status="built"><td><b>Sign gate</b></td><td><span class="st built">built</span></td><td>An assessment with empty judgment or empty actions cannot be signed.</td></tr>
+          <tr data-status="built"><td><b>Assessment revisions</b></td><td><span class="st built">built</span></td><td>Editing a published assessment publishes a numbered revision rather than overwriting it.</td></tr>
+          <tr data-status="built"><td><b>Roadmap board</b></td><td><span class="st built">built</span></td><td>Product and Leadership only. Drag or keyboard, with a Jira import preview.</td></tr>
+          <tr data-status="built"><td><b>Role routed notifications</b></td><td><span class="st built">built</span></td><td>The same event reaches each role as a different sentence, or not at all.</td></tr>
+          <tr data-status="built"><td><b>List sorting</b></td><td><span class="st built">built</span></td><td>Recency, player, score and category across every list that can grow past a screen.</td></tr>
           <tr data-status="spec"><td><b>Share to Teams as an adaptive card</b></td><td><span class="st spec">spec</span></td><td>Copies to clipboard today. Needs a channel webhook.</td></tr>
           <tr data-status="p2"><td><b>Field intake in Salesforce</b></td><td><span class="st p2">phase 2</span></td><td>Organizationally gated, not technically hard.</td></tr>
           <tr data-status="p2"><td><b>Tier 1 alerts to email and Teams</b></td><td><span class="st p2">phase 2</span></td><td>Preferences already captured in Settings.</td></tr>
           <tr data-status="p2"><td><b>Scheduled collector runs</b></td><td><span class="st p2">phase 2</span></td><td>Currently run on demand.</td></tr>
           <tr data-status="p2"><td><b>Persistence</b></td><td><span class="st p2">phase 2</span></td><td>Signing, dismissals and logged signals reset on reload. Theme and notification preferences persist.</td></tr>
-          <tr data-status="p3"><td><b>Automatic cross stream correlation</b></td><td><span class="st p3">phase 3</span></td><td>Field heard it first is curated today, not detected.</td></tr>
+          <tr data-status="p3"><td><b>Cross subject correlation</b></td><td><span class="st p3">phase 3</span></td><td>Subject clustering and syndication de-duplication are built. Cross subject correlation, meaning two differently named players being one story, is still analyst work.</td></tr>
           <tr data-status="p3"><td><b>Decision briefs and trend intelligence</b></td><td><span class="st p3">phase 3</span></td><td>Where the function stops reporting and starts predicting.</td></tr>
         </tbody>
       </table>
