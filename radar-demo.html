@@ -398,6 +398,13 @@
   body.dark .switch .sl{background:#33406A;}
 
   /* ---------- accessibility & polish ---------- */
+  /* every entrance animation uses fill-mode both, so if animations never run
+     the content is stranded at opacity 0. Honour the preference and make the
+     resting state the visible one. */
+  @media (prefers-reduced-motion: reduce){
+    *, *::before, *::after{animation-duration:.001ms !important; animation-iteration-count:1 !important; transition-duration:.001ms !important; scroll-behavior:auto !important;}
+    .page{opacity:1 !important; transform:none !important;}
+  }
   .skip{position:absolute; left:-9999px; top:8px; z-index:200; background:var(--card); color:var(--blue);
     border:1px solid var(--blue); border-radius:8px; padding:9px 15px; font-size:13px; font-weight:bold; text-decoration:none;}
   .skip:focus{left:14px;}
@@ -594,7 +601,7 @@ const PAGES = [
   {id:"signals",    label:()=> "Signals",              icon:"signals", count:()=>SIGNALS.length},
   {id:"lab",        label:()=> "Assistant Lab",        icon:"lab"},
   {id:"watchlist",  label:()=> "Watchlist",            icon:"watch"},
-  {id:"moves",      label:()=> "Assessments",          icon:"moves"},
+  {id:"moves",      label:()=> "Assessments",          icon:"moves", count:()=> role==="ci" ? reviewQueue().length : 0},
   {id:"battlecards",label:()=> "Battlecards",          icon:"shield"}
 ];
 
@@ -1049,7 +1056,8 @@ function renderSwitcher(){
 
 function renderNav(){
   $("nav").innerHTML = PAGES.map(p => {
-    const count = p.count ? '<span class="count">'+p.count()+'</span>' : '';
+    const n = p.count ? p.count() : 0;
+    const count = n ? '<span class="count">'+n+'</span>' : '';   /* a zero badge is noise */
     return '<a class="'+(page===p.id?"active":"")+'" onclick="go(\''+p.id+'\')">'+icon(p.icon)+p.label(role)+count+'</a>';
   }).join("");
 
@@ -2049,15 +2057,167 @@ function moveCard(m, inModal){
   + '</div>';
 }
 
+/* =============== the two-stage gate ===============
+   Stage 1: any of five events forces a review. No tier exemption, no
+   discretion about whether to look.
+   Stage 2: the review asks one question. Does this change what anyone
+   should do? Yes becomes an assessment. No gets written down.
+
+   The reject log is the point. A CI function that never records what it
+   declined cannot tell the difference between "we considered it and it was
+   noise" and "we missed it". Neither can anyone auditing it. */
+
+const TRIGGER_LABEL = {
+  funding:     "Funding round or acquisition",
+  partnership: "New partnership",
+  launch:      "Launch that changes real capability",
+  field:       "Field hit a competitor in a live deal",
+  volume:      "Sustained signal volume"
+};
+const TRIGGER_SHORT = {funding:"funding", partnership:"partnership", launch:"launch", field:"field hit", volume:"volume"};
+const REJECT_REASONS = [
+  "No action implied. Nothing changes for anyone.",
+  "Already covered by a published assessment.",
+  "Single source, not corroborated.",
+  "Player sits below the attention threshold.",
+  "Syndicated coverage, not a distinct event."
+];
+
+let REVIEWED = {};
+let REJECTS = [
+  {date:"Jul 24", player:"Booking Holdings", trig:"partnership", by:"A. Abboud",
+   title:"OTA loyalty tie-up with a regional airline",
+   reason:"No action implied. Nothing changes for anyone."},
+  {date:"Jul 19", player:"Regional NDC aggregator", trig:"funding", by:"A. Abboud",
+   title:"Seed round, undisclosed amount",
+   reason:"Player sits below the attention threshold."}
+];
+
+function reviewKey(kind, a, b){ return kind + "|" + a + "|" + (b || ""); }
+
+function reviewQueue(){
+  const out = [];
+  SIGNALS.forEach(s => {
+    if(!s.trigger) return;
+    const k = reviewKey("s", s.player, s.title);
+    if(REVIEWED[k]) return;
+    out.push({key:k, kind:"signal", trig:s.trigger, player:s.player,
+              title:s.title, date:s.date, sig:s});
+  });
+  buildClusters(SIGNALS).forEach(c => {
+    if(!c.trigger.fires) return;
+    const k = reviewKey("c", c.subject);
+    if(REVIEWED[k]) return;
+    out.push({key:k, kind:"cluster", trig:"volume", player:c.subject,
+              title:c.trigger.events+" distinct events from "+c.trigger.sources+" sources, "+c.trigger.from+" to "+c.trigger.to,
+              date:c.trigger.to, cluster:c});
+  });
+  const rank = t => t === "field" ? 0 : t === "volume" ? 1 : 2;
+  out.sort((a,b) => rank(a.trig) - rank(b.trig));
+  return out;
+}
+
+function reviewAssess(key){
+  const item = reviewQueue().find(x => x.key === key);
+  if(!item) return;
+  REVIEWED[key] = {decision:"assessment"};
+  const isCluster = item.kind === "cluster";
+  MOVES.unshift({
+    id: "rv" + Date.now(),
+    status: "draft",
+    title: isCluster ? item.player + ": sustained activity" : item.player + ": " + item.title,
+    when: "Draft · from the review queue",
+    ribbon: "Forced by a trigger · " + TRIGGER_LABEL[item.trig],
+    what: isCluster ? item.cluster.events.slice(0,5).map(e => e.lead.title)
+                    : [item.title + (item.sig && item.sig.body ? ". " + item.sig.body : "")],
+    why: [],
+    doing: [],
+    signed: "DRAFT · unsigned · visible to CI and leadership only",
+    sources: isCluster ? item.cluster.events.map(e => e.lead.date + " · " + srcName(e.lead) + " · " + e.lead.title)
+                       : [item.date + " · " + (item.sig ? item.sig.source : "review queue")]
+  });
+  page = "moves";
+  render();
+  toast("Draft opened. Facts are prefilled. It will not sign until judgment and actions are written.");
+}
+
+function reviewRejectModal(key){
+  const item = reviewQueue().find(x => x.key === key);
+  if(!item) return;
+  openModal(''
+  + '<h4>Not worth an assessment</h4>'
+  + '<div class="hint">The trigger still fired and the tier still moved. This records that a human looked and said no, and why.</div>'
+  + '<div class="kv"><div class="k">Item</div><div><b>'+item.player+'</b><br>'+item.title+'</div></div>'
+  + '<div class="kv"><div class="k">Trigger</div><div>'+TRIGGER_LABEL[item.trig]+'</div></div>'
+  + '<label>Reason</label><select id="rj-reason">'
+  +   REJECT_REASONS.map(r => '<option>'+r+'</option>').join("")
+  +   '<option value="__other">Something else…</option></select>'
+  + '<div id="rj-otherwrap" style="display:none"><label>Your reason</label><input id="rj-other" placeholder="Recorded against your name"></div>'
+  + '<div class="actions"><button class="btn ghost" onclick="closeModal()">Cancel</button>'
+  + '<button class="btn" onclick="reviewReject(\''+key.replace(/'/g,"\\'")+'\')">Log the decision</button></div>');
+  const sel = $("rj-reason");
+  if(sel) sel.onchange = function(){ $("rj-otherwrap").style.display = this.value === "__other" ? "block" : "none"; };
+}
+
+function reviewReject(key){
+  const item = reviewQueue().find(x => x.key === key);
+  if(!item) return;
+  const sel = $("rj-reason");
+  let reason = sel ? sel.value : REJECT_REASONS[0];
+  if(reason === "__other") reason = ($("rj-other").value || "").trim() || "No reason given";
+  REVIEWED[key] = {decision:"reject"};
+  REJECTS.unshift({date:"Today", player:item.player, trig:item.trig,
+                   title:item.title, reason:reason, by:"A. Abboud"});
+  closeModal();
+  render();
+  toast("Logged. The no is now on the record, with your name and a reason.");
+}
+
 function pageMoves(){
   const seesDrafts = role==="ci" || role==="leadership";
   const visible = MOVES.filter(m => m.status==="published" || seesDrafts);
   const hiddenDrafts = MOVES.some(m => m.status==="draft") && !seesDrafts;
+  const queue = role==="ci" ? reviewQueue() : [];
+  const reviewedCount = Object.keys(REVIEWED).length;
+  const assessed = Object.keys(REVIEWED).filter(k => REVIEWED[k].decision === "assessment").length;
+
   return ''
   + header("Assessments", "Curated significant events. Facts first, judgment layered on top, every claim drills to its source.")
   + '<div class="kicker">Signals are evidence. Assessments are judgment. The line between them is the product.</div>'
+
+  + (role === "ci"
+      ? '<div class="card"><h3>Review queue · five events force a look, no tier exemption</h3>'
+        + '<div style="font-size:13px;color:var(--ink2);margin-bottom:12px">A trigger forces the review, never the assessment. The question at this stage is only: does this change what anyone should do?</div>'
+        + '<div class="limitbox" style="margin:0 0 14px"><b>Why this queue is mostly launches.</b> The collector can detect that a launch happened. It cannot judge whether the launch changed real capability, which is what the criterion actually asks. That gap is the reason the review stage exists rather than the trigger firing an assessment directly.</div>'
+        + (queue.length ? queue.map(q =>
+            '<div class="sig"><div class="when">'+q.date+'</div><div class="bodywrap">'
+            + '<div class="meta"><span class="trig" title="'+TRIGGER_LABEL[q.trig]+'">⚡ '+TRIGGER_SHORT[q.trig]+'</span><span class="chip outline">'+q.player+'</span>'
+            +   (q.kind==="cluster" ? '<span class="chip">cluster</span>' : '')+'</div>'
+            + '<div class="t">'+(fieldAccess(q.sig || {stream:"published"})==="locked" ? "Field signal · restricted" : q.title)+'</div>'
+            + '<div style="margin-top:8px;display:flex;gap:10px;flex-wrap:wrap">'
+            +   '<button class="btn" style="padding:6px 13px" onclick="reviewAssess(\''+q.key.replace(/'/g,"\\'")+'\')">Write an assessment</button>'
+            +   '<button class="btn ghost" style="padding:6px 13px" onclick="reviewRejectModal(\''+q.key.replace(/'/g,"\\'")+'\')">Not worth one</button>'
+            + '</div></div></div>'
+          ).join("")
+          : '<div class="empty"><div class="eh">Queue clear</div>Every triggered item has been through a human. Nothing is sitting in the gap between detected and decided.</div>')
+        + (reviewedCount ? '<div class="signed" style="margin-top:12px"><b>'+reviewedCount+'</b> reviewed this session · <b>'+assessed+'</b> became assessments · <b>'+(reviewedCount-assessed)+'</b> did not</div>' : '')
+        + '</div>'
+      : '')
+
   + visible.map(m => moveCard(m, false)).join("")
-  + (hiddenDrafts ? '<div class="card"><div class="lockcard">'+lockSvg+'<div><b>1 draft in review · visible to the CI team only.</b> Assessments publish signed or not at all. You will see it Friday if it survives review.</div></div></div>' : '');
+  + (hiddenDrafts ? '<div class="card"><div class="lockcard">'+lockSvg+'<div><b>Draft in review · visible to the CI team only.</b> Assessments publish signed or not at all. You will see it Friday if it survives review.</div></div></div>' : '')
+
+  + (seesDrafts
+      ? '<div class="card"><h3>Reject log · what we decided not to write, and why</h3>'
+        + '<div style="font-size:13px;color:var(--ink2);margin-bottom:10px">The cheapest answer to "how do you know you are not missing things". A silent no and a miss look identical from outside. These are the nos.</div>'
+        + (REJECTS.length ? REJECTS.map(r =>
+            '<div class="promo" style="cursor:default"><div class="d">'+r.date+'</div><div>'
+            + '<b>'+r.player+'</b> <span style="color:var(--ink3);font-size:12px">· '+TRIGGER_LABEL[r.trig]+'</span>'
+            + '<div style="color:var(--ink2);font-size:12.5px">'+r.title+'</div>'
+            + '<div class="auto">'+r.reason+' · '+r.by+'</div></div></div>'
+          ).join("") : '<div style="color:var(--ink3);font-size:13px">Nothing rejected yet.</div>')
+        + '</div>'
+      : '');
 }
 
 function moveModal(id){
