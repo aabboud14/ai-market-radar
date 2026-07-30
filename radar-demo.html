@@ -434,6 +434,29 @@
   .nav a.active{box-shadow:inset 0 0 0 1px rgba(0,94,184,.09);}
   .btn:focus-visible{outline-offset:3px;}
 
+  /* ---------- clusters ---------- */
+  .clus{border:1px solid var(--line); border-radius:10px; padding:13px 15px; margin-bottom:10px; background:var(--card); cursor:pointer; transition:transform .14s, box-shadow .14s, border-color .14s;}
+  .clus:hover{transform:translateY(-2px); box-shadow:var(--shadow-hover); border-color:#C9D8EC;}
+  .clus .ch{display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-bottom:5px;}
+  .clus .cn{font-weight:bold; font-size:14.5px;}
+  .clus .lead{font-size:13px; color:var(--ink2); margin-bottom:7px;}
+  .funnel{display:flex; align-items:center; gap:7px; font-size:11.5px; color:var(--ink3); flex-wrap:wrap; padding-top:8px; border-top:1px solid var(--line);}
+  .funnel b{color:var(--ink); font-weight:bold;}
+  .funnel .arw{color:var(--ink3); opacity:.6;}
+  .collapsed{color:var(--warn); font-weight:bold;}
+  body.dark .collapsed{color:#F0B769;}
+  .evrow{padding:9px 0; border-top:1px solid var(--line);}
+  .evrow:first-of-type{border-top:0;}
+  .evrow .et{font-size:13px; font-weight:bold; margin-bottom:2px;}
+  .evrow .em{font-size:11.5px; color:var(--ink3);}
+  .dupe{font-size:11.5px; color:var(--ink3); margin-top:5px; padding-left:15px; position:relative; line-height:1.45;}
+  .dupe::before{content:"\21B3"; position:absolute; left:0; top:0;}
+  .dupe b{color:var(--warn);}
+  body.dark .dupe b{color:#F0B769;}
+  .limitbox{background:#FAFBFD; border:1px dashed #C6CEDC; border-radius:9px; padding:11px 14px; font-size:12.5px; color:var(--ink2); line-height:1.55; margin-top:12px;}
+  body.dark .limitbox{background:#0F1530; border-color:#334064;}
+  .limitbox b{color:var(--ink);}
+
   .kbdhint{font-size:11px; color:var(--ink3); margin-top:10px;}
   .kbd{display:inline-block; border:1px solid var(--line); border-bottom-width:2px; border-radius:4px;
     padding:0 5px; font-size:10.5px; font-family:inherit; background:var(--card); color:var(--ink2);}
@@ -789,6 +812,7 @@ let role = "ci";
 let page = "home";
 let labTask = "multi";
 let sigFilter = "all";
+let sigView = "feed";
 let catFilter = "all";
 let objQuery = "";
 
@@ -1136,9 +1160,9 @@ function homeCI(){
   + header("Ops overview", "The week at a glance: what came in, what needs judgment, what ships Friday.")
   + '<div class="kicker">Three streams in. One system out.</div>'
   + '<div class="grid4">'
-  +   '<div class="tile clickable" onclick="go(\'signals\')"><div class="num" data-n="'+SIGNALS.length+'">0</div><div class="lbl">Signals in the system</div><div class="note">'+(LIVE.length? LIVE.length+' live · ':'')+'field + lab + published</div></div>'
+  +   '<div class="tile clickable" onclick="sigView=\'feed\';go(\'signals\')"><div class="num" data-n="'+SIGNALS.length+'">0</div><div class="lbl">Signals in the system</div><div class="note">'+(LIVE.length? LIVE.length+' live · ':'')+'field + lab + published</div></div>'
   +   '<div class="tile clickable" onclick="sigFilter=\'published\';catFilter=\'all\';go(\'signals\')"><div class="num" data-n="3">0</div><div class="lbl">Pending triage</div><div class="note">Auto-tagged, awaiting confirm</div></div>'
-  +   '<div class="tile clickable" onclick="corrModal(0)"><div class="num" data-n="2">0</div><div class="lbl">Correlation flags</div><div class="note">Cross-stream matches</div></div>'
+  +   clusterTile()
   +   '<div class="tile clickable" onclick="go(\'moves\')"><div class="num" data-n="1">0</div><div class="lbl">Draft in review</div><div class="note">Publishes Friday</div></div>'
   + '</div>'
   + '<div class="grid2" style="margin-top:16px">'
@@ -1508,7 +1532,19 @@ function pageSignals(){
         '<button class="catchip '+(catFilter===c?"active":"")+'" onclick="setCatFilter(\''+c+'\')">'+CAT_SHORT[c]+'</button>'
       ).join("")
   + '</div></div>'
-  + '<div class="resultbar"><span><b>'+list.length+'</b> of '+SIGNALS.length+' signals'
+  + '<div class="fgroup" style="margin-bottom:14px"><span class="flabel">View</span>'
+  + '<div class="seg">'
+  +   '<button class="'+(sigView==="feed"?"active":"")+'" onclick="setSigView(\'feed\')">Feed</button>'
+  +   '<button class="'+(sigView==="clusters"?"active":"")+'" onclick="setSigView(\'clusters\')">Clustered</button>'
+  + '</div>'
+  + '<span style="font-size:11.5px;color:var(--ink3)">Stage 2 of the pipeline. Same signals, grouped into stories.</span>'
+  + '</div>'
+  + (sigView === "clusters" ? clustersView(list) : feedView(list))
+  + '</div>';
+}
+
+function feedView(list){
+  return '<div class="resultbar"><span><b>'+list.length+'</b> of '+SIGNALS.length+' signals'
   +   (sigFilter!=="all" || catFilter!=="all" ? ' · filtered' : '')
   +   (LIVE.length ? ' · '+LIVE.length+' live' : '')+'</span>'
   +   (sigFilter!=="all" || catFilter!=="all"
@@ -1519,12 +1555,33 @@ function pageSignals(){
         + 'No signal matches '+(catFilter==="all" ? "this stream" : CATS[catFilter])
         + (sigFilter==="all" ? "" : " in the "+sigFilter+" stream")
         + '. That is information too: a quiet category is a category nobody is moving in.'
+        + '<div><button class="btn ghost" onclick="clearFilters()">Clear filters</button></div></div>');
+}
+
+function clustersView(list){
+  const clusters = buildClusters(list);
+  window._clusters = clusters;
+  const events = clusters.reduce((n,c) => n + c.eventCount, 0);
+  const collapsed = clusters.reduce((n,c) => n + c.collapsed, 0);
+  const firing = clusters.filter(c => c.trigger.fires);
+  return '<div class="resultbar">'
+  + '<span><b>'+list.length+'</b> signals <span class="arw">→</span> <b>'+clusters.length+'</b> '
+  +   (clusters.length===1?'cluster':'clusters')+' <span class="arw">→</span> <b>'+events+'</b> distinct '
+  +   (events===1?'event':'events')
+  +   (collapsed ? ' · <span class="collapsed">'+collapsed+' syndicated '+(collapsed===1?'copy':'copies')+' collapsed</span>' : '')
+  + '</span>'
+  + (firing.length ? '<span class="trig">⚡ '+firing.length+' assessment '+(firing.length===1?'candidate':'candidates')+'</span>' : '')
+  + '</div>'
+  + (clusters.length ? clusters.map(clusterCard).join("")
+      : '<div class="empty"><div class="eh">Nothing to cluster</div>Clear the filters to see the whole feed grouped.'
         + '<div><button class="btn ghost" onclick="clearFilters()">Clear filters</button></div></div>')
-  + '</div>';
+  + '<div class="limitbox"><b>A cluster is not a correlation flag.</b> A cluster is one subject over time. A correlation flag is one event seen independently by two different streams. Different questions, both worth asking.<br><br>'
+  + '<b>Honest about what this is.</b> Grouping runs on the subject tag the collector already applied, plus headline similarity to fold syndicated coverage into one event. It catches wire copy of the same announcement, but not an independent rewrite: two outlets covering one launch in completely different words still read as two events. It also does not work out that two differently named players are the same story, and it does not link a field signal to a published one by meaning. That correlation is still analyst judgment, and it sits in Phase 2.</div>';
 }
 
 function setSigFilter(f){ sigFilter=f; render(); }
 function setCatFilter(c){ catFilter=c; render(); }
+function setSigView(v){ sigView=v; render(); }
 function clearFilters(){ sigFilter="all"; catFilter="all"; render(); }
 
 function sigCard(s){
@@ -1550,6 +1607,197 @@ function sigCard(s){
   return '<div class="sig"><div class="when">'+s.date+'</div><div class="bodywrap">'+meta
   + '<div class="t">'+title+'</div>'+(s.body?'<div class="b">'+s.body+'</div>':'')+'<div class="src">'+src+'</div>'
   + '</div></div>';
+}
+
+/* =============== clustering · pipeline stage 2 =====================
+   The pipeline claimed this stage before anything implemented it, so the
+   throughput argument rested on manual work. This makes it real.
+
+   Two levels, and the distinction is the whole point:
+     cluster = one subject
+     event   = one thing that actually happened
+   Syndicated coverage of a single announcement collapses into one event.
+   Without that, "volume" measures how well a press release travelled
+   rather than how much a player is doing. */
+
+const STOPWORDS = new Set(["the","and","for","with","its","new","from","that","this","are","how","why","into","out","who","was","has","have","will","they","their","not","but","all","can","get","now","one","two","ai"]);
+const MONTHS = {Jan:0,Feb:1,Mar:2,Apr:3,May:4,Jun:5,Jul:6,Aug:7,Sep:8,Oct:9,Nov:10,Dec:11};
+
+function sigDay(s){
+  if(s.iso) return Math.floor(Date.parse(s.iso) / 864e5);
+  if(s.date === "Now") return Math.floor(Date.UTC(2026,6,30) / 864e5);
+  const m = /^([A-Z][a-z]{2})\s+(\d+)$/.exec(s.date || "");
+  if(m && MONTHS[m[1]] !== undefined) return Math.floor(Date.UTC(2026, MONTHS[m[1]], +m[2]) / 864e5);
+  return 0;
+}
+function srcName(s){ return String(s.source || "unknown").split(" · ")[0].trim(); }
+function titleTokens(t){
+  const out = new Set();
+  String(t).toLowerCase().replace(/[^a-z0-9\s]/g," ").split(/\s+/)
+    .forEach(w => { if(w.length > 2 && !STOPWORDS.has(w)) out.add(w); });
+  return out;
+}
+function jaccard(a, b){
+  if(!a.size || !b.size) return 0;
+  let inter = 0;
+  a.forEach(x => { if(b.has(x)) inter++; });
+  return inter / (a.size + b.size - inter);
+}
+
+/* Threshold picked against the real feed, not guessed. Measured pairs:
+     0.333  Navan MCP launch, Business Wire vs Investing.com   same event
+     0.077  Mindtrip DMO tool vs Answer Intelligence           arguably same
+     0.053  Visa/Yatra roundup vs Travelport ticketing         different
+   0.28 sits clear of both edges. Note the middle case: headline overlap
+   cannot catch an independent rewrite of the same announcement. That is a
+   real limit of this approach and it is stated in the UI rather than hidden
+   by over-tuning, which would start collapsing genuinely separate launches. */
+const DUPE_SIMILARITY = 0.28, DUPE_WINDOW_DAYS = 3;
+
+function buildClusters(list){
+  const bySubject = {};
+  (list || SIGNALS).forEach(s => { (bySubject[s.player] = bySubject[s.player] || []).push(s); });
+
+  return Object.keys(bySubject).map(subject => {
+    const items = bySubject[subject].slice().sort((a,b) => sigDay(a) - sigDay(b));
+    const events = [];
+    items.forEach(s => {
+      const tok = titleTokens(s.title);
+      const hit = events.find(e =>
+        Math.abs(sigDay(e.lead) - sigDay(s)) <= DUPE_WINDOW_DAYS &&
+        jaccard(e.tokens, tok) >= DUPE_SIMILARITY);
+      if(hit) hit.dupes.push(s);
+      else events.push({lead:s, dupes:[], tokens:tok});
+    });
+    const sources = new Set(items.map(srcName));
+    const streams = new Set(items.map(s => s.stream));
+    /* category by weight, not by whichever item happened to be oldest. A
+       cluster spanning shelves is itself worth seeing, so keep the count. */
+    const tally = {};
+    items.forEach(s => { tally[s.cat] = (tally[s.cat] || 0) + 1; });
+    const cats = Object.keys(tally).sort((a,b) => tally[b] - tally[a]);
+    return {
+      subject: subject,
+      cat: cats[0],
+      cats: cats,
+      items: items,
+      events: events,
+      signalCount: items.length,
+      eventCount: events.length,
+      collapsed: items.length - events.length,
+      sources: sources,
+      streams: streams,
+      latest: items[items.length - 1],
+      trigger: volumeTrigger(events)
+    };
+  }).sort((a,b) =>
+    (b.trigger.fires ? 1 : 0) - (a.trigger.fires ? 1 : 0) ||
+    b.eventCount - a.eventCount ||
+    sigDay(b.latest) - sigDay(a.latest)
+  );
+}
+
+/* §10A trigger 5. Counts EVENTS, not items, so syndication cannot fire it. */
+function volumeTrigger(events){
+  for(let i = 0; i < events.length; i++){
+    const win = events.filter(e => {
+      const d = sigDay(e.lead) - sigDay(events[i].lead);
+      return d >= 0 && d <= 7;
+    });
+    if(win.length < 3) continue;
+    const src = new Set();
+    win.forEach(e => { src.add(srcName(e.lead)); e.dupes.forEach(d => src.add(srcName(d))); });
+    if(src.size >= 2){
+      return {fires:true, events:win.length, sources:src.size,
+              from:win[0].lead.date, to:win[win.length-1].lead.date};
+    }
+  }
+  return {fires:false};
+}
+
+/* the throughput claim, stated as a number instead of asserted in prose */
+function clusterTile(){
+  const cl = buildClusters(SIGNALS);
+  const cand = cl.filter(c => c.trigger.fires).length;
+  return '<div class="tile clickable" onclick="sigView=\'clusters\';catFilter=\'all\';sigFilter=\'all\';go(\'signals\')">'
+  + '<div class="num" data-n="'+cl.length+'">0</div>'
+  + '<div class="lbl">Clusters, not headlines</div>'
+  + '<div class="note">'+SIGNALS.length+' signals grouped'+(cand ? ' · '+cand+' assessment candidate'+(cand===1?'':'s') : '')+'</div></div>';
+}
+
+function clusterCard(c, i){
+  const t = c.trigger;
+  const restricted = fieldAccess(c.latest) === "locked";
+  return '<div class="clus" onclick="clusterModal('+i+')">'
+  + '<div class="ch"><span class="cn">'+c.subject+'</span>'+catChip(c.cat)
+  +   (c.cats.length > 1 ? '<span class="chip">spans '+c.cats.length+' shelves</span>' : '')
+  +   (t.fires ? '<span class="trig">⚡ volume trigger</span>' : '')
+  +   ([...c.streams].map(s => streamBadge(s)).join(""))
+  + '</div>'
+  + '<div class="lead">'+(restricted ? 'Field signal · details restricted' : c.latest.title)+'</div>'
+  + '<div class="funnel"><b>'+c.signalCount+'</b> signals <span class="arw">→</span> <b>'+c.eventCount+'</b> '
+  +   (c.eventCount === 1 ? 'event' : 'events')
+  +   (c.collapsed ? ' <span class="collapsed">· '+c.collapsed+' syndicated '+(c.collapsed===1?'copy':'copies')+' collapsed</span>' : '')
+  +   ' <span class="arw">·</span> '+c.sources.size+' '+(c.sources.size===1?'source':'sources')
+  + '</div>'
+  + '</div>';
+}
+
+function clusterModal(i){
+  const c = window._clusters[i];
+  if(!c) return;
+  const t = c.trigger;
+  openModal(''
+  + '<h4>'+c.subject+'</h4>'
+  + '<div class="hint">Cluster · pipeline stage 2 · grouped by tagged subject, syndication collapsed</div>'
+  + '<div class="kv"><div class="k">Funnel</div><div><b>'+c.signalCount+'</b> signals → <b>'+c.eventCount+'</b> distinct '
+  +   (c.eventCount===1?'event':'events')+(c.collapsed ? ' · '+c.collapsed+' collapsed as syndicated coverage' : ' · nothing collapsed')+'</div></div>'
+  + '<div class="kv"><div class="k">Sources</div><div>'+[...c.sources].join(" · ")+'</div></div>'
+  + '<div class="kv"><div class="k">Streams</div><div>'+[...c.streams].map(s=>streamBadge(s)).join(" ")+'</div></div>'
+  + '<div class="kv"><div class="k">Trigger 5</div><div>'
+  +   (t.fires
+        ? '<span class="trig">⚡ fires</span> '+t.events+' events from '+t.sources+' sources, '+t.from+' to '+t.to
+          +'<br><span style="color:var(--ink3);font-size:12px">Assessment candidate. Detection is built; the forced-assessment gate is still spec.</span>'
+        : '<span style="color:var(--ink3)">Does not fire. Needs 3+ distinct events from 2+ sources inside 7 days.</span>')
+  + '</div></div>'
+  + '<div class="seclabel">What is in it</div>'
+  + c.events.map(e => {
+      const locked = fieldAccess(e.lead) === "locked";
+      return '<div class="evrow"><div class="et">'+(locked ? 'Field signal · restricted' : e.lead.title)+'</div>'
+      + '<div class="em">'+e.lead.date+' · '+srcName(e.lead)+'</div>'
+      + e.dupes.map(d => '<div class="dupe"><b>syndicated copy</b> · '+srcName(d)+' · '+d.date+'<br>'+d.title+'</div>').join("")
+      + '</div>';
+    }).join("")
+  + '<div class="limitbox"><b>What this does not do yet.</b> It groups by the subject tag the collector already applied, and collapses near-identical headlines. It does not work out that two differently named players are the same story, and it does not link a field signal to a published one by meaning. That cross-subject correlation is still analyst work, and it is on the Phase 2 list.</div>'
+  + '<div class="actions"><button class="btn ghost" onclick="closeModal()">Close</button>'
+  + (role === "ci"
+      ? '<button class="btn" onclick="draftFromCluster('+i+')">Draft an assessment from this</button>'
+      : '<button class="btn" onclick="closeModal();catFilter=\'all\';sigFilter=\'all\';sigView=\'feed\';render()">Back to the feed</button>')
+  + '</div>');
+}
+
+/* stage 2 to stage 4. Clustering that does not hand off to judgment is just
+   a tidier feed, so the pipeline claim only holds if this edge exists. */
+function draftFromCluster(i){
+  const c = window._clusters[i];
+  if(!c) return;
+  const id = "cl" + Date.now();
+  MOVES.unshift({
+    id: id,
+    status: "draft",
+    title: c.subject + ": " + c.eventCount + " events in " + c.sources.size + " sources",
+    when: "Draft · assembled from a cluster",
+    ribbon: c.trigger.fires ? "Volume trigger fired · " + c.trigger.events + " events between " + c.trigger.from + " and " + c.trigger.to : null,
+    what: c.events.slice(0,5).map(e => e.lead.title),
+    why: [],
+    doing: [],
+    signed: "DRAFT · unsigned · visible to CI and leadership only",
+    sources: c.events.map(e => e.lead.date + " · " + srcName(e.lead) + " · " + e.lead.title)
+  });
+  closeModal();
+  page = "moves";
+  render();
+  toast("Draft assembled from the " + c.subject + " cluster. Facts are prefilled. Judgment and actions are not, and it will not sign until they are.");
 }
 
 /* ---- Lab ---- */
@@ -1821,6 +2069,17 @@ function moveModal(id){
 function signMove(id){
   const m = MOVES.find(x => x.id === id);
   if(!m || m.status !== "draft") return;
+  /* §10A stopping rule. An assessment that asks nothing of anyone is a
+     signal wearing a signature. Required now that clusters can create
+     drafts with the action column deliberately empty. */
+  if(!m.doing || !m.doing.length || !m.why || !m.why.length){
+    const missing = [];
+    if(!m.why || !m.why.length) missing.push("Why it matters");
+    if(!m.doing || !m.doing.length) missing.push("What we are doing");
+    toast("Cannot sign. " + missing.join(" and ") + " still empty. An assessment that asks nothing of anyone is a signal, not an assessment.");
+    editMove(id);
+    return;
+  }
   m.status = "published";
   m.when = "Published today";
   m.signed = "Published today · signed A. Abboud, Market Intelligence";
