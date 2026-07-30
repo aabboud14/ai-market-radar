@@ -46,7 +46,7 @@ QUERIES = [
     ("Microsoft / Copilot", "Copilot AI travel booking", "plat"),
     ("Travelport", '"Travelport" AI agent', "rails"),
     ("Duffel", '"Duffel" flights API', "rails"),
-    ("Amadeus", '"Amadeus" AI agent travel', "rails"),
+    ("Navan", '"Navan" travel AI agent', "rails"),
     ("Payments", "agentic commerce payments travel checkout", "pay"),
     ("Protocols", '"Model Context Protocol" travel booking', "proto"),
     ("Suppliers", "airline direct AI agent booking", "supplier"),
@@ -57,7 +57,7 @@ CATS = ["plat", "rails", "proto", "supplier", "pay"]
 RELEVANCE = [
     "ai", "agent", "agentic", "assistant", "chatgpt", "gemini", "claude",
     "copilot", "perplexity", "mindtrip", "sabre", "travelport", "duffel",
-    "amadeus", "booking", "travel", "gds", "ndc", "mcp", "payment",
+    "navan", "booking", "travel", "gds", "ndc", "mcp", "payment",
     "checkout", "itinerary", "airline", "hotel",
 ]
 

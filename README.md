@@ -2,7 +2,7 @@
 
 A concept prototype for a competitive intelligence function: how you sense what is happening in AI-native travel booking, decide what matters, and get it in front of the people who can act on it.
 
-**This is an independent concept demo built for an interview discussion. It is not an Amadeus product, it is not affiliated with or endorsed by Amadeus, and the personas and curated data in it are illustrative.**
+**This is an independent concept demo. It is not a commercial product, it is not affiliated with or endorsed by any company, and the personas and curated data in it are illustrative.**
 
 ## What is here
 
@@ -15,6 +15,12 @@ A concept prototype for a competitive intelligence function: how you sense what 
 | `radar_collector.py` | The published-stream collector. Pulls public news feeds, tags each item to a category, flags promotion triggers, writes `radar-data.js`. |
 
 Everything runs as static files with no build step and no server. Nothing you do in the prototype leaves your browser.
+
+## The idea
+
+Three sensing streams feed five categories. Everything is scored on a fixed rubric, tiered by how much attention it earns, and either published fast and unsigned or slowly and signed by an analyst. It lands with four different teams in four different shapes, and two feedback loops send what those teams learn back into what the system watches next.
+
+Open `radar-flow.html` for the whole thing in one picture.
 
 ## Refreshing the live feed
 

@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>AI Market Radar · Product Requirements</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><circle cx='8' cy='24' r='4' fill='%23005EB8'/><circle cx='16' cy='8' r='5' fill='%2329ABE2'/><circle cx='26' cy='19' r='4' fill='%23000835'/></svg>">
-<!-- Concept PRD written for interview discussion. Not an Amadeus product document. -->
+<!-- Concept PRD written for interview discussion. Not a commercial product document. -->
 <style>
   :root{
     --navy:#000835; --blue:#005EB8; --sky:#29ABE2;
@@ -303,7 +303,7 @@
       <label class="switch"><input type="checkbox" id="builtsw" onchange="document.body.classList.toggle('onlybuilt', this.checked)"><span class="sl"></span></label>
     </div>
     <div class="sidefoot">
-      Concept prototype for interview discussion.<br>Not an Amadeus product.<br>Nothing on this page leaves your browser.
+      Concept prototype for interview discussion.<br>Not a commercial product.<br>Nothing on this page leaves your browser.
     </div>
   </aside>
 
@@ -363,7 +363,7 @@
     <section id="problem" data-title="Problem">
       <div class="snum">01</div>
       <h3>Problem</h3>
-      <p class="sub">Amadeus has no structured competitive intelligence function for AI assistants today. The market moves daily. The reporting does not.</p>
+      <p class="sub">There is no structured competitive intelligence function for AI assistants today. The market moves daily. The reporting does not.</p>
 
       <div class="kicker">Intelligence exists. It just dies in Teams threads.</div>
 
@@ -390,7 +390,7 @@
 
       <div class="card">
         <h4>The shape of the market being tracked</h4>
-        <p style="font-size:13.5px; color:var(--ink2);">AI assistants are moving from planning to booking to servicing. Planning is already commoditized across ChatGPT, Gemini, Claude, Perplexity, Copilot and Mindtrip. Booking is the contested frontier, and it runs through rails, protocols and payments, which is precisely where Amadeus lives. Servicing is wide open. A CI function that only tracks assistant launches will miss the part that decides the outcome.</p>
+        <p style="font-size:13.5px; color:var(--ink2);">AI assistants are moving from planning to booking to servicing. Planning is already commoditized across ChatGPT, Gemini, Claude, Perplexity, Copilot and Mindtrip. Booking is the contested frontier, and it runs through rails, protocols and payments, which is precisely where we live. Servicing is wide open. A CI function that only tracks assistant launches will miss the part that decides the outcome.</p>
       </div>
     </section>
 
@@ -499,7 +499,7 @@
             <tr><td><b>Rails and Infrastructure</b></td><td class="mono">rails</td><td>Sabre, Travelport, Duffel, NDC aggregators</td><td><span class="stream published">pub</span> <span class="stream field">field</span></td></tr>
             <tr><td><b>Protocols and Standards</b></td><td class="mono">proto</td><td>MCP, Agentic Commerce Protocol, the stated MCP to UCP direction</td><td><span class="stream published">pub</span> <span class="stream field">field</span></td></tr>
             <tr><td><b>Supplier Direct to Agent</b></td><td class="mono">supplier</td><td>Airlines and hotels bypassing intermediaries</td><td><span class="stream published">pub</span> <span class="stream field">field</span></td></tr>
-            <tr><td><b>Payments and Agentic Commerce</b></td><td class="mono">pay</td><td>In chat checkout, PayPal and Stripe rails, ties to Outpayce</td><td><span class="stream published">pub</span> <span class="stream field">field</span> <span class="stream product">part</span></td></tr>
+            <tr><td><b>Payments and Agentic Commerce</b></td><td class="mono">pay</td><td>In chat checkout, PayPal and Stripe rails, ties to our own payments business</td><td><span class="stream published">pub</span> <span class="stream field">field</span> <span class="stream product">part</span></td></tr>
           </tbody>
         </table>
         <details class="more">
@@ -663,7 +663,7 @@ items, mode = claude_triage(items)   <span class="cm"># falls back to keywords o
           <thead><tr><th style="width:18%">Stream</th><th style="width:18%">Status</th><th>Automation stance</th></tr></thead>
           <tbody>
             <tr><td><span class="stream published">published</span></td><td><span class="st built">built</span></td><td>Fully automated. Collector runs on a schedule, writes the feed, flags triggers. No human in the loop until the analyst confirms tags.</td></tr>
-            <tr data-status="p2"><td><span class="stream field">field</span></td><td><span class="st p2">phase 2</span></td><td>Structured intake as a Salesforce quick action, since Amadeus already runs deep on Salesforce including Agentforce. Organizationally gated, not technically hard. Interim: any structured form.</td></tr>
+            <tr data-status="p2"><td><span class="stream field">field</span></td><td><span class="st p2">phase 2</span></td><td>Structured intake as a Salesforce quick action, since the business already runs deep on Salesforce including Agentforce. Organizationally gated, not technically hard. Interim: any structured form.</td></tr>
             <tr><td><span class="stream product">lab</span></td><td><span class="st spec">human by design</span></td><td>Stays manual on purpose. Monthly hands on benchmark, same real tasks, scored on plan, price, book and service. Hands on judgment is the moat, so automating it would remove the thing that makes it worth reading.</td></tr>
           </tbody>
         </table>
@@ -818,7 +818,7 @@ items, mode = claude_triage(items)   <span class="cm"># falls back to keywords o
           <thead><tr><th style="width:44%">Question</th><th style="width:20%">Confidence today</th><th>Action</th></tr></thead>
           <tbody>
             <tr><td><b>Which BI layer does the team standardize on?</b></td><td><span class="chip">not confirmed</span></td><td>Confirm day one. The design deliberately does not depend on a specific tool.</td></tr>
-            <tr><td><b>Salesforce admin capacity for the field quick action.</b></td><td><span class="chip">likely available</span></td><td>Amadeus already runs deep on Salesforce including Agentforce, so the platform is not in question. Admin time is.</td></tr>
+            <tr><td><b>Salesforce admin capacity for the field quick action.</b></td><td><span class="chip">likely available</span></td><td>the business already runs deep on Salesforce including Agentforce, so the platform is not in question. Admin time is.</td></tr>
             <tr><td><b>Teams channel and webhook for tier 1 alerts.</b></td><td><span class="chip">low risk</span></td><td>Microsoft 365 is named in the brief. Needs a channel and a webhook URL, roughly ten lines of code.</td></tr>
             <tr><td><b>Who signs when the CI analyst is out?</b></td><td><span class="chip">open</span></td><td>Name a deputy signer before go live. Unsigned records must never back up.</td></tr>
             <tr><td><b>Retention and legal review on competitor claims captured from live deals.</b></td><td><span class="chip">open</span></td><td>Review before the field stream opens beyond a pilot team.</td></tr>
@@ -879,7 +879,7 @@ python3 radar_collector.py</pre>
       </div>
 
       <div class="footnote">
-        Concept prototype and concept document, produced for interview discussion. Not an Amadeus product and not an Amadeus document. Illustrative data throughout, except the published stream feed, which contains real headlines collected from public sources. Role names in the prototype are illustrative personas.
+        Concept prototype and concept document, produced for interview discussion. Not a commercial product and not a company document. Illustrative data throughout, except the published stream feed, which contains real headlines collected from public sources. Role names in the prototype are illustrative personas.
       </div>
     </section>
 
@@ -991,7 +991,7 @@ const ENTITIES={
      ['artifacts','string','Transcripts and screenshots from the run']]},
  Assessments:{note:'The judgment layer, kept deliberately separate from every fact it rests on.',
   f:[['id','string','Stable key'],['subject','ref','A player, a move or a category'],['verdict','text','What we think it means'],
-     ['confidence','enum','high | medium | low. Stated, never implied'],['so_what','text','The consequence for Amadeus'],
+     ['confidence','enum','high | medium | low. Stated, never implied'],['so_what','text','The consequence for us'],
      ['author','user','A person, always'],['signed_at','datetime','Blank means it does not circulate'],
      ['supersedes','ref','Assessments age. The chain stays readable']]}
 };
@@ -1024,7 +1024,7 @@ $('#scorebody').innerHTML=SCORES.map(r=>
 /* ---------- agent pipeline ---------- */
 const STAGES=[
  ['01','Watchlist queries','12 queries, one per subject, each carrying a default category.',
-  'One query per watchlist subject rather than one generic travel-AI query. The category travels with the query, so an item arrives pre-tagged before any classification happens. Queries cover Mindtrip, Sabre, OpenAI, Google, Perplexity, Microsoft, Travelport, Duffel, Amadeus, plus three thematic sweeps for payments, protocols and supplier direct moves.'],
+  'One query per watchlist subject rather than one generic travel-AI query. The category travels with the query, so an item arrives pre-tagged before any classification happens. Queries cover Mindtrip, Sabre, OpenAI, Google, Perplexity, Microsoft, Travelport, Duffel, Navan, plus three thematic sweeps for payments, protocols and supplier direct moves.'],
  ['02','Fetch','Google News RSS over HTTPS, 20 second timeout, per feed failure isolated.',
   'Public RSS only. No scraping, no credentials, no rate limited API. A failed feed prints a warning and the run continues, because a partial run is far more useful than no run.'],
  ['03','Parse and clean','Strip HTML, remove the trailing source suffix, drop echoed descriptions.',
@@ -1092,7 +1092,7 @@ const PHASES=[
  {n:'Phase 2 · Automate the boring half',tag:'ingest plus dashboard',
   goal:'Remove the manual cost from the parts that do not need judgment.',
   items:[['Published ingest','The collector on a schedule. Built and running today, ahead of plan.'],
-         ['Field intake','Salesforce quick action, since Amadeus already runs deep on Salesforce including Agentforce.'],
+         ['Field intake','Salesforce quick action, since the business already runs deep on Salesforce including Agentforce.'],
          ['Dashboard','The single system of record, replacing the spreadsheet.'],
          ['LLM triage','Classification, dedupe and drafting. Analyst still confirms and still signs.'],
          ['Alerts','Tier 1 triggers to email and Teams, opt in per user.']]},
