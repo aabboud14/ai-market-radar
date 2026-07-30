@@ -1,0 +1,1231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AI Market Radar · Product Requirements</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><circle cx='8' cy='24' r='4' fill='%23005EB8'/><circle cx='16' cy='8' r='5' fill='%2329ABE2'/><circle cx='26' cy='19' r='4' fill='%23000835'/></svg>">
+<!-- Concept PRD written for interview discussion. Not an Amadeus product document. -->
+<style>
+  :root{
+    --navy:#000835; --blue:#005EB8; --sky:#29ABE2;
+    --bg:#F3F5F9; --card:#FFFFFF;
+    --ink:#10182B; --ink2:#4A5568; --ink3:#8A94A6;
+    --line:#E3E8F0;
+    --good:#1D7A46; --warn:#B85C00; --high:#B3261E;
+    --f-field:#0E7C66; --f-product:#6B4FC8; --f-published:#005EB8;
+    --radius:12px;
+    --shadow:0 1px 2px rgba(16,24,43,.05), 0 4px 14px rgba(16,24,43,.04);
+    --shadow-hover:0 2px 4px rgba(16,24,43,.07), 0 10px 26px rgba(16,24,43,.09);
+  }
+  body.dark{
+    --bg:#0C1124; --card:#141A31; --ink:#E8ECF5; --ink2:#A9B4C9; --ink3:#6E7A93; --line:#232C47;
+    --shadow:0 1px 2px rgba(0,0,0,.35), 0 4px 14px rgba(0,0,0,.28);
+    --shadow-hover:0 2px 4px rgba(0,0,0,.4), 0 10px 26px rgba(0,0,0,.45);
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html{scroll-behavior:smooth; scroll-padding-top:84px;}
+  body{font-family:Arial, Helvetica, sans-serif; background:var(--bg); color:var(--ink); font-size:14px; line-height:1.55; -webkit-font-smoothing:antialiased;}
+  ::selection{background:#BFE3F5;}
+  body.dark ::selection{background:#1E4E86;}
+  *:focus-visible{outline:2px solid var(--sky); outline-offset:2px; border-radius:4px;}
+  ::-webkit-scrollbar{width:10px; height:10px;}
+  ::-webkit-scrollbar-thumb{background:#C9D2E0; border-radius:6px; border:2px solid var(--bg);}
+  body.dark ::-webkit-scrollbar-thumb{background:#2C3757; border-color:var(--bg);}
+  ::-webkit-scrollbar-track{background:transparent;}
+  a{color:var(--blue);}
+
+  /* ---------- topbar ---------- */
+  .topbar{position:sticky; top:0; z-index:60; height:64px; display:flex; align-items:center; gap:16px; padding:0 20px; color:#fff;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='430' height='64'%3E%3Cg stroke='%2329ABE2' stroke-opacity='.28'%3E%3Cline x1='40' y1='48' x2='120' y2='14'/%3E%3Cline x1='120' y1='14' x2='210' y2='40'/%3E%3Cline x1='210' y1='40' x2='300' y2='10'/%3E%3Cline x1='300' y1='10' x2='392' y2='44'/%3E%3C/g%3E%3Cg fill='%2329ABE2'%3E%3Ccircle cx='40' cy='48' r='2.5' fill-opacity='.55'/%3E%3Ccircle cx='120' cy='14' r='3' fill-opacity='.85'/%3E%3Ccircle cx='210' cy='40' r='2' fill-opacity='.5'/%3E%3Ccircle cx='300' cy='10' r='2.5' fill-opacity='.7'/%3E%3Ccircle cx='392' cy='44' r='3' fill-opacity='.6'/%3E%3C/g%3E%3C/svg%3E"), linear-gradient(115deg, #000835 0%, #001250 55%, #001E66 100%);
+    background-repeat:no-repeat, no-repeat; background-position:right -30px center, 0 0;}
+  .brand{display:flex; align-items:center; gap:11px; min-width:0;}
+  .brand h1{font-size:16px; font-weight:bold; letter-spacing:.2px; white-space:nowrap;}
+  .brand .sub{font-size:11px; color:#9FB3D9; white-space:nowrap;}
+  .demo-badge{font-size:10px; letter-spacing:.5px; text-transform:uppercase; color:#FFD9A0; border:1px solid #C98A2E; border-radius:999px; padding:4px 10px; white-space:nowrap;}
+  .spacer{flex:1;}
+  .toplinks{display:flex; gap:4px; background:rgba(255,255,255,.09); border-radius:999px; padding:3px;}
+  .toplinks a{color:#C9D4EA; text-decoration:none; font-size:12.5px; padding:6px 13px; border-radius:999px; white-space:nowrap; transition:color .15s, background .15s;}
+  .toplinks a:hover{color:#fff;}
+  .toplinks a.here{background:var(--sky); color:#00253F; font-weight:bold;}
+  .iconbtn{width:34px; height:34px; border-radius:50%; background:rgba(255,255,255,.1); color:#C9D4EA; display:flex; align-items:center; justify-content:center; cursor:pointer; border:0; transition:background .15s, color .15s; flex-shrink:0;}
+  .iconbtn:hover{background:rgba(255,255,255,.2); color:#fff;}
+
+  @media(max-width:1080px){ .demo-badge{display:none;} .toplinks a{padding:6px 10px; font-size:12px;} }
+
+  /* ---------- layout ---------- */
+  .layout{display:flex; min-height:calc(100vh - 64px);}
+  .sidebar{width:250px; background:var(--card); border-right:1px solid var(--line); padding:18px 12px 22px; flex-shrink:0; position:sticky; top:64px; height:calc(100vh - 64px); overflow-y:auto; display:flex; flex-direction:column;}
+  .navlabel{font-size:10.5px; text-transform:uppercase; letter-spacing:.8px; color:var(--ink3); padding:0 10px 8px;}
+  .toc a{display:flex; align-items:baseline; gap:9px; padding:7px 10px; border-radius:9px; color:var(--ink2); text-decoration:none; font-size:13px; margin-bottom:1px; border-left:3px solid transparent; transition:background .13s, color .13s;}
+  .toc a:hover{background:#F0F4FA;}
+  body.dark .toc a:hover{background:#1A2340;}
+  .toc a.active{background:#EAF2FB; color:var(--blue); font-weight:bold; border-left-color:var(--blue);}
+  body.dark .toc a.active{background:#14305C; color:#7FC0F5; border-left-color:#5EA9EF;}
+  .toc a .n{font-size:10.5px; color:var(--ink3); font-weight:bold; width:16px; flex-shrink:0;}
+  .toc a.active .n{color:inherit;}
+  .sidefoot{margin-top:auto; padding:14px 10px 0; border-top:1px solid var(--line); font-size:11px; color:var(--ink3); line-height:1.6;}
+  .buildtoggle{margin:14px 8px 0; padding:11px 12px; border-radius:10px; background:#F1F5FA; display:flex; align-items:center; gap:10px;}
+  body.dark .buildtoggle{background:#182142;}
+  .buildtoggle .bt{font-size:12px; font-weight:bold; line-height:1.35;}
+  .buildtoggle .bd{font-size:11px; color:var(--ink3); margin-top:2px;}
+  .switch{position:relative; display:inline-block; width:38px; height:22px; flex-shrink:0;}
+  .switch input{opacity:0; width:0; height:0;}
+  .switch .sl{position:absolute; inset:0; background:#C9D2E0; border-radius:999px; transition:.2s; cursor:pointer;}
+  .switch .sl::before{content:""; position:absolute; width:16px; height:16px; left:3px; top:3px; background:#fff; border-radius:50%; transition:.2s; box-shadow:0 1px 3px rgba(0,0,0,.25);}
+  .switch input:checked + .sl{background:var(--blue);}
+  .switch input:checked + .sl::before{transform:translateX(16px);}
+
+  .main{flex:1; padding:30px 40px 80px; max-width:1000px; min-width:0;}
+
+  /* ---------- doc typography ---------- */
+  .hero{margin-bottom:26px;}
+  .doctype{font-size:11px; text-transform:uppercase; letter-spacing:1.2px; color:var(--blue); font-weight:bold; margin-bottom:8px;}
+  .hero h2{font-size:33px; letter-spacing:-.6px; line-height:1.2; margin-bottom:8px;}
+  .hero .lede{font-size:16px; color:var(--ink2); max-width:66ch;}
+  .metastrip{display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:1px; background:var(--line); border:1px solid var(--line); border-radius:var(--radius); overflow:hidden; margin:22px 0 8px;}
+  .metastrip div{background:var(--card); padding:11px 14px;}
+  .metastrip .k{font-size:10px; text-transform:uppercase; letter-spacing:.7px; color:var(--ink3);}
+  .metastrip .v{font-size:13px; font-weight:bold; margin-top:3px;}
+
+  section{padding-top:34px; margin-bottom:6px;}
+  .snum{font-size:11px; font-weight:bold; letter-spacing:1.2px; color:var(--sky); margin-bottom:5px;}
+  section > h3{font-size:23px; letter-spacing:-.3px; margin-bottom:6px;}
+  section > .sub{color:var(--ink2); font-size:14px; margin-bottom:18px; max-width:70ch;}
+  .kicker{border-left:4px solid var(--sky); background:var(--card); padding:12px 16px; border-radius:0 var(--radius) var(--radius) 0; font-size:15px; font-weight:bold; color:var(--navy); margin:0 0 20px; box-shadow:var(--shadow);}
+  body.dark .kicker{color:#BFE0FF;}
+  h4.sh{font-size:12px; text-transform:uppercase; letter-spacing:.8px; color:var(--ink3); margin:22px 0 10px;}
+
+  .card{background:var(--card); border:1px solid var(--line); border-radius:var(--radius); padding:18px 20px; box-shadow:var(--shadow); margin-bottom:16px;}
+  .card > h4{font-size:11.5px; text-transform:uppercase; letter-spacing:.8px; color:var(--ink3); margin-bottom:12px;}
+  .grid2{display:grid; grid-template-columns:1fr 1fr; gap:16px;}
+  .grid3{display:grid; grid-template-columns:repeat(3,1fr); gap:14px;}
+  .grid4{display:grid; grid-template-columns:repeat(4,1fr); gap:12px;}
+  @media(max-width:900px){.grid2,.grid3,.grid4{grid-template-columns:1fr;}}
+
+  ul.tick{list-style:none;}
+  ul.tick li{position:relative; padding-left:20px; margin-bottom:8px; color:var(--ink2); font-size:13.5px;}
+  ul.tick li::before{content:""; position:absolute; left:3px; top:8px; width:6px; height:6px; border-radius:50%; background:var(--sky);}
+  ul.tick li b{color:var(--ink);}
+  ul.no li::before{background:#C9D2E0;}
+
+  table.t{width:100%; border-collapse:collapse; font-size:13px;}
+  table.t th{text-align:left; font-size:10.5px; text-transform:uppercase; letter-spacing:.7px; color:var(--ink3); font-weight:bold; padding:0 12px 9px 0; border-bottom:1px solid var(--line);}
+  table.t td{padding:11px 12px 11px 0; border-bottom:1px solid var(--line); color:var(--ink2); vertical-align:top;}
+  table.t tr:last-child td{border-bottom:0;}
+  table.t td b, table.t td strong{color:var(--ink);}
+  table.t td.mono{font-family:"SF Mono",Menlo,Consolas,monospace; font-size:12px; color:var(--blue); white-space:nowrap;}
+
+  .chip{display:inline-block; font-size:11px; border-radius:999px; padding:2.5px 9px; background:#EEF1F6; color:var(--ink2); white-space:nowrap;}
+  body.dark .chip{background:#222B47; color:var(--ink2);}
+  .stream{display:inline-block; font-size:10.5px; font-weight:bold; letter-spacing:.4px; text-transform:uppercase; border-radius:5px; padding:2.5px 7px; border:1px solid currentColor; background:var(--card);}
+  .stream.field{color:var(--f-field);} .stream.product{color:var(--f-product);} .stream.published{color:var(--f-published);}
+  .st{display:inline-block; font-size:9.5px; font-weight:bold; letter-spacing:.6px; text-transform:uppercase; border-radius:5px; padding:2.5px 7px; vertical-align:1px;}
+  .st.built{background:#E8F5EE; color:#14603A;}
+  .st.spec{background:#EEF1F6; color:var(--ink3);}
+  .st.p2{background:#FBEDE0; color:var(--warn);}
+  .st.p3{background:#F1EDFB; color:var(--f-product);}
+  body.dark .st.built{background:#12341F; color:#6FD59B;}
+  body.dark .st.spec{background:#222B47; color:var(--ink3);}
+  body.dark .st.p2{background:#3A2A14; color:#F0B769;}
+  body.dark .st.p3{background:#2A2350; color:#A093EF;}
+
+  .tabs{display:flex; gap:7px; flex-wrap:wrap; margin-bottom:14px;}
+  .tab{border:1px solid var(--line); background:var(--card); border-radius:999px; padding:6px 14px; font-size:12.5px; color:var(--ink2); cursor:pointer; font-family:inherit; transition:all .13s;}
+  .tab:hover{border-color:var(--sky); color:var(--blue);}
+  .tab.active{background:var(--blue); border-color:var(--blue); color:#fff; font-weight:bold;}
+
+  .clickable{cursor:pointer; transition:transform .16s ease, box-shadow .16s ease, border-color .16s ease;}
+  .clickable:hover{transform:translateY(-2px); box-shadow:var(--shadow-hover); border-color:#C9D8EC;}
+  .clickable:active{transform:translateY(0); box-shadow:var(--shadow);}
+
+  /* layer stack */
+  .layer{display:flex; gap:16px; align-items:flex-start; background:var(--card); border:1px solid var(--line); border-left:5px solid var(--blue); border-radius:10px; padding:15px 18px; margin-bottom:10px; box-shadow:var(--shadow);}
+  .layer .lnum{font-size:22px; font-weight:bold; color:#D3DEEC; line-height:1; width:30px; flex-shrink:0;}
+  body.dark .layer .lnum{color:#2C3757;}
+  .layer h5{font-size:15px; margin-bottom:3px;}
+  .layer p{font-size:13px; color:var(--ink2);}
+  .layer .tagrow{margin-top:9px; display:flex; gap:6px; flex-wrap:wrap;}
+  .layer.l1{border-left-color:var(--f-field);} .layer.l2{border-left-color:var(--sky);}
+  .layer.l3{border-left-color:var(--f-product);} .layer.l4{border-left-color:var(--blue);}
+
+  /* pipeline */
+  .pipe{display:grid; grid-template-columns:repeat(5,1fr); gap:10px;}
+  @media(max-width:900px){.pipe{grid-template-columns:repeat(2,1fr);}}
+  .stage{background:var(--card); border:1px solid var(--line); border-radius:10px; padding:12px 13px; box-shadow:var(--shadow); position:relative;}
+  .stage .sn{font-size:10px; font-weight:bold; color:var(--sky); letter-spacing:.5px;}
+  .stage .sname{font-size:13px; font-weight:bold; margin:3px 0 4px; line-height:1.3;}
+  .stage .sdesc{font-size:11.5px; color:var(--ink2); line-height:1.45;}
+  .stage::after{content:"›"; position:absolute; top:9px; right:11px; color:#C3CCDA; font-size:16px; transition:color .15s, transform .15s;}
+  .stage:hover::after{color:var(--sky); transform:translateX(2px);}
+
+  /* matrix */
+  table.perm{width:100%; border-collapse:separate; border-spacing:2px;}
+  table.perm th{font-size:11px; color:var(--ink2); font-weight:bold; padding:7px 4px; text-align:center; line-height:1.3;}
+  table.perm th.rh{text-align:left; padding-left:0;}
+  table.perm td.rowh{font-size:12.5px; color:var(--ink); padding:0 12px 0 0; white-space:nowrap;}
+  table.perm td.c{width:78px; height:40px; text-align:center; border-radius:7px; font-size:15px; font-weight:bold; cursor:pointer; transition:outline-color .12s, filter .12s; outline:2px solid transparent; outline-offset:-2px;}
+  table.perm td.c:hover{outline-color:var(--sky); filter:brightness(1.03);}
+  .c.yes{background:#E4F1E9; color:#14603A;} .c.no{background:#F2F4F8; color:#A9B2C1;} .c.part{background:#FBEDE0; color:#8A4A08;}
+  body.dark .c.yes{background:#16351F; color:#6FD59B;} body.dark .c.no{background:#1B2137; color:#4E5872;} body.dark .c.part{background:#3A2A14; color:#F0B769;}
+  .permleg{display:flex; gap:16px; margin-top:12px; font-size:11.5px; color:var(--ink3); flex-wrap:wrap;}
+  .permleg span{display:inline-flex; align-items:center; gap:6px;}
+  .permleg i{width:16px; height:11px; border-radius:3px; display:inline-block; font-style:normal;}
+
+  /* misc */
+  .quote{background:var(--card); border:1px solid var(--line); border-radius:var(--radius); padding:20px 24px; box-shadow:var(--shadow); font-size:17px; font-weight:bold; color:var(--navy); line-height:1.45; margin:18px 0;}
+  body.dark .quote{color:#BFE0FF;}
+  .quote .attr{font-size:12px; font-weight:normal; color:var(--ink3); margin-top:8px;}
+  .warnbox{border-left:4px solid var(--warn); background:#FDF6EE; border-radius:0 9px 9px 0; padding:12px 16px; font-size:13px; color:#7A4A08; margin-bottom:14px;}
+  body.dark .warnbox{background:#2A2013; color:#F0C58A;}
+  .okbox{border-left:4px solid var(--good); background:#EEF7F1; border-radius:0 9px 9px 0; padding:12px 16px; font-size:13px; color:#14603A; margin-bottom:14px;}
+  body.dark .okbox{background:#12291C; color:#8FDDB2;}
+  code{font-family:"SF Mono",Menlo,Consolas,monospace; font-size:12.5px; background:#EEF1F6; color:var(--blue); border-radius:4px; padding:1px 6px;}
+  body.dark code{background:#1E2740;}
+  pre{background:var(--navy); color:#D6E4F5; border-radius:10px; padding:14px 16px; overflow-x:auto; font-family:"SF Mono",Menlo,Consolas,monospace; font-size:12px; line-height:1.65;}
+  pre .cm{color:#7A90B8;} pre .kw{color:#7FC0F5;} pre .str{color:#9BD9A8;}
+  details.more{margin-top:12px; border-top:1px solid var(--line); padding-top:11px;}
+  details.more summary{cursor:pointer; color:var(--blue); font-weight:bold; font-size:12.5px; list-style:none;}
+  details.more summary::-webkit-details-marker{display:none;}
+  details.more summary::before{content:"▸ "; font-size:10px;}
+  details.more[open] summary::before{content:"▾ ";}
+  details.more .body{padding-top:11px; font-size:13px; color:var(--ink2);}
+  .footnote{margin-top:34px; font-size:11.5px; color:var(--ink3); border-top:1px solid var(--line); padding-top:14px; line-height:1.7;}
+
+  /* modal */
+  .overlay{position:fixed; inset:0; background:rgba(0,8,53,.45); backdrop-filter:blur(3px); display:flex; align-items:center; justify-content:center; z-index:100; animation:fadeIn .15s ease; padding:20px;}
+  @keyframes fadeIn{from{opacity:0}}
+  .modal{background:var(--card); border-radius:14px; width:560px; max-width:100%; max-height:86vh; overflow:auto; padding:22px 24px; animation:pop .18s ease; box-shadow:0 20px 60px rgba(0,8,53,.3);}
+  @keyframes pop{from{transform:scale(.95) translateY(6px); opacity:0}}
+  .modal h4{font-size:17px; margin-bottom:3px;}
+  .modal .hint{font-size:12px; color:var(--ink3); margin-bottom:15px;}
+  .modal .kv{display:flex; gap:12px; padding:9px 0; border-bottom:1px solid var(--line); font-size:13px; color:var(--ink2);}
+  .modal .kv:last-of-type{border-bottom:0;}
+  .modal .kv .k{width:120px; flex-shrink:0; color:var(--ink3); font-size:11px; text-transform:uppercase; letter-spacing:.4px; padding-top:2px;}
+  .modal .actions{display:flex; justify-content:flex-end; margin-top:18px;}
+  .btn{display:inline-flex; align-items:center; gap:7px; background:var(--blue); color:#fff; border:0; border-radius:9px; padding:9px 16px; font-size:13px; font-weight:bold; cursor:pointer; font-family:inherit; transition:background .14s, transform .1s;}
+  .btn:hover{background:#004E99;} .btn:active{transform:scale(.97);}
+
+  /* ---------- delivery tree ---------- */
+  .treebar{display:flex; align-items:center; gap:10px; margin-bottom:14px; flex-wrap:wrap;}
+  .minibtn{border:1px solid var(--line); background:var(--card); border-radius:8px; padding:6px 13px; font-size:12.5px; color:var(--ink2); cursor:pointer; font-family:inherit; transition:all .13s;}
+  .minibtn:hover{border-color:var(--sky); color:var(--blue);}
+  details.epic{background:var(--card); border:1px solid var(--line); border-radius:var(--radius); margin-bottom:12px; box-shadow:var(--shadow); overflow:hidden;}
+  details.epic > summary, details.feat > summary{list-style:none; cursor:pointer;}
+  details.epic > summary::-webkit-details-marker, details.feat > summary::-webkit-details-marker{display:none;}
+  details.epic > summary{display:flex; align-items:center; gap:13px; padding:15px 19px; transition:background .13s;}
+  details.epic > summary:hover{background:#F7F9FC;}
+  body.dark details.epic > summary:hover{background:#1A2138;}
+  .caret{width:9px; height:9px; border-right:2px solid var(--ink3); border-bottom:2px solid var(--ink3); transform:rotate(-45deg); transition:transform .18s; flex-shrink:0; margin-top:-3px;}
+  details[open] > summary .caret{transform:rotate(45deg); margin-top:-6px;}
+  .ecode{font-size:10.5px; font-weight:bold; letter-spacing:1px; color:var(--sky); background:#E9F5FD; border-radius:5px; padding:3px 8px; flex-shrink:0;}
+  body.dark .ecode{background:#12304C;}
+  .etitle{flex:1; min-width:0;}
+  .etitle h5{font-size:16.5px; line-height:1.3;}
+  .etitle .g{font-size:12.5px; color:var(--ink2); margin-top:2px;}
+  .ecount{font-size:11px; color:var(--ink2); background:#EEF1F6; border-radius:999px; padding:3px 10px; white-space:nowrap; flex-shrink:0; font-weight:bold;}
+  body.dark .ecount{background:#222B47;}
+  .ecount.full{background:#E4F1E9; color:#14603A;}
+  body.dark .ecount.full{background:#16351F; color:#6FD59B;}
+  details.feat{border-top:1px solid var(--line);}
+  details.feat > summary{display:flex; align-items:center; gap:11px; padding:12px 19px 12px 44px; font-size:14px; transition:background .13s;}
+  details.feat > summary:hover{background:#F7F9FC;}
+  body.dark details.feat > summary:hover{background:#1A2138;}
+  .fname{flex:1; font-weight:bold;}
+  .story{padding:13px 19px 14px 62px; border-top:1px dashed var(--line); background:#FAFBFD;}
+  body.dark .story{background:#11172C;}
+  .story .top{display:flex; align-items:center; gap:9px; margin-bottom:6px; flex-wrap:wrap;}
+  .story .sid{font-family:"SF Mono",Menlo,Consolas,monospace; font-size:11px; color:var(--blue); font-weight:bold;}
+  .story .size{font-size:10px; font-weight:bold; letter-spacing:.5px; color:var(--ink3); border:1px solid var(--line); border-radius:4px; padding:1px 5px;}
+  .story .txt{font-size:13.5px; color:var(--ink2); line-height:1.6;}
+  .story .txt b{color:var(--ink3); font-weight:bold; font-size:11px; text-transform:uppercase; letter-spacing:.5px;}
+  .story .txt i{font-style:normal; color:var(--ink);}
+  .story .ac{margin-top:9px; padding-top:9px; border-top:1px solid var(--line);}
+  .story .ac .lbl{font-size:10px; text-transform:uppercase; letter-spacing:.7px; color:var(--ink3); font-weight:bold; margin-bottom:5px;}
+  .story .ac ul{list-style:none;}
+  .story .ac li{position:relative; padding-left:17px; font-size:12.5px; color:var(--ink2); margin-bottom:4px;}
+  .story .ac li::before{content:"✓"; position:absolute; left:0; top:0; color:var(--good); font-size:11px; font-weight:bold;}
+
+  body.onlybuilt [data-status]:not([data-status="built"]){display:none;}
+  .filterbar{display:none; position:sticky; top:64px; z-index:50; background:#FBEDE0; color:#7A4A08; border-radius:9px; padding:9px 14px; font-size:12.5px; margin-bottom:16px;}
+  body.dark .filterbar{background:#3A2A14; color:#F0B769;}
+  body.onlybuilt .filterbar{display:block;}
+
+  @media print{
+    .topbar,.sidebar,.filterbar{display:none!important;}
+    .main{max-width:none; padding:0;}
+    body{background:#fff; font-size:11px;}
+    .card,.layer,.stage{box-shadow:none; break-inside:avoid;}
+    section{break-inside:avoid-page; padding-top:18px;}
+    details.more{display:none;}
+  }
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="brand">
+    <svg width="30" height="30" viewBox="0 0 30 30" aria-hidden="true">
+      <line x1="6" y1="22" x2="15" y2="8" stroke="#29ABE2" stroke-width="1.2"/>
+      <line x1="15" y1="8" x2="24" y2="18" stroke="#29ABE2" stroke-width="1.2"/>
+      <circle cx="6" cy="22" r="2.6" fill="#FFFFFF"/>
+      <circle cx="15" cy="8" r="3.2" fill="#29ABE2"/>
+      <circle cx="24" cy="18" r="2.6" fill="#005EB8" stroke="#7FB6E0" stroke-width="1"/>
+    </svg>
+    <div>
+      <h1>AI Market Radar</h1>
+      <div class="sub">Product Requirements · v1.0</div>
+    </div>
+  </div>
+  <span class="demo-badge">Concept document</span>
+  <div class="spacer"></div>
+  <nav class="toplinks">
+    <a href="radar-demo.html">Prototype</a>
+    <a href="radar-prd.html" class="here">PRD</a>
+    <a href="radar-explainer.html">Plain english</a>
+    <a href="radar-flow.html">How it works</a>
+  </nav>
+  <button class="iconbtn" id="printbtn" onclick="window.print()" title="Print or save as PDF">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9V2h12v7M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2M6 14h12v8H6z"/></svg>
+  </button>
+  <button class="iconbtn" id="themebtn" onclick="setDark(!isDark())" title="Toggle night mode"></button>
+</header>
+
+<div class="layout">
+  <aside class="sidebar">
+    <div class="navlabel">Contents</div>
+    <div class="toc" id="toc"></div>
+    <div class="buildtoggle">
+      <div>
+        <div class="bt">Only what is built</div>
+        <div class="bd">Hide everything still on paper</div>
+      </div>
+      <label class="switch"><input type="checkbox" id="builtsw" onchange="document.body.classList.toggle('onlybuilt', this.checked)"><span class="sl"></span></label>
+    </div>
+    <div class="sidefoot">
+      Concept prototype for interview discussion.<br>Not an Amadeus product.<br>Nothing on this page leaves your browser.
+    </div>
+  </aside>
+
+  <main class="main">
+
+    <div class="hero">
+      <div class="doctype">Product Requirements Document</div>
+      <h2>AI Market Radar</h2>
+      <p class="lede">A competitive intelligence system for the AI Assistant team. Three streams in, one system out. It turns a market that changes daily into a decision the roadmap can actually use.</p>
+      <div class="metastrip">
+        <div><div class="k">Owner</div><div class="v">Alex Abboud</div></div>
+        <div><div class="k">Function</div><div class="v">AI Strategy &amp; Market Intel</div></div>
+        <div><div class="k">Version</div><div class="v">1.0</div></div>
+        <div><div class="k">Date</div><div class="v">29 July 2026</div></div>
+        <div><div class="k">Status</div><div class="v">Prototype shipped</div></div>
+      </div>
+      <div class="footnote" style="margin-top:10px; border:0; padding-top:0;">
+        Status legend, used throughout this document:
+        <span class="st built">built</span> working today in the prototype ·
+        <span class="st spec">spec</span> designed, not built ·
+        <span class="st p2">phase 2</span> ·
+        <span class="st p3">phase 3</span>
+      </div>
+    </div>
+
+    <div class="filterbar">Filtered view: showing only what exists and runs today. Toggle it off in the sidebar to see the full specification.</div>
+
+    <div class="card">
+      <h4>Build status at a glance</h4>
+      <p style="font-size:13.5px; color:var(--ink2); margin-bottom:14px;">Eleven capabilities run today. Seven are specified and not built. Stated up front, because a PRD that cannot tell you which half is real is a wish list.</p>
+      <table class="t">
+        <thead><tr><th style="width:40%">Capability</th><th style="width:15%">Status</th><th>Note</th></tr></thead>
+        <tbody>
+          <tr data-status="built"><td><b>Published stream collector</b></td><td><span class="st built">built</span></td><td>Runs against 12 watchlist queries. Last run: 14 signals.</td></tr>
+          <tr data-status="built"><td><b>Promotion trigger detection</b></td><td><span class="st built">built</span></td><td>Funding, partnership, launch. Last run flagged 7.</td></tr>
+          <tr data-status="built"><td><b>LLM triage pass</b></td><td><span class="st built">built</span></td><td>Optional. Needs the SDK and a key, falls back silently without them.</td></tr>
+          <tr data-status="built"><td><b>Dashboard, six pages</b></td><td><span class="st built">built</span></td><td>Self contained, no dependencies, works offline.</td></tr>
+          <tr data-status="built"><td><b>Five role views</b></td><td><span class="st built">built</span></td><td>Each role lands on a different home screen.</td></tr>
+          <tr data-status="built"><td><b>Permission walls</b></td><td><span class="st built">built</span></td><td>Field bodies and unsigned drafts, enforced per record.</td></tr>
+          <tr data-status="built"><td><b>Assistant Lab matrix and evidence drill down</b></td><td><span class="st built">built</span></td><td>Three tasks, six players, run IDs and deltas.</td></tr>
+          <tr data-status="built"><td><b>Watchlist rubric, scores and promotion queue</b></td><td><span class="st built">built</span></td><td>All five rubric steps are implemented, not just described.</td></tr>
+          <tr data-status="built"><td><b>Sign and publish flow</b></td><td><span class="st built">built</span></td><td>Signing a draft makes it appear for every other role.</td></tr>
+          <tr data-status="built"><td><b>Daily, weekly and monthly digests</b></td><td><span class="st built">built</span></td><td>Daily is machine assembled and labelled unsigned.</td></tr>
+          <tr data-status="built"><td><b>Share to email</b></td><td><span class="st built">built</span></td><td>Permission aware summary, per page.</td></tr>
+          <tr data-status="spec"><td><b>Share to Teams as an adaptive card</b></td><td><span class="st spec">spec</span></td><td>Copies to clipboard today. Needs a channel webhook.</td></tr>
+          <tr data-status="p2"><td><b>Field intake in Salesforce</b></td><td><span class="st p2">phase 2</span></td><td>Organizationally gated, not technically hard.</td></tr>
+          <tr data-status="p2"><td><b>Tier 1 alerts to email and Teams</b></td><td><span class="st p2">phase 2</span></td><td>Preferences already captured in Settings.</td></tr>
+          <tr data-status="p2"><td><b>Scheduled collector runs</b></td><td><span class="st p2">phase 2</span></td><td>Currently run on demand.</td></tr>
+          <tr data-status="p2"><td><b>Persistence</b></td><td><span class="st p2">phase 2</span></td><td>Signing, dismissals and logged signals reset on reload. Theme and notification preferences persist.</td></tr>
+          <tr data-status="p3"><td><b>Automatic cross stream correlation</b></td><td><span class="st p3">phase 3</span></td><td>Field heard it first is curated today, not detected.</td></tr>
+          <tr data-status="p3"><td><b>Decision briefs and trend intelligence</b></td><td><span class="st p3">phase 3</span></td><td>Where the function stops reporting and starts predicting.</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- ========== 1 ========== -->
+    <section id="problem" data-title="Problem">
+      <div class="snum">01</div>
+      <h3>Problem</h3>
+      <p class="sub">Amadeus has no structured competitive intelligence function for AI assistants today. The market moves daily. The reporting does not.</p>
+
+      <div class="kicker">Intelligence exists. It just dies in Teams threads.</div>
+
+      <div class="grid2">
+        <div class="card">
+          <h4>What exists today</h4>
+          <ul class="tick no">
+            <li>Ad hoc Teams messages when someone spots a competitor move.</li>
+            <li>Pre sales anecdotes that stay inside the deal they came from.</li>
+            <li>A newsletter that reports news rather than answering questions.</li>
+            <li>No owner, no cadence, no record.</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h4>What that costs</h4>
+          <ul class="tick">
+            <li>The same competitor move gets researched three times by three teams.</li>
+            <li>An objection heard in Madrid never reaches the marketer writing the battlecard.</li>
+            <li>Roadmap calls get made on the loudest anecdote in the room.</li>
+            <li>Nobody can answer <b>what changed this month</b> without a person going to look.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="card">
+        <h4>The shape of the market being tracked</h4>
+        <p style="font-size:13.5px; color:var(--ink2);">AI assistants are moving from planning to booking to servicing. Planning is already commoditized across ChatGPT, Gemini, Claude, Perplexity, Copilot and Mindtrip. Booking is the contested frontier, and it runs through rails, protocols and payments, which is precisely where Amadeus lives. Servicing is wide open. A CI function that only tracks assistant launches will miss the part that decides the outcome.</p>
+      </div>
+    </section>
+
+    <!-- ========== 2 ========== -->
+    <section id="goals" data-title="Goals and non-goals">
+      <div class="snum">02</div>
+      <h3>Goals and non-goals</h3>
+      <p class="sub">What this system is responsible for, and what it deliberately refuses to do.</p>
+
+      <div class="grid2">
+        <div class="card">
+          <h4>Goals</h4>
+          <ul class="tick">
+            <li><b>One system of record.</b> Three streams in, one system out.</li>
+            <li><b>Coverage by category, not by volume.</b> Five named categories decide what counts as signal.</li>
+            <li><b>Attention allocated by a published rubric.</b> Scored, re-scored quarterly, overridden in real time by triggers.</li>
+            <li><b>A view per role, not a shared inbox.</b> Each consumer lands on what their job needs.</li>
+            <li><b>Fact separated from judgment</b> on every single record.</li>
+            <li><b>Habit before tool.</b> Phase 1 runs with zero custom software.</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h4>Non-goals</h4>
+          <ul class="tick no">
+            <li>Not a news aggregator. Volume is not the product.</li>
+            <li>Not a replacement for the analyst. The machine tags, the analyst confirms and signs.</li>
+            <li>Not an automated Assistant Lab. Hands on testing stays human on purpose.</li>
+            <li>Not a new BI stack. It rides whatever the team already standardizes on.</li>
+            <li>Not real time alerting on everything. Only tier 1 triggers interrupt anyone.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="quote">
+        A dashboard nobody feeds is a graveyard. Habit first, tool second. The tool exists to make the habit cheap.
+      </div>
+    </section>
+
+    <!-- ========== 3 ========== -->
+    <section id="users" data-title="Users and roles">
+      <div class="snum">03</div>
+      <h3>Users and roles</h3>
+      <p class="sub">Five personas. Each one gives something to the system and gets something back. That loop is the design, not a feature.</p>
+
+      <div class="card">
+        <table class="t">
+          <thead><tr><th style="width:16%">Role</th><th style="width:26%">Job to be done</th><th style="width:22%">Home view</th><th style="width:18%">Gives</th><th>Gets</th></tr></thead>
+          <tbody>
+            <tr>
+              <td><b>CI Analyst</b><br><span class="chip">author</span></td>
+              <td>Run the function. Confirm machine tags, write assessments, sign what circulates.</td>
+              <td>Ops overview: streams, open triggers, digest queue</td>
+              <td>Judgment and the signature</td>
+              <td>Full system, all streams, drafts, publishing rights</td>
+            </tr>
+            <tr>
+              <td><b>Product</b></td>
+              <td>Decide what to build next and defend the call.</td>
+              <td>What changed: deltas since last look</td>
+              <td>Roadmap questions</td>
+              <td>Capability deltas, Lab benchmarks, decision briefs</td>
+            </tr>
+            <tr>
+              <td><b>Product Marketing</b></td>
+              <td>Position against claims that keep changing.</td>
+              <td>Claims versus reality, with verdict chips</td>
+              <td>Messaging gaps</td>
+              <td>Tested evidence to back or kill a claim</td>
+            </tr>
+            <tr>
+              <td><b>Pre-Sales / Solutions</b></td>
+              <td>Answer the objection in the room, today.</td>
+              <td>Objection library with search</td>
+              <td>Field signals from live deals</td>
+              <td>Battlecards, rebuttals, landmine warnings</td>
+            </tr>
+            <tr>
+              <td><b>Leadership</b></td>
+              <td>Know the three things that matter this month.</td>
+              <td>One screen: threat strip plus three moves</td>
+              <td>Direction and priorities</td>
+              <td>Full access by design, a choice rather than a wall</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="okbox"><b>The give to get loop.</b> Pre-sales logs a signal in under a minute and gets a battlecard that reflects the deal they are in. Nobody contributes to a system that only takes.</div>
+    </section>
+
+    <!-- ========== 4 ========== -->
+    <section id="architecture" data-title="Architecture">
+      <div class="snum">04</div>
+      <h3>Architecture</h3>
+      <p class="sub">Four layers. Ingestion, knowledge, intelligence, consumption. Click any layer for what it contains.</p>
+
+      <div id="layers"></div>
+
+      <div class="card">
+        <h4>Two axis tagging</h4>
+        <p style="font-size:13.5px; color:var(--ink2); margin-bottom:12px;">Every record carries a <b>category</b> (what part of the market it belongs to) and a <b>stream</b> (how we came to know it). Filtering on both is what turns a feed into an answer. It also makes the honest gap visible: the Lab can only test platforms and part of payments, so rails, protocols and supplier moves are covered by the published and field streams only.</p>
+        <table class="t">
+          <thead><tr><th>Category</th><th class="mono">key</th><th>What it tracks</th><th>Streams that can cover it</th></tr></thead>
+          <tbody>
+            <tr><td><b>AI Assistant Platforms</b></td><td class="mono">plat</td><td>What ChatGPT, Gemini, Claude, Perplexity, Copilot and Mindtrip actually do end to end, not what they announce</td><td><span class="stream published">pub</span> <span class="stream field">field</span> <span class="stream product">lab</span></td></tr>
+            <tr><td><b>Rails and Infrastructure</b></td><td class="mono">rails</td><td>Sabre, Travelport, Duffel, NDC aggregators</td><td><span class="stream published">pub</span> <span class="stream field">field</span></td></tr>
+            <tr><td><b>Protocols and Standards</b></td><td class="mono">proto</td><td>MCP, Agentic Commerce Protocol, the stated MCP to UCP direction</td><td><span class="stream published">pub</span> <span class="stream field">field</span></td></tr>
+            <tr><td><b>Supplier Direct to Agent</b></td><td class="mono">supplier</td><td>Airlines and hotels bypassing intermediaries</td><td><span class="stream published">pub</span> <span class="stream field">field</span></td></tr>
+            <tr><td><b>Payments and Agentic Commerce</b></td><td class="mono">pay</td><td>In chat checkout, PayPal and Stripe rails, ties to Outpayce</td><td><span class="stream published">pub</span> <span class="stream field">field</span> <span class="stream product">part</span></td></tr>
+          </tbody>
+        </table>
+        <details class="more">
+          <summary>Why five categories and not a single feed</summary>
+          <div class="body">A single feed answers "what happened". Five categories answer "did the thing we are exposed to move". Booking without owning payment is a hollow win, so payments is tracked as a first class category rather than as a footnote under platforms. The reference move that proves the point: Sabre with Mindtrip and PayPal, announced February 2026, live May 2026. Three categories at once.</div>
+        </details>
+      </div>
+    </section>
+
+    <!-- ========== 5 ========== -->
+    <section id="datamodel" data-title="Data model">
+      <div class="snum">05</div>
+      <h3>Data model</h3>
+      <p class="sub">Five entities. Select one to see its fields.</p>
+
+      <div class="tabs" id="enttabs"></div>
+      <div class="card" id="entbody"></div>
+
+      <div class="warnbox"><b>The one rule that governs the schema.</b> Facts and judgment never share a field. A Signal holds what happened and where it came from. An Assessment holds what we think it means, who thinks so, and when they signed it. Anyone reading a record can tell in one second which they are looking at.</div>
+    </section>
+
+    <!-- ========== 6 ========== -->
+    <section id="focus" data-title="Focus rubric">
+      <div class="snum">06</div>
+      <h3>Focus rubric</h3>
+      <p class="sub">Not everyone earns the same attention. Here is how that gets decided, and re-decided.</p>
+
+      <div class="kicker">Five steps. Published, so nobody has to guess why a competitor moved tier.</div>
+
+      <div class="grid2">
+        <div class="card">
+          <h4>Step 1 · Score every player on three fixed questions</h4>
+          <table class="t">
+            <thead><tr><th>Question</th><th style="width:70px">Range</th></tr></thead>
+            <tbody>
+              <tr><td>Can they move a roadmap decision in the next 90 days?</td><td class="mono">0 to 2</td></tr>
+              <tr><td>Do they touch a core revenue line? Distribution, IT solutions, hospitality, payments.</td><td class="mono">0 to 2</td></tr>
+              <tr><td>Velocity. How fast are they actually shipping?</td><td class="mono">0 to 2</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="card">
+          <h4>Step 2 · Score sets the tier</h4>
+          <table class="t">
+            <thead><tr><th>Total</th><th>Tier</th><th>Cadence</th></tr></thead>
+            <tbody>
+              <tr><td class="mono">5 to 6</td><td><b>Always-On</b></td><td>Continuous watch, in every digest</td></tr>
+              <tr><td class="mono">3 to 4</td><td><b>Weekly</b></td><td>Reviewed in the weekly digest</td></tr>
+              <tr><td class="mono">0 to 2</td><td><b>Monthly</b></td><td>Swept monthly, promoted on trigger</td></tr>
+            </tbody>
+          </table>
+          <p style="font-size:12.5px; color:var(--ink3); margin-top:10px;">Scores are visible on every player row in the prototype as <code>n/6</code>, with the per question breakdown in the player profile.</p>
+        </div>
+      </div>
+
+      <div class="card">
+        <h4>Step 3 · Triggers override the schedule in real time</h4>
+        <div class="grid3">
+          <div><b>Funding or M&amp;A</b><div style="font-size:12.5px; color:var(--ink2);">A round or an acquisition changes what a player can afford to do next.</div></div>
+          <div><b>Partnership or integration go-live</b><div style="font-size:12.5px; color:var(--ink2);">Distribution changes hands the day an integration ships, not the day it is announced.</div></div>
+          <div><b>Capability changing launch</b><div style="font-size:12.5px; color:var(--ink2);">Not a feature. A launch that moves a player across plan, book or service.</div></div>
+        </div>
+        <div style="margin-top:14px; padding-top:14px; border-top:1px solid var(--line);">
+          <b>Direct field signal</b> <span class="stream field">field</span>
+          <div style="font-size:12.5px; color:var(--ink2);">A competitor showing up in a live deal outranks anything published. Field flagged triggers sort to the top of the promotion queue.</div>
+        </div>
+        <div class="okbox" style="margin:14px 0 0;" data-status="built"><span class="st built">built</span> &nbsp;The collector detects funding, partnership and launch triggers automatically and files them into the promotion queue. The last run flagged 7 launch triggers across Mindtrip, Sabre, Navan, TripGain and Travelport.</div>
+      </div>
+
+      <div class="grid2">
+        <div class="card">
+          <h4>Step 4 · Depth is rationed inside the tier</h4>
+          <p style="font-size:13.5px; color:var(--ink2);">Always-On earns attention. It does not automatically earn a Lab slot. Deep coverage, meaning full hands on Assistant Lab treatment, is reserved for roadmap movers. Everyone else gets light touch. Sabre is Always-On and light touch. Mindtrip is Always-On with Lab depth. That distinction is the whole point of the step.</p>
+        </div>
+        <div class="card">
+          <h4>Step 5 · Quarterly re-score</h4>
+          <p style="font-size:13.5px; color:var(--ink2);">Every player is re-scored on the same three questions each quarter. Triggers catch the spikes. The re-score catches the slow fade and the slow rise, which is what actually kills a watchlist over time.</p>
+          <table class="t" style="margin-top:10px;">
+            <tbody><tr><td>Last full re-score</td><td><b>1 July 2026</b></td></tr>
+            <tr><td>Next full re-score</td><td><b>1 October 2026</b></td></tr></tbody>
+          </table>
+        </div>
+      </div>
+
+      <details class="more" style="border:0;">
+        <summary>Current watchlist scores, as implemented in the prototype</summary>
+        <div class="body">
+          <table class="t">
+            <thead><tr><th>Player</th><th>Tier</th><th>Roadmap</th><th>Revenue</th><th>Velocity</th><th>Total</th><th>Depth</th></tr></thead>
+            <tbody id="scorebody"></tbody>
+          </table>
+        </div>
+      </details>
+    </section>
+
+    <!-- ========== 7 ========== -->
+    <section id="agent" data-title="The agent">
+      <div class="snum">07</div>
+      <h3>The agent</h3>
+      <p class="sub">The published stream is automated and running today. Click any stage for what it actually does.</p>
+
+      <div class="okbox" data-status="built"><span class="st built">built</span> &nbsp;<code>radar_collector.py</code>. Python standard library only, no dependencies for the base run. Last run produced 14 live signals with 7 promotion triggers, written to <code>radar-data.js</code> and picked up by the dashboard automatically.</div>
+
+      <h4 class="sh">Pipeline</h4>
+      <div class="pipe" id="pipe"></div>
+
+      <h4 class="sh">Core logic in one screen</h4>
+      <pre><span class="cm"># 1. one query per watchlist subject, category attached up front</span>
+QUERIES = [(<span class="str">"Mindtrip"</span>, <span class="str">'"Mindtrip" AI travel'</span>, <span class="str">"plat"</span>), ...]   <span class="cm"># 12 total</span>
+
+<span class="cm"># 2. hard limits so the feed stays a signal, not a firehose</span>
+RECENT_DAYS = <span class="kw">45</span>      <span class="cm"># anything older is history, not intelligence</span>
+MAX_PER_QUERY = <span class="kw">3</span>     <span class="cm"># no single player can flood the run</span>
+MAX_TOTAL = <span class="kw">14</span>        <span class="cm"># a human has to be able to read the whole thing</span>
+
+<span class="cm"># 3. three filters, in order: recency, relevance, duplicate</span>
+<span class="kw">if</span> item.dt &lt; cutoff: skip
+<span class="kw">if not</span> any(k <span class="kw">in</span> text <span class="kw">for</span> k <span class="kw">in</span> RELEVANCE): skip
+<span class="kw">if</span> norm_title(item.title) <span class="kw">in</span> seen: skip
+
+<span class="cm"># 4. tag category and promotion trigger</span>
+item.cat     = keyword_cat(item)     <span class="cm"># pay, proto, supplier override the default</span>
+item.trigger = detect_trigger(item)  <span class="cm"># funding | partnership | launch | None</span>
+
+<span class="cm"># 5. optional second pass: Claude re-reads the whole batch</span>
+items, mode = claude_triage(items)   <span class="cm"># falls back to keywords on any failure</span></pre>
+
+      <div class="grid2" style="margin-top:16px;">
+        <div class="card">
+          <h4>Triage pass · what Claude adds</h4>
+          <ul class="tick">
+            <li><b>Drops the noise</b> keyword matching keeps. Stock coverage, listicles, generic travel news.</li>
+            <li><b>Fixes the category</b> when a keyword lands an item in the wrong bucket.</li>
+            <li><b>Rewrites the body</b> as one crisp why it matters line for an analyst, instead of a repeated headline.</li>
+            <li><b>Tags triggers strictly.</b> Real events only, not commentary about events.</li>
+          </ul>
+          <table class="t" style="margin-top:12px;">
+            <tbody>
+              <tr><td>Model</td><td class="mono">claude-opus-5</td></tr>
+              <tr><td>Override</td><td class="mono">RADAR_MODEL</td></tr>
+              <tr><td>Output</td><td class="mono">json_schema</td></tr>
+              <tr><td>Refusal check</td><td class="mono">stop_reason == "refusal"</td></tr>
+              <tr><td>On any failure</td><td>Silent fallback to keyword tagging</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="card">
+          <h4>Known limits, stated on purpose</h4>
+          <ul class="tick no">
+            <li>Keyword mode occasionally miscategorizes. A news roundup landed under Protocols in a real run.</li>
+            <li>Keyword mode does not merge duplicate stories. Two Navan MCP items survived the same run.</li>
+            <li>Trigger words over fire on launch adjacent verbs. The triage prompt exists to correct exactly this.</li>
+          </ul>
+          <div class="warnbox" style="margin:12px 0 0;">This is not a defect to hide. It is the argument for the design: <b>the machine tags, the analyst confirms.</b> Automation buys coverage. It does not buy the signature.</div>
+        </div>
+      </div>
+
+      <h4 class="sh">Agent roadmap by stream</h4>
+      <div class="card">
+        <table class="t">
+          <thead><tr><th style="width:18%">Stream</th><th style="width:18%">Status</th><th>Automation stance</th></tr></thead>
+          <tbody>
+            <tr><td><span class="stream published">published</span></td><td><span class="st built">built</span></td><td>Fully automated. Collector runs on a schedule, writes the feed, flags triggers. No human in the loop until the analyst confirms tags.</td></tr>
+            <tr data-status="p2"><td><span class="stream field">field</span></td><td><span class="st p2">phase 2</span></td><td>Structured intake as a Salesforce quick action, since Amadeus already runs deep on Salesforce including Agentforce. Organizationally gated, not technically hard. Interim: any structured form.</td></tr>
+            <tr><td><span class="stream product">lab</span></td><td><span class="st spec">human by design</span></td><td>Stays manual on purpose. Monthly hands on benchmark, same real tasks, scored on plan, price, book and service. Hands on judgment is the moat, so automating it would remove the thing that makes it worth reading.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ========== 8 ========== -->
+    <section id="takeaways" data-title="From signal to takeaway">
+      <div class="snum">08</div>
+      <h3>From signal to takeaway</h3>
+      <p class="sub">A headline is not intelligence. This is the path a raw item walks before it can change a decision.</p>
+
+      <div class="card">
+        <table class="t">
+          <thead><tr><th style="width:14%">Step</th><th style="width:26%">What happens</th><th style="width:22%">Who or what does it</th><th>Output</th></tr></thead>
+          <tbody>
+            <tr><td><b>1. Capture</b></td><td>An item enters through one of three streams and gets category plus stream tags.</td><td>Collector, field contributor, or Lab run</td><td>A <b>Signal</b>. Fact only.</td></tr>
+            <tr><td><b>2. Cluster</b></td><td>Signals about the same underlying event are grouped into one story.</td><td>Triage pass, analyst confirms</td><td>A <b>Move</b> with several sources.</td></tr>
+            <tr><td><b>3. Correlate</b></td><td>Cross stream check. Did the field see this before it was published? Do Lab scores move with it?</td><td>Intelligence layer</td><td>Field heard it first flag, benchmark link.</td></tr>
+            <tr><td><b>4. Assess</b></td><td>Judgment gets written. So what, for whom, how confident.</td><td>AI drafts, analyst owns</td><td>An <b>Assessment</b>, still unsigned.</td></tr>
+            <tr><td><b>5. Sign</b></td><td>The analyst puts their name on it. Only then is it visible beyond CI and Leadership.</td><td>CI Analyst only</td><td>A signed, circulating record.</td></tr>
+            <tr><td><b>6. Route</b></td><td>The same record reaches each role in the shape their job needs.</td><td>Consumption layer</td><td>Battlecard, delta, verdict chip, one screen.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="grid3">
+        <div class="card"><h4>Fact</h4><p style="font-size:13px; color:var(--ink2);">What happened, with a source and a date. Never edited to fit a narrative. This is what the machine is allowed to produce on its own.</p></div>
+        <div class="card"><h4>Assessment</h4><p style="font-size:13px; color:var(--ink2);">What we think it means and how sure we are. Authored by a person, drafted by AI when useful, always attributable.</p></div>
+        <div class="card"><h4>Action</h4><p style="font-size:13px; color:var(--ink2);">What somebody should now do differently. If a Move has no action column, it was news, not intelligence.</p></div>
+      </div>
+
+      <h4 class="sh">Digest specification</h4>
+      <div class="card">
+        <table class="t">
+          <thead><tr><th style="width:14%">Digest</th><th style="width:12%">Cadence</th><th style="width:16%">Authorship</th><th>Contents</th></tr></thead>
+          <tbody>
+            <tr data-status="built"><td><b>Daily flash</b> <span class="st built">built</span></td><td>08:00 daily</td><td><b>Machine made, unsigned.</b> Labelled as such.</td><td>Newest signals plus open promotion triggers. Assembled live from the feed, no analyst in the loop.</td></tr>
+            <tr data-status="built"><td><b>Weekly</b> <span class="st built">built</span></td><td>Weekly</td><td>AI drafts, analyst signs</td><td>What moved, what it means, what changes. Nothing circulates until it carries a signature.</td></tr>
+            <tr data-status="built"><td><b>Monthly deep dive</b> <span class="st built">built</span></td><td>Monthly</td><td>Analyst authored and signed</td><td>Tier movements, Lab trendline, category heat, and a section called The call, which is an explicit recommendation.</td></tr>
+            <tr data-status="p2"><td><b>Tier 1 alert</b> <span class="st p2">phase 2</span></td><td>On trigger</td><td>Machine, routed</td><td>Email or Teams, opt in per user. Only Always-On players with a confirmed trigger are allowed to interrupt anyone.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ========== 9 ========== -->
+    <section id="permissions" data-title="Permissions and governance">
+      <div class="snum">09</div>
+      <h3>Permissions and governance</h3>
+      <p class="sub">Two hard walls, and nothing else locked. Click any cell for the rule behind it.</p>
+
+      <div class="card">
+        <div style="overflow-x:auto;"><table class="perm" id="perm"></table></div>
+        <div class="permleg">
+          <span><i class="c yes"></i> Full access</span>
+          <span><i class="c part"></i> Conditional</span>
+          <span><i class="c no"></i> Metadata only, item visible but locked</span>
+        </div>
+      </div>
+
+      <div class="grid2">
+        <div class="card">
+          <h4>Wall 1 · Field signal bodies</h4>
+          <p style="font-size:13.5px; color:var(--ink2);">Visible to CI, Leadership, and the contributing team only. A pre-sales lead in EMEA sees EMEA bodies and sees that APAC signals exist without reading them. This protects the source and the deal. Remove the wall and the field stream dries up within a quarter.</p>
+        </div>
+        <div class="card">
+          <h4>Wall 2 · Unsigned drafts</h4>
+          <p style="font-size:13.5px; color:var(--ink2);">Visible to CI and Leadership only. Nothing unsigned circulates as fact. The moment the analyst signs, the record appears for every role at once. In the prototype you can watch that happen live.</p>
+        </div>
+      </div>
+
+      <div class="okbox">Everyone sees the titles and metadata of locked items. Nobody has to guess what exists. A wall you cannot see feels like a system that is hiding things, which costs more trust than it protects.</div>
+
+      <details class="more" style="border:0;">
+        <summary>Why Leadership gets full access rather than a summary</summary>
+        <div class="body">The default view for Leadership is a single screen, because that is what the job needs on a Tuesday morning. But every other page stays open to them. It is a choice, not a wall. An executive who cannot check the underlying record eventually stops trusting the summary, and then asks a person to go and look, which is the exact behaviour this system exists to replace.</div>
+      </details>
+    </section>
+
+    <!-- ========== 10 ========== -->
+    <section id="phasing" data-title="Phasing">
+      <div class="snum">10</div>
+      <h3>Phasing</h3>
+      <p class="sub">The sequence matters more than the tooling. Select a phase.</p>
+      <div class="tabs" id="phasetabs"></div>
+      <div class="card" id="phasebody"></div>
+    </section>
+
+    <!-- ========== 11 ========== -->
+    <section id="metrics" data-title="Metrics">
+      <div class="snum">11</div>
+      <h3>Metrics</h3>
+      <p class="sub">Two kinds. Activity metrics tell you the machine is running. Stickiness metrics tell you it matters. Only the second kind justifies the function.</p>
+
+      <div class="card">
+        <h4>Activity</h4>
+        <table class="t">
+          <thead><tr><th style="width:40%">Metric</th><th style="width:22%">Target by day 90</th><th>Source</th></tr></thead>
+          <tbody>
+            <tr><td><b>Signals captured per week</b></td><td>40 or more across all streams</td><td>System count</td></tr>
+            <tr><td><b>Field contribution rate</b></td><td>60 percent of pre-sales teams log at least one signal a month</td><td>Contributor field</td></tr>
+            <tr><td><b>Lab coverage</b></td><td>6 players by 3 tasks monthly, no gap over 45 days</td><td>Benchmark run dates</td></tr>
+            <tr><td><b>Trigger to tier review latency</b></td><td>Under 3 business days</td><td>Promotion log</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="card">
+        <h4>Stickiness</h4>
+        <table class="t">
+          <thead><tr><th style="width:40%">Metric</th><th style="width:22%">Target by day 90</th><th>Source</th></tr></thead>
+          <tbody>
+            <tr><td><b>Roadmap decisions citing a Radar record</b></td><td>Every AI assistant roadmap decision</td><td>Decision briefs</td></tr>
+            <tr><td><b>Weekly digest open rate</b></td><td>70 percent of named stakeholders</td><td>Distribution list</td></tr>
+            <tr><td><b>Battlecard pulls before a competitive deal</b></td><td>Trending up month over month</td><td>Page and copy events</td></tr>
+            <tr><td><b>Repeat research incidents</b></td><td>Trending to zero</td><td>Analyst log</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="quote">If leadership stops asking someone to go and look, the function works.<div class="attr">The real success metric. Everything above is a proxy for it.</div></div>
+    </section>
+
+    <!-- ========== 12 ========== -->
+    <section id="risks" data-title="Risks">
+      <div class="snum">12</div>
+      <h3>Risks</h3>
+      <p class="sub">Each one with the mitigation already designed into the system.</p>
+      <div class="card">
+        <table class="t">
+          <thead><tr><th style="width:32%">Risk</th><th style="width:30%">How it shows up</th><th>Mitigation in the design</th></tr></thead>
+          <tbody>
+            <tr><td><b>Breadth beats depth</b></td><td>Fifteen players tracked shallowly. Nothing said with confidence about any of them.</td><td>Depth rationed by rubric step 4. Lab treatment reserved for roadmap movers, published so it can be argued with.</td></tr>
+            <tr><td><b>Tagging accuracy</b></td><td>The machine miscategorizes and the error propagates into a digest.</td><td>Machine tags, analyst confirms. Category is an editable field. Nothing unsigned circulates.</td></tr>
+            <tr><td><b>Source trust erodes</b></td><td>A field signal leaks into a wider view and pre-sales stops logging.</td><td>Wall 1, enforced at the record level, with visible lock cards so the protection is legible.</td></tr>
+            <tr><td><b>Tool without habit</b></td><td>A dashboard gets built, nobody feeds it, it dies quietly in month four.</td><td>Phase 1 ships with zero custom software. The tool arrives only after the habit exists.</td></tr>
+            <tr><td><b>Trigger over firing</b></td><td>Everything looks urgent, so nothing does.</td><td>Triage tags real events only. Dismissals are logged, so over firing becomes measurable and tunable.</td></tr>
+            <tr><td><b>Analyst as single point of failure</b></td><td>Signing stops when one person is out.</td><td>Open question below. Needs a named deputy signer before go live.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ========== 13 ========== -->
+    <section id="open" data-title="Open questions">
+      <div class="snum">13</div>
+      <h3>Open questions and dependencies</h3>
+      <p class="sub">Stated rather than assumed. Each one has an owner and a day one action.</p>
+      <div class="card">
+        <table class="t">
+          <thead><tr><th style="width:44%">Question</th><th style="width:20%">Confidence today</th><th>Action</th></tr></thead>
+          <tbody>
+            <tr><td><b>Which BI layer does the team standardize on?</b></td><td><span class="chip">not confirmed</span></td><td>Confirm day one. The design deliberately does not depend on a specific tool.</td></tr>
+            <tr><td><b>Salesforce admin capacity for the field quick action.</b></td><td><span class="chip">likely available</span></td><td>Amadeus already runs deep on Salesforce including Agentforce, so the platform is not in question. Admin time is.</td></tr>
+            <tr><td><b>Teams channel and webhook for tier 1 alerts.</b></td><td><span class="chip">low risk</span></td><td>Microsoft 365 is named in the brief. Needs a channel and a webhook URL, roughly ten lines of code.</td></tr>
+            <tr><td><b>Who signs when the CI analyst is out?</b></td><td><span class="chip">open</span></td><td>Name a deputy signer before go live. Unsigned records must never back up.</td></tr>
+            <tr><td><b>Retention and legal review on competitor claims captured from live deals.</b></td><td><span class="chip">open</span></td><td>Review before the field stream opens beyond a pilot team.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ========== 14 ========== -->
+    <section id="delivery" data-title="Delivery breakdown">
+      <div class="snum">14</div>
+      <h3>Delivery breakdown</h3>
+      <p class="sub">The same product expressed as work. Six epics, nineteen features, forty eight stories. Click any row to open it.</p>
+
+      <div class="kicker">Every story says who it is for and what it unlocks. If it cannot be written that way, it is not a story.</div>
+
+      <div class="treebar">
+        <button class="minibtn" onclick="treeAll(true)">Expand all</button>
+        <button class="minibtn" onclick="treeAll(false)">Collapse all</button>
+        <span style="font-size:12.5px; color:var(--ink3);" id="treestat"></span>
+      </div>
+
+      <div id="tree"></div>
+
+      <div class="card" style="margin-top:18px;">
+        <h4>How to read the counts</h4>
+        <p style="font-size:13.5px; color:var(--ink2);">Each epic and feature shows built stories against total. A green count means the whole branch runs today. The sidebar toggle applies here too: switch on <b>Only what is built</b> and every unbuilt story, feature and branch disappears, leaving exactly what you could demo this afternoon.</p>
+      </div>
+    </section>
+
+    <!-- ========== 15 ========== -->
+    <section id="appendix" data-title="Appendix">
+      <div class="snum">15</div>
+      <h3>Appendix · what actually exists</h3>
+      <p class="sub">Five files. Two of them run.</p>
+      <div class="card">
+        <table class="t">
+          <thead><tr><th style="width:24%">File</th><th style="width:14%">Status</th><th>What it is</th></tr></thead>
+          <tbody>
+            <tr><td class="mono">radar-demo.html</td><td><span class="st built">runs</span></td><td>The working prototype. Single self contained file, vanilla JavaScript, zero dependencies, works offline from the file system. Six pages, five role views, permission walls, Lab evidence drill down, promotion queue, sign and publish flow.</td></tr>
+            <tr><td class="mono">radar_collector.py</td><td><span class="st built">runs</span></td><td>The published stream agent. Python standard library only. Optional Claude triage pass when the SDK and credentials are present.</td></tr>
+            <tr><td class="mono">radar-data.js</td><td><span class="st built">generated</span></td><td>The last collector run. 14 live signals, 7 promotion triggers. Regenerated by rerunning the collector.</td></tr>
+            <tr><td class="mono">radar-prd.html</td><td><span class="st built">this file</span></td><td>This document.</td></tr>
+            <tr><td class="mono">radar-explainer.html</td><td><span class="st built">runs</span></td><td>The same system explained in plain language, for anyone who needs the concept without the specification.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="card">
+        <h4>To run the agent</h4>
+        <pre><span class="cm"># base run, no dependencies</span>
+python3 radar_collector.py
+
+<span class="cm"># with the Claude triage pass</span>
+pip3 install anthropic
+export ANTHROPIC_API_KEY=sk-ant-...
+python3 radar_collector.py</pre>
+      </div>
+
+      <div class="footnote">
+        Concept prototype and concept document, produced for interview discussion. Not an Amadeus product and not an Amadeus document. Illustrative data throughout, except the published stream feed, which contains real headlines collected from public sources. Role names in the prototype are illustrative personas.
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<div id="modal-root"></div>
+
+<script>
+const $=(s,r=document)=>r.querySelector(s);
+const $$=(s,r=document)=>Array.from(r.querySelectorAll(s));
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+/* ---------- theme ---------- */
+const MOON='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>';
+const SUN='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>';
+function isDark(){return document.body.classList.contains('dark');}
+function setDark(v){
+  document.body.classList.toggle('dark',v);
+  $('#themebtn').innerHTML=v?SUN:MOON;
+  try{localStorage.setItem('radar-theme',v?'dark':'light');}catch(e){}
+}
+(function(){let t='light'; try{t=localStorage.getItem('radar-theme')||'light';}catch(e){} setDark(t==='dark');})();
+
+/* ---------- modal ---------- */
+function openModal(html){
+  $('#modal-root').innerHTML='<div class="overlay" onclick="if(event.target===this)closeModal()"><div class="modal">'+html+
+    '<div class="actions"><button class="btn" onclick="closeModal()">Close</button></div></div></div>';
+}
+function closeModal(){$('#modal-root').innerHTML='';}
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal();});
+
+/* ---------- contents + scrollspy ---------- */
+const SECS=$$('main section[data-title]');
+$('#toc').innerHTML=SECS.map((s,i)=>
+  '<a href="#'+s.id+'"><span class="n">'+String(i+1).padStart(2,'0')+'</span>'+esc(s.dataset.title)+'</a>').join('');
+const TOCLINKS=$$('#toc a');
+let ticking=false;
+function spy(){
+  ticking=false;
+  let idx=0;
+  SECS.forEach((s,i)=>{ if(s.getBoundingClientRect().top<=140) idx=i; });
+  TOCLINKS.forEach((a,i)=>a.classList.toggle('active',i===idx));
+}
+window.addEventListener('scroll',()=>{if(!ticking){ticking=true;requestAnimationFrame(spy);}},{passive:true});
+spy();
+
+/* ---------- architecture layers ---------- */
+const LAYERS=[
+ {c:'l1',n:'01',t:'Ingestion · three streams',
+  d:'Everything enters through exactly one of three doors, and the door is recorded. Provenance is not metadata trivia. It is what lets you say the field saw this before the press did.',
+  tags:['<span class="stream field">field capture</span>','<span class="stream published">published ingest</span>','<span class="stream product">assistant lab</span>'],
+  detail:[['Field capture','Structured intake from pre-sales and solutions. Under a minute to log, from inside the tool they already have open. Fixes intelligence dying in Teams threads.'],
+          ['Published ingest','The collector. 12 watchlist queries, 45 day window, filtered, deduped, tagged. Automated and running today.'],
+          ['Assistant Lab','Monthly hands on benchmark. Same real tasks, same scoring across plan, price, book and service. Human by design.']]},
+ {c:'l2',n:'02',t:'Knowledge model · five entities',
+  d:'One shared vocabulary. Players, Signals, Moves, Benchmarks, Assessments. Two axis tagging on every record, category by stream. Fact and judgment kept in separate fields.',
+  tags:['<span class="chip">Players</span>','<span class="chip">Signals</span>','<span class="chip">Moves</span>','<span class="chip">Benchmarks</span>','<span class="chip">Assessments</span>'],
+  detail:[['Why entities and not documents','A document can be read. A record can be queried, correlated and counted. The difference is whether you can answer a question you did not anticipate.'],
+          ['Two axis tagging','Category answers what part of the market. Stream answers how we know. Filtering on both is what makes coverage gaps visible instead of invisible.']]},
+ {c:'l3',n:'03',t:'Intelligence layer',
+  d:'Where raw records become something worth someone’s attention. Triage, correlation, drafting. All of it produces drafts. None of it publishes.',
+  tags:['<span class="chip">LLM triage</span>','<span class="chip">cross stream correlation</span>','<span class="chip">field heard it first</span>','<span class="chip">AI drafts</span>'],
+  detail:[['Triage','Classify, drop, dedupe, summarize. Built and running in the collector.'],
+          ['Correlation','Same player surfacing across two streams inside a short window is a stronger signal than either alone.'],
+          ['Field heard it first','When a field signal predates the published item on the same subject, the record gets flagged. It is the single best argument for why pre-sales should keep logging.'],
+          ['Drafting','AI writes the first version of the weekly digest and move assessments. The analyst signs. Never the other way round.']]},
+ {c:'l4',n:'04',t:'Consumption and access control',
+  d:'Four role shaped views plus Leadership’s one screen. Two hard permission walls. Share to email or Teams from any page, with the summary already permission aware.',
+  tags:['<span class="chip">role views</span>','<span class="chip">digests</span>','<span class="chip">battlecards</span>','<span class="chip">RBAC</span>'],
+  detail:[['Role views','The same record, shaped differently. Product sees a delta. Marketing sees claim versus reality. Pre-sales sees a rebuttal. Leadership sees a threat strip.'],
+          ['Permission aware sharing','What gets copied into an email is filtered by what the sender is allowed to see, not by what the page happens to be showing.']]}
+];
+$('#layers').innerHTML=LAYERS.map((l,i)=>
+ '<div class="layer '+l.c+' clickable" onclick="showLayer('+i+')">'+
+ '<div class="lnum">'+l.n+'</div><div><h5>'+l.t+'</h5><p>'+l.d+'</p>'+
+ '<div class="tagrow">'+l.tags.join('')+'</div></div></div>').join('');
+function showLayer(i){
+  const l=LAYERS[i];
+  openModal('<h4>'+l.t+'</h4><div class="hint">Architecture layer '+l.n+'</div>'+
+    l.detail.map(d=>'<div class="kv"><div class="k">'+esc(d[0])+'</div><div>'+esc(d[1])+'</div></div>').join(''));
+}
+
+/* ---------- data model ---------- */
+const ENTITIES={
+ Players:{note:'The watchlist. One row per tracked company, carrying its score and its tier history.',
+  f:[['id','string','Stable key'],['name','string','Display name'],['category','enum','plat | rails | proto | supplier | pay'],
+     ['tier','enum','always-on | weekly | monthly'],['score_roadmap','0 to 2','Can they move a roadmap decision in 90 days'],
+     ['score_revenue','0 to 2','Do they touch a core revenue line'],['score_velocity','0 to 2','How fast are they shipping'],
+     ['depth','enum','lab | light. Rationed inside the tier'],['tier_history','array','Every move, with date and reason'],
+     ['last_scored / next_score','date','Quarterly cycle. 1 Jul 2026, 1 Oct 2026'],['owner','user','Named analyst']]},
+ Signals:{note:'The atom. One observed thing, from one stream, with a source. Fact only, never judgment.',
+  f:[['id','string','Stable key'],['date / iso','date','Observed date'],['stream','enum','field | published | product'],
+     ['category','enum','The five categories'],['player','ref','Links to Players'],['title','string','What happened'],
+     ['body','text','Detail, or the analyst why it matters line after triage'],['source','string','Publication or contributor'],
+     ['url','string','Link out where public'],['trigger','enum','funding | partnership | launch | null'],
+     ['visibility','enum','Drives wall 1. Owning team recorded for field signals'],['contributor / region','user','Who logged it, from where']]},
+ Moves:{note:'A story assembled from several signals. Facts, assessment and actions kept in three separate columns.',
+  f:[['id','string','Stable key'],['player','ref','Subject'],['headline','string','The move in one line'],
+     ['facts','array','Each with a source reference'],['assessment','ref','The judgment, authored'],
+     ['actions','array','What somebody now does differently'],['signal_ids','array','Provenance chain'],
+     ['status','enum','draft | signed. Drives wall 2'],['signed_by / signed_at','user, date','The byline'],
+     ['field_first','bool','Field beat the press. Shown as a ribbon']]},
+ Benchmarks:{note:'One Assistant Lab result. Same tasks every month so the delta means something.',
+  f:[['id','string','Stable key'],['run_id','string','Example MU-0726-GEM. Task, period, player'],
+     ['task','enum','multi-city | complex change | group booking'],['player','ref','Assistant under test'],
+     ['dimension','enum','plan | price | book | service'],['score','0 to 5','Scored against a fixed rubric'],
+     ['delta','int','Change since the previous run'],['run_date / tester','date, user','Reproducibility'],
+     ['artifacts','string','Transcripts and screenshots from the run']]},
+ Assessments:{note:'The judgment layer, kept deliberately separate from every fact it rests on.',
+  f:[['id','string','Stable key'],['subject','ref','A player, a move or a category'],['verdict','text','What we think it means'],
+     ['confidence','enum','high | medium | low. Stated, never implied'],['so_what','text','The consequence for Amadeus'],
+     ['author','user','A person, always'],['signed_at','datetime','Blank means it does not circulate'],
+     ['supersedes','ref','Assessments age. The chain stays readable']]}
+};
+const ENAMES=Object.keys(ENTITIES);
+$('#enttabs').innerHTML=ENAMES.map((n,i)=>'<button class="tab'+(i===0?' active':'')+'" onclick="showEnt(\''+n+'\',this)">'+n+'</button>').join('');
+function showEnt(n,btn){
+  $$('#enttabs .tab').forEach(b=>b.classList.remove('active'));
+  if(btn)btn.classList.add('active');
+  const e=ENTITIES[n];
+  $('#entbody').innerHTML='<h4>'+n+'</h4><p style="font-size:13.5px; color:var(--ink2); margin-bottom:14px;">'+esc(e.note)+'</p>'+
+    '<table class="t"><thead><tr><th style="width:24%">Field</th><th style="width:20%">Type</th><th>Notes</th></tr></thead><tbody>'+
+    e.f.map(r=>'<tr><td class="mono">'+esc(r[0])+'</td><td>'+esc(r[1])+'</td><td>'+esc(r[2])+'</td></tr>').join('')+'</tbody></table>';
+}
+showEnt(ENAMES[0]);
+
+/* ---------- watchlist scores ---------- */
+const SCORES=[
+ ['OpenAI / ChatGPT','Always-On',2,2,2,'lab'],['Google / Gemini','Always-On',2,2,2,'lab'],
+ ['Sabre','Always-On',2,2,1,'light'],['Mindtrip','Always-On',2,1,2,'lab'],
+ ['Anthropic / Claude','Weekly',1,1,2,'lab'],['Perplexity','Weekly',1,1,2,'lab'],
+ ['Microsoft / Copilot','Weekly',1,2,1,'lab'],['Travelport','Weekly',1,2,1,'light'],
+ ['Duffel','Weekly',1,1,1,'light'],['Stripe / PayPal','Weekly',1,2,1,'light'],
+ ['TripAgentOS','Weekly',1,0,2,'light'],['Booking Holdings','Monthly',1,1,0,'light'],
+ ['Expedia','Monthly',1,1,0,'light'],['Regional NDC aggregators','Monthly',0,1,0,'light']
+];
+$('#scorebody').innerHTML=SCORES.map(r=>
+ '<tr><td><b>'+esc(r[0])+'</b></td><td>'+r[1]+'</td><td>'+r[2]+'</td><td>'+r[3]+'</td><td>'+r[4]+'</td>'+
+ '<td><b>'+(r[2]+r[3]+r[4])+'/6</b></td><td>'+(r[5]==='lab'?'<span class="chip">Lab depth</span>':'<span class="chip">light touch</span>')+'</td></tr>').join('');
+
+/* ---------- agent pipeline ---------- */
+const STAGES=[
+ ['01','Watchlist queries','12 queries, one per subject, each carrying a default category.',
+  'One query per watchlist subject rather than one generic travel-AI query. The category travels with the query, so an item arrives pre-tagged before any classification happens. Queries cover Mindtrip, Sabre, OpenAI, Google, Perplexity, Microsoft, Travelport, Duffel, Amadeus, plus three thematic sweeps for payments, protocols and supplier direct moves.'],
+ ['02','Fetch','Google News RSS over HTTPS, 20 second timeout, per feed failure isolated.',
+  'Public RSS only. No scraping, no credentials, no rate limited API. A failed feed prints a warning and the run continues, because a partial run is far more useful than no run.'],
+ ['03','Parse and clean','Strip HTML, remove the trailing source suffix, drop echoed descriptions.',
+  'Google News appends the publication name to every headline and frequently repeats the headline as the description. Both are stripped, so the record reads like intelligence rather than like a feed dump. Body capped at 220 characters.'],
+ ['04','Recency window','45 days. Older items are history, not intelligence.',
+  'Publication dates are parsed and normalized to UTC. Anything outside the window is discarded before any further processing.'],
+ ['05','Relevance filter','24 keyword whitelist across AI, agents, travel and rails.',
+  'A cheap first pass that removes obviously unrelated results a broad news query drags in. Deliberately permissive: it is a noise floor, not the classifier.'],
+ ['06','Dedupe','Normalized title key, punctuation and case removed, first 80 characters.',
+  'Prevents the same headline arriving through several queries. It does not merge two different articles about the same event, which is a known limit that the triage pass exists to fix.'],
+ ['07','Tag category','Keyword rules override the query default for payments, protocols and supplier.',
+  'A Sabre item that turns out to be about agentic checkout should file under payments, not rails. The override list is intentionally short, because keyword classification degrades fast as it grows.'],
+ ['08','Detect trigger','funding, partnership or launch, matched against three word lists.',
+  'This is the link between the collector and the focus rubric. A detected trigger files the player into the promotion queue for tier review, ahead of the quarterly re-score. Known limit: launch verbs over fire.'],
+ ['09','Claude triage','Optional second pass. Classify, drop, rewrite, retag. Falls back silently.',
+  'The whole batch goes to claude-opus-5 in one call with a strict json_schema. Claude drops irrelevant items, corrects categories, rewrites each body as an analyst why it matters line, and retags triggers for real events only. Refusals are checked explicitly. Any failure at all, including a missing SDK or missing credentials, falls back to keyword tagging and reports the mode.'],
+ ['10','Write and render','radar-data.js, picked up automatically by the dashboard.',
+  'Output is window.LIVE_SIGNALS plus window.LIVE_META, which carries the generation time, the item count, the triage mode used and the window length. The dashboard loads it if present and falls back to curated demo data if absent, so the prototype never breaks in front of an audience.']
+];
+$('#pipe').innerHTML=STAGES.map((s,i)=>
+ '<div class="stage clickable" onclick="showStage('+i+')"><div class="sn">'+s[0]+'</div>'+
+ '<div class="sname">'+esc(s[1])+'</div><div class="sdesc">'+esc(s[2])+'</div></div>').join('');
+function showStage(i){
+  const s=STAGES[i];
+  openModal('<h4>'+esc(s[1])+'</h4><div class="hint">Pipeline stage '+s[0]+' of 10 · radar_collector.py</div>'+
+   '<div class="kv"><div class="k">In one line</div><div>'+esc(s[2])+'</div></div>'+
+   '<div class="kv"><div class="k">What it does</div><div>'+esc(s[3])+'</div></div>');
+}
+
+/* ---------- permission matrix ---------- */
+const ROLES=['CI Analyst','Product','Product Mktg','Pre-Sales','Leadership'];
+const PERMS=[
+ ['Signal titles and metadata',['yes','yes','yes','yes','yes'],'Everyone sees that a record exists, including records they cannot open. A wall you cannot see reads as a system that hides things.'],
+ ['Published stream bodies',['yes','yes','yes','yes','yes'],'Public sources. Nothing to protect, so nothing is locked.'],
+ ['Field signal bodies',['yes','no','no','part','yes'],'Wall 1. CI and Leadership always. Pre-sales sees their own team only, so EMEA reads EMEA and sees that APAC exists. This protects the source and the deal.'],
+ ['Assistant Lab results',['yes','yes','yes','yes','yes'],'Our own testing. Shared deliberately and widely, because it is the most persuasive artifact the function produces.'],
+ ['Unsigned drafts',['yes','no','no','no','yes'],'Wall 2. Nothing unsigned circulates as fact. Leadership is included because they are accountable for the call, not because rank grants access.'],
+ ['Signed moves and assessments',['yes','yes','yes','yes','yes'],'The moment a signature lands, the record appears for every role at once.'],
+ ['Battlecards',['yes','yes','yes','yes','yes'],'The give to get payoff. Pre-sales contributes signals and gets the card back.'],
+ ['Watchlist scores and rubric',['yes','yes','yes','yes','yes'],'Published on purpose. A focus rubric that cannot be inspected cannot be argued with, and one that cannot be argued with quietly stops being believed.'],
+ ['Sign and publish',['yes','no','no','no','no'],'Authorship sits with one accountable role. Leadership can read everything and still does not sign, because a byline has to mean a specific person did the work.']
+];
+$('#perm').innerHTML=
+ '<thead><tr><th class="rh">Resource</th>'+ROLES.map(r=>'<th>'+r+'</th>').join('')+'</tr></thead><tbody>'+
+ PERMS.map((p,i)=>'<tr><td class="rowh">'+esc(p[0])+'</td>'+
+   p[1].map((v,j)=>'<td class="c '+v+'" onclick="showPerm('+i+','+j+')">'+(v==='yes'?'✓':v==='no'?'·':'◑')+'</td>').join('')+'</tr>').join('')+
+ '</tbody>';
+function showPerm(i,j){
+  const p=PERMS[i], v=p[1][j];
+  const label=v==='yes'?'Full access':v==='part'?'Conditional access':'Metadata only';
+  openModal('<h4>'+esc(p[0])+'</h4><div class="hint">'+ROLES[j]+' · '+label+'</div>'+
+   '<div class="kv"><div class="k">Rule</div><div>'+esc(p[2])+'</div></div>'+
+   '<div class="kv"><div class="k">Across roles</div><div>'+ROLES.map((r,k)=>r+': '+(p[1][k]==='yes'?'full':p[1][k]==='part'?'conditional':'metadata only')).join(' · ')+'</div></div>');
+}
+
+/* ---------- phases ---------- */
+const PHASES=[
+ {n:'Phase 1 · First 30 to 60 days',tag:'zero custom software',
+  goal:'Prove the habit before spending a euro on tooling.',
+  items:[['Field intake','A structured form. Any form. The discipline is the fields, not the platform.'],
+         ['Assistant Lab','First monthly benchmark run, same tasks, scored and written up.'],
+         ['Watchlist','Scored with the rubric and published, so the argument happens early.'],
+         ['Digests','Written by hand. Weekly, signed. If nobody reads it by hand, no tool will save it.'],
+         ['Storage','A spreadsheet and a shared folder. Deliberately.']]},
+ {n:'Phase 2 · Automate the boring half',tag:'ingest plus dashboard',
+  goal:'Remove the manual cost from the parts that do not need judgment.',
+  items:[['Published ingest','The collector on a schedule. Built and running today, ahead of plan.'],
+         ['Field intake','Salesforce quick action, since Amadeus already runs deep on Salesforce including Agentforce.'],
+         ['Dashboard','The single system of record, replacing the spreadsheet.'],
+         ['LLM triage','Classification, dedupe and drafting. Analyst still confirms and still signs.'],
+         ['Alerts','Tier 1 triggers to email and Teams, opt in per user.']]},
+ {n:'Phase 3 · Role portals and correlation',tag:'the compounding part',
+  goal:'Make the system answer questions nobody thought to ask when it was designed.',
+  items:[['Role portals','Each role lands on their own view by default. Built in the prototype.'],
+         ['Cross stream correlation','Automatic field heard it first detection and benchmark linkage.'],
+         ['Decision briefs','A roadmap question becomes a structured query against the system rather than a research project.'],
+         ['Trend intelligence','Lab trendlines and category heat over quarters, which is where a CI function stops reporting and starts predicting.']]}
+];
+$('#phasetabs').innerHTML=PHASES.map((p,i)=>'<button class="tab'+(i===0?' active':'')+'" onclick="showPhase('+i+',this)">'+p.n.split(' · ')[0]+'</button>').join('');
+function showPhase(i,btn){
+  $$('#phasetabs .tab').forEach(b=>b.classList.remove('active'));
+  if(btn)btn.classList.add('active');
+  const p=PHASES[i];
+  $('#phasebody').innerHTML='<h4>'+esc(p.n)+' &nbsp;<span class="chip">'+esc(p.tag)+'</span></h4>'+
+   '<p style="font-size:14px; font-weight:bold; color:var(--navy); margin-bottom:14px;" class="pgoal">'+esc(p.goal)+'</p>'+
+   '<table class="t"><tbody>'+p.items.map(it=>'<tr><td style="width:26%"><b>'+esc(it[0])+'</b></td><td>'+esc(it[1])+'</td></tr>').join('')+'</tbody></table>';
+  if(isDark())$('#phasebody .pgoal').style.color='#BFE0FF';
+}
+showPhase(0);
+
+/* ---------- delivery tree ---------- */
+const EPICS=[
+{code:'EPIC 1',name:'Ingestion',goal:'Get signal in through three separate doors, and never lose which door it came through.',feats:[
+  {name:'Published stream collector',st:'built',stories:[
+    {id:'RDR-101',st:'built',size:'S',role:'CI analyst',want:'twelve watchlist scoped queries instead of one broad travel query',so:'results arrive already attached to a category before anything has to classify them',ac:['One query per tracked subject','Default category travels with the query','Adding a subject is a one line change']},
+    {id:'RDR-102',st:'built',size:'S',role:'CI analyst',want:'recency, relevance and duplicate filters applied in that order',so:'a run stays short enough that a human reads all of it',ac:['45 day window enforced','Maximum 3 per query and 14 per run','Duplicate detection on a normalized title']},
+    {id:'RDR-103',st:'built',size:'M',role:'CI analyst',want:'funding, partnership and launch events detected automatically',so:'the promotion queue fills without me reading every headline',ac:['Three trigger types recognised','Trigger stored on the record','No trigger is a valid state']},
+    {id:'RDR-104',st:'p2',size:'S',role:'CI analyst',want:'the collector to run on a schedule',so:'the feed is already fresh when the daily flash goes out',ac:['Runs before 07:30 daily','A failed run alerts the analyst','Last run time visible in the interface']}]},
+  {name:'Field signal capture',st:'p2',stories:[
+    {id:'RDR-111',st:'p2',size:'M',role:'pre-sales lead',want:'to log a competitor signal in under sixty seconds from the tool I already have open',so:'I never have to leave the deal to report what I just heard',ac:['Quick action inside Salesforce','Five fields maximum','Player, category and region captured']},
+    {id:'RDR-112',st:'p2',size:'S',role:'CI analyst',want:'every field signal to carry contributor and region',so:'the first permission wall can be enforced per record and I can credit the source',ac:['Contributor and region mandatory','Region drives team level visibility']},
+    {id:'RDR-113',st:'spec',size:'S',role:'pre-sales lead',want:'to see what happened to a signal I logged',so:'contributing feels like it went somewhere',ac:['Contributor sees current status','Notified when it appears in a signed move']}]},
+  {name:'Assistant Lab intake',st:'built',stories:[
+    {id:'RDR-121',st:'built',size:'M',role:'CI analyst',want:'to record a benchmark run against a stable run identifier',so:'any score can be traced back to one specific test',ac:['Run ID encodes task, period and player','Tester and date stored','Artifacts referenced from the record']},
+    {id:'RDR-122',st:'built',size:'S',role:'product manager',want:'the change since the previous run shown beside every score',so:'I see direction rather than a snapshot',ac:['Delta shown on the matrix cell','History available in the evidence view']}]}]},
+
+{code:'EPIC 2',name:'Knowledge model',goal:'One shared vocabulary, with fact and judgment structurally separated.',feats:[
+  {name:'Entity schema',st:'built',stories:[
+    {id:'RDR-201',st:'built',size:'M',role:'CI analyst',want:'five defined entities rather than free form documents',so:'the system can answer questions nobody anticipated when it was designed',ac:['Players, Signals, Moves, Benchmarks, Assessments','Every record carries provenance','Fact fields can never hold judgment']},
+    {id:'RDR-202',st:'built',size:'S',role:'any user',want:'every record tagged with both category and stream',so:'I can filter by what part of the market and by how we know it',ac:['Both axes mandatory','Filtering combines the two independently']}]},
+  {name:'Coverage visibility',st:'built',stories:[
+    {id:'RDR-211',st:'built',size:'S',role:'CI analyst',want:'to see which categories a given stream cannot cover',so:'I never present the three stream model as evenly covering all five categories',ac:['Lab covers platforms and part of payments only','The gap is stated in the interface, not buried']}]},
+  {name:'Persistence',st:'p2',stories:[
+    {id:'RDR-221',st:'p2',size:'L',role:'any user',want:'signing, dismissals and logged signals to survive a reload',so:'the system is a record rather than a session',ac:['Durable storage behind every write','Audit trail on each state change','No silent data loss on failure']}]}]},
+
+{code:'EPIC 3',name:'Intelligence layer',goal:'Turn raw records into something worth attention. Draft everything, publish nothing.',feats:[
+  {name:'LLM triage',st:'built',stories:[
+    {id:'RDR-301',st:'built',size:'M',role:'CI analyst',want:'the whole batch re-read by Claude after keyword tagging',so:'categories get corrected and every item gets a why it matters line',ac:['Strict JSON schema on the response','Refusals detected explicitly','Any failure falls back to keyword tagging']},
+    {id:'RDR-302',st:'built',size:'S',role:'CI analyst',want:'the triage mode recorded on every run',so:'I always know whether I am reading machine tagged or model triaged output',ac:['Mode written into the run metadata','Mode surfaced in the interface']},
+    {id:'RDR-303',st:'spec',size:'M',role:'CI analyst',want:'near duplicate stories merged into a single item',so:'two articles about one event do not consume two slots',ac:['Merged item retains both sources','Merge is reversible by the analyst']}]},
+  {name:'Correlation',st:'p3',stories:[
+    {id:'RDR-311',st:'p3',size:'L',role:'CI analyst',want:'the same player surfacing across two streams inside a short window flagged automatically',so:'weak signals that agree get promoted above loud signals that stand alone',ac:['Configurable window','Flag appears on both records']},
+    {id:'RDR-312',st:'p3',size:'M',role:'pre-sales lead',want:'automatic detection of when the field reported something before it was published',so:'the value of contributing is proven rather than asserted',ac:['Field first ribbon applied automatically','Contributor credited on the move']}]},
+  {name:'Drafting and sign-off',st:'built',stories:[
+    {id:'RDR-321',st:'built',size:'M',role:'CI analyst',want:'AI to draft the weekly digest and move assessments',so:'my time goes into judgment rather than assembly',ac:['Draft generated from signed records','Analyst edits before signing','Draft is never distributed on its own']},
+    {id:'RDR-322',st:'built',size:'S',role:'CI analyst',want:'unsigned drafts held back from every other role',so:'nothing unfinished circulates as though it were settled',ac:['Draft state drives visibility','Signing publishes to all roles at once']}]}]},
+
+{code:'EPIC 4',name:'Focus and prioritization',goal:'Ration attention out loud, using a rule anyone can inspect and argue with.',feats:[
+  {name:'Scoring rubric',st:'built',stories:[
+    {id:'RDR-401',st:'built',size:'M',role:'CI analyst',want:'every player scored on the same three questions from zero to two',so:'attention is allocated by a rule rather than by who shouted last',ac:['Three fixed questions','Total shown as n out of 6','Score visible on every player row']},
+    {id:'RDR-402',st:'built',size:'S',role:'product manager',want:'the per question breakdown behind any score',so:'I can disagree with the reasoning rather than just the number',ac:['Breakdown in the player profile','Each question shown separately']}]},
+  {name:'Tiering and depth',st:'built',stories:[
+    {id:'RDR-411',st:'built',size:'S',role:'CI analyst',want:'the tier derived from the score rather than set by hand',so:'the cadence cannot drift away from the reasoning',ac:['5 to 6 Always-On, 3 to 4 Weekly, 0 to 2 Monthly','Tier recalculates when a score changes']},
+    {id:'RDR-412',st:'built',size:'S',role:'CI analyst',want:'coverage depth flagged independently of tier',so:'expensive hands on testing is reserved for players that can move the roadmap',ac:['Lab depth and light touch are distinct','Depth is visible on the watchlist']}]},
+  {name:'Promotion queue',st:'built',stories:[
+    {id:'RDR-421',st:'built',size:'M',role:'CI analyst',want:'agent flagged triggers to land in a review queue',so:'a Tuesday event does not wait for a quarterly rescore',ac:['Triggers queue automatically','Field sourced triggers sort to the top']},
+    {id:'RDR-422',st:'built',size:'S',role:'CI analyst',want:'to review or dismiss a queued trigger',so:'the queue reflects decisions rather than accumulating noise',ac:['Both actions available inline','Dismissals are logged so over firing is measurable']},
+    {id:'RDR-423',st:'spec',size:'S',role:'CI analyst',want:'a reminder when the quarterly rescore is due',so:'slow drift gets caught on schedule',ac:['Last and next rescore dates stored','Reminder fires ahead of the date']}]}]},
+
+{code:'EPIC 5',name:'Consumption',goal:'The same record, reshaped for five different jobs, plus the summaries that arrive uninvited.',feats:[
+  {name:'Role home views',st:'built',stories:[
+    {id:'RDR-501',st:'built',size:'M',role:'product manager',want:'to land on what changed since I last looked',so:'I do not have to reconstruct the delta myself',ac:['Deltas computed against last view','Capability changes highlighted']},
+    {id:'RDR-502',st:'built',size:'M',role:'product marketer',want:'competitor claims shown beside our own test verdict',so:'I can back or kill a claim with evidence',ac:['Verdict chip on every claim','Verdict links to the benchmark run']},
+    {id:'RDR-503',st:'built',size:'M',role:'executive',want:'one screen with the threat picture and three moves',so:'I get the month in under two minutes',ac:['Single screen by default','Full access to everything underneath']}]},
+  {name:'Core pages',st:'built',stories:[
+    {id:'RDR-511',st:'built',size:'M',role:'any user',want:'to filter signals by stream and by category as two visibly distinct controls',so:'I never confuse how we know something with what it is about',ac:['Stream and category are separate control types','Both filters combine']},
+    {id:'RDR-512',st:'built',size:'L',role:'product manager',want:'to open any Lab score and see the evidence behind it',so:'a benchmark is checkable rather than asserted',ac:['Run ID, delta history and task shown','Artifacts referenced']},
+    {id:'RDR-513',st:'built',size:'M',role:'CI analyst',want:'a full profile behind every watchlist player',so:'tier decisions carry their history with them',ac:['Scorecard, coverage, rescore dates and tier history','Recent signals assembled live']},
+    {id:'RDR-514',st:'built',size:'M',role:'any user',want:'moves presented as fact, assessment and action in three columns',so:'I can tell instantly which part is evidence and which is opinion',ac:['Three columns never merged','Sources expandable','Signature shown when signed']},
+    {id:'RDR-515',st:'built',size:'M',role:'pre-sales lead',want:'a battlecard per major competitor with copyable answers',so:'I can respond in the meeting rather than after it',ac:['Copy action on every answer','Landmine warnings called out']}]},
+  {name:'Digests and alerts',st:'built',stories:[
+    {id:'RDR-521',st:'built',size:'M',role:'any user',want:'a daily flash assembled by machine and clearly labelled unsigned',so:'speed and authority are never confused',ac:['Generated from newest signals and open triggers','Labelled machine made']},
+    {id:'RDR-522',st:'built',size:'M',role:'CI analyst',want:'the weekly digest drafted for me and signed by me',so:'it ships every week without consuming a day',ac:['Draft ready for review','Signature required before distribution']},
+    {id:'RDR-523',st:'built',size:'M',role:'executive',want:'a monthly deep dive ending in an explicit recommendation',so:'the function produces a call rather than a summary',ac:['Tier movements, Lab trendline and category heat','A section stating the recommendation outright']},
+    {id:'RDR-524',st:'p2',size:'M',role:'any user',want:'tier one alerts delivered to email or Teams',so:'the few things that cannot wait actually reach me',ac:['Opt in per user','Only Always-On players with a confirmed trigger']}]},
+  {name:'Sharing',st:'built',stories:[
+    {id:'RDR-531',st:'built',size:'S',role:'any user',want:'to send the page I am looking at as an email summary',so:'intelligence travels to people who are not in the tool',ac:['Summary filtered by what the sender may see','Works from every page']},
+    {id:'RDR-532',st:'spec',size:'S',role:'any user',want:'to post a summary into Teams as a card',so:'it lands where the team already works',ac:['Adaptive card via a channel webhook','Respects the sender permissions']}]}]},
+
+{code:'EPIC 6',name:'Governance',goal:'Two hard walls, one accountable signature, and a trail behind every change.',feats:[
+  {name:'Permission walls',st:'built',stories:[
+    {id:'RDR-601',st:'built',size:'L',role:'pre-sales lead',want:'the detail of what I reported restricted to my team, the analyst and leadership',so:'I can report candidly without exposing a customer',ac:['Enforced per record','Team scoped for contributors','Other teams see the item exists']},
+    {id:'RDR-602',st:'built',size:'M',role:'CI analyst',want:'unsigned material restricted to me and leadership',so:'nothing half formed reaches the people acting on it',ac:['Draft state controls access','Publishing is a deliberate act']},
+    {id:'RDR-603',st:'built',size:'S',role:'any user',want:'to see that a locked item exists even when I cannot open it',so:'the system reads as having rules rather than secrets',ac:['Title and metadata always visible','Lock explains the reason']}]},
+  {name:'Authorship',st:'built',stories:[
+    {id:'RDR-611',st:'built',size:'M',role:'CI analyst',want:'sign and publish rights held by my role alone',so:'a byline always means one identifiable person did the work',ac:['Only CI can sign','Leadership can read everything and still cannot sign']},
+    {id:'RDR-612',st:'built',size:'S',role:'any user',want:'the signature and date shown on everything circulating',so:'I know who stands behind a conclusion',ac:['Signature line on every signed record']},
+    {id:'RDR-613',st:'spec',size:'S',role:'CI analyst',want:'a named deputy signer',so:'unsigned work does not back up when I am away',ac:['Deputy configured in advance','Deputy signatures distinguishable']}]},
+  {name:'Audit',st:'spec',stories:[
+    {id:'RDR-621',st:'spec',size:'M',role:'CI analyst',want:'every state change logged with actor and timestamp',so:'a tier move or a retracted assessment can always be explained later',ac:['Actor, action and time recorded','Log is readable, not just stored']}]}]}
+];
+const STLABEL={built:'built',spec:'spec',p2:'phase 2',p3:'phase 3'};
+function storyHTML(s){
+  return '<div class="story" data-status="'+s.st+'">'+
+    '<div class="top"><span class="sid">'+s.id+'</span><span class="st '+s.st+'">'+STLABEL[s.st]+'</span><span class="size">'+s.size+'</span></div>'+
+    '<div class="txt"><b>As a</b> <i>'+esc(s.role)+'</i>, <b>I want</b> <i>'+esc(s.want)+'</i>, <b>so that</b> <i>'+esc(s.so)+'</i>.</div>'+
+    '<div class="ac"><div class="lbl">Acceptance criteria</div><ul>'+s.ac.map(a=>'<li>'+esc(a)+'</li>').join('')+'</ul></div></div>';
+}
+function countBuilt(stories){return stories.filter(s=>s.st==='built').length;}
+let TOTALS={built:0,all:0};
+$('#tree').innerHTML=EPICS.map(ep=>{
+  const all=ep.feats.reduce((n,f)=>n+f.stories.length,0);
+  const built=ep.feats.reduce((n,f)=>n+countBuilt(f.stories),0);
+  TOTALS.built+=built; TOTALS.all+=all;
+  return '<details class="epic"><summary><span class="caret"></span><span class="ecode">'+ep.code+'</span>'+
+    '<span class="etitle"><h5>'+esc(ep.name)+'</h5><span class="g">'+esc(ep.goal)+'</span></span>'+
+    '<span class="ecount'+(built===all?' full':'')+'">'+built+' of '+all+' built</span></summary>'+
+    ep.feats.map(f=>{
+      const fb=countBuilt(f.stories);
+      return '<details class="feat" data-status="'+f.st+'"><summary><span class="caret"></span>'+
+        '<span class="fname">'+esc(f.name)+'</span><span class="st '+f.st+'">'+STLABEL[f.st]+'</span>'+
+        '<span class="ecount'+(fb===f.stories.length?' full':'')+'">'+fb+' of '+f.stories.length+'</span></summary>'+
+        f.stories.map(storyHTML).join('')+'</details>';
+    }).join('')+'</details>';
+}).join('');
+$('#treestat').textContent=TOTALS.built+' of '+TOTALS.all+' stories run today';
+function treeAll(open){$$('#tree details').forEach(d=>d.open=open);}
+window.addEventListener('beforeprint',()=>treeAll(true));
+
+const _setDark=setDark;
+setDark=function(v){_setDark(v); const g=$('#phasebody .pgoal'); if(g)g.style.color=v?'#BFE0FF':'#000835';};
+</script>
+</body>
+</html>

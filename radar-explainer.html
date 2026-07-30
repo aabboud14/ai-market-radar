@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AI Market Radar · Explained simply</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><circle cx='8' cy='24' r='4' fill='%23005EB8'/><circle cx='16' cy='8' r='5' fill='%2329ABE2'/><circle cx='26' cy='19' r='4' fill='%23000835'/></svg>">
+<!-- Plain language companion to the AI Market Radar prototype and PRD. Not an Amadeus product. -->
+<style>
+  :root{
+    --navy:#000835; --blue:#005EB8; --sky:#29ABE2;
+    --bg:#F3F5F9; --card:#FFFFFF;
+    --ink:#10182B; --ink2:#4A5568; --ink3:#8A94A6;
+    --line:#E3E8F0;
+    --good:#1D7A46; --warn:#B85C00; --high:#B3261E;
+    --f-field:#0E7C66; --f-product:#6B4FC8; --f-published:#005EB8;
+    --radius:12px;
+    --shadow:0 1px 2px rgba(16,24,43,.05), 0 4px 14px rgba(16,24,43,.04);
+    --shadow-hover:0 2px 4px rgba(16,24,43,.07), 0 10px 26px rgba(16,24,43,.09);
+  }
+  body.dark{
+    --bg:#0C1124; --card:#141A31; --ink:#E8ECF5; --ink2:#A9B4C9; --ink3:#6E7A93; --line:#232C47;
+    --shadow:0 1px 2px rgba(0,0,0,.35), 0 4px 14px rgba(0,0,0,.28);
+    --shadow-hover:0 2px 4px rgba(0,0,0,.4), 0 10px 26px rgba(0,0,0,.45);
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html{scroll-behavior:smooth; scroll-padding-top:84px;}
+  body{font-family:Arial, Helvetica, sans-serif; background:var(--bg); color:var(--ink); font-size:15px; line-height:1.65; -webkit-font-smoothing:antialiased;}
+  ::selection{background:#BFE3F5;}
+  body.dark ::selection{background:#1E4E86;}
+  *:focus-visible{outline:2px solid var(--sky); outline-offset:2px; border-radius:4px;}
+  ::-webkit-scrollbar{width:10px; height:10px;}
+  ::-webkit-scrollbar-thumb{background:#C9D2E0; border-radius:6px; border:2px solid var(--bg);}
+  body.dark ::-webkit-scrollbar-thumb{background:#2C3757; border-color:var(--bg);}
+  a{color:var(--blue);}
+
+  .topbar{position:sticky; top:0; z-index:60; height:64px; display:flex; align-items:center; gap:16px; padding:0 20px; color:#fff;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='430' height='64'%3E%3Cg stroke='%2329ABE2' stroke-opacity='.28'%3E%3Cline x1='40' y1='48' x2='120' y2='14'/%3E%3Cline x1='120' y1='14' x2='210' y2='40'/%3E%3Cline x1='210' y1='40' x2='300' y2='10'/%3E%3Cline x1='300' y1='10' x2='392' y2='44'/%3E%3C/g%3E%3Cg fill='%2329ABE2'%3E%3Ccircle cx='40' cy='48' r='2.5' fill-opacity='.55'/%3E%3Ccircle cx='120' cy='14' r='3' fill-opacity='.85'/%3E%3Ccircle cx='210' cy='40' r='2' fill-opacity='.5'/%3E%3Ccircle cx='300' cy='10' r='2.5' fill-opacity='.7'/%3E%3Ccircle cx='392' cy='44' r='3' fill-opacity='.6'/%3E%3C/g%3E%3C/svg%3E"), linear-gradient(115deg, #000835 0%, #001250 55%, #001E66 100%);
+    background-repeat:no-repeat, no-repeat; background-position:right -30px center, 0 0;}
+  .brand{display:flex; align-items:center; gap:11px; min-width:0;}
+  .brand h1{font-size:16px; font-weight:bold; letter-spacing:.2px; white-space:nowrap;}
+  .brand .sub{font-size:11px; color:#9FB3D9; white-space:nowrap;}
+  .demo-badge{font-size:10px; letter-spacing:.5px; text-transform:uppercase; color:#FFD9A0; border:1px solid #C98A2E; border-radius:999px; padding:4px 10px; white-space:nowrap;}
+  .spacer{flex:1;}
+  .toplinks{display:flex; gap:4px; background:rgba(255,255,255,.09); border-radius:999px; padding:3px;}
+  .toplinks a{color:#C9D4EA; text-decoration:none; font-size:12.5px; padding:6px 13px; border-radius:999px; white-space:nowrap; transition:color .15s, background .15s;}
+  .toplinks a:hover{color:#fff;}
+  .toplinks a.here{background:var(--sky); color:#00253F; font-weight:bold;}
+  .iconbtn{width:34px; height:34px; border-radius:50%; background:rgba(255,255,255,.1); color:#C9D4EA; display:flex; align-items:center; justify-content:center; cursor:pointer; border:0; transition:background .15s, color .15s; flex-shrink:0;}
+  .iconbtn:hover{background:rgba(255,255,255,.2); color:#fff;}
+
+  @media(max-width:1080px){ .demo-badge{display:none;} .toplinks a{padding:6px 10px; font-size:12px;} }
+
+  .layout{display:flex; min-height:calc(100vh - 64px);}
+  .sidebar{width:245px; background:var(--card); border-right:1px solid var(--line); padding:18px 12px 22px; flex-shrink:0; position:sticky; top:64px; height:calc(100vh - 64px); overflow-y:auto; display:flex; flex-direction:column;}
+  .navlabel{font-size:10.5px; text-transform:uppercase; letter-spacing:.8px; color:var(--ink3); padding:0 10px 8px;}
+  .toc a{display:flex; align-items:baseline; gap:9px; padding:7px 10px; border-radius:9px; color:var(--ink2); text-decoration:none; font-size:13px; margin-bottom:1px; border-left:3px solid transparent; transition:background .13s, color .13s; line-height:1.4;}
+  .toc a:hover{background:#F0F4FA;}
+  body.dark .toc a:hover{background:#1A2340;}
+  .toc a.active{background:#EAF2FB; color:var(--blue); font-weight:bold; border-left-color:var(--blue);}
+  body.dark .toc a.active{background:#14305C; color:#7FC0F5; border-left-color:#5EA9EF;}
+  .toc a .n{font-size:10.5px; color:var(--ink3); font-weight:bold; width:14px; flex-shrink:0;}
+  .toc a.active .n{color:inherit;}
+  .sidefoot{margin-top:auto; padding:14px 10px 0; border-top:1px solid var(--line); font-size:11px; color:var(--ink3); line-height:1.6;}
+
+  .main{flex:1; padding:34px 44px 90px; max-width:860px; min-width:0;}
+
+  .hero h2{font-size:36px; letter-spacing:-.7px; line-height:1.15; margin-bottom:12px;}
+  .doctype{font-size:11px; text-transform:uppercase; letter-spacing:1.2px; color:var(--blue); font-weight:bold; margin-bottom:8px;}
+  .hero .lede{font-size:18px; color:var(--ink2); line-height:1.6;}
+  .readmeta{display:flex; gap:9px; margin-top:16px; flex-wrap:wrap;}
+
+  section{padding-top:44px;}
+  .chnum{display:inline-flex; align-items:center; justify-content:center; width:30px; height:30px; border-radius:50%; background:var(--sky); color:#00253F; font-weight:bold; font-size:14px; margin-bottom:12px;}
+  section > h3{font-size:27px; letter-spacing:-.4px; line-height:1.25; margin-bottom:10px;}
+  section p{color:var(--ink2); margin-bottom:14px; max-width:64ch;}
+  section p b, section li b{color:var(--ink);}
+  .oneline{background:var(--card); border-left:4px solid var(--sky); border-radius:0 var(--radius) var(--radius) 0; padding:14px 18px; box-shadow:var(--shadow); margin:0 0 22px;}
+  .oneline .l{font-size:10px; text-transform:uppercase; letter-spacing:.9px; color:var(--ink3); font-weight:bold; margin-bottom:3px;}
+  .oneline .t{font-size:17px; font-weight:bold; color:var(--navy); line-height:1.4;}
+  body.dark .oneline .t{color:#BFE0FF;}
+
+  .card{background:var(--card); border:1px solid var(--line); border-radius:var(--radius); padding:20px 22px; box-shadow:var(--shadow); margin-bottom:16px;}
+  .card > h4{font-size:16px; margin-bottom:8px;}
+  .card p:last-child{margin-bottom:0;}
+  .grid2{display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:16px;}
+  .grid3{display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin-bottom:16px;}
+  @media(max-width:900px){.grid2,.grid3{grid-template-columns:1fr;}}
+
+  ul.plain{list-style:none; margin-bottom:16px;}
+  ul.plain li{position:relative; padding-left:22px; margin-bottom:10px; color:var(--ink2);}
+  ul.plain li::before{content:""; position:absolute; left:4px; top:10px; width:6px; height:6px; border-radius:50%; background:var(--sky);}
+
+  .chip{display:inline-block; font-size:11.5px; border-radius:999px; padding:3px 11px; background:#EEF1F6; color:var(--ink2); white-space:nowrap;}
+  body.dark .chip{background:#222B47;}
+  .chip.blue{background:#E5EFF9; color:var(--blue);}
+  body.dark .chip.blue{background:#14305C; color:#7FC0F5;}
+
+  /* three streams */
+  .stream-card{background:var(--card); border:1px solid var(--line); border-top:4px solid var(--blue); border-radius:var(--radius); padding:18px 20px; box-shadow:var(--shadow);}
+  .stream-card.s1{border-top-color:var(--f-field);} .stream-card.s2{border-top-color:var(--f-published);} .stream-card.s3{border-top-color:var(--f-product);}
+  .stream-card .who{font-size:11px; text-transform:uppercase; letter-spacing:.8px; font-weight:bold; margin-bottom:6px;}
+  .stream-card.s1 .who{color:var(--f-field);} .stream-card.s2 .who{color:var(--f-published);} .stream-card.s3 .who{color:var(--f-product);}
+  .stream-card h5{font-size:17px; margin-bottom:8px; line-height:1.3;}
+  .stream-card p{font-size:14px; margin-bottom:10px;}
+  .stream-card .eg{font-size:13px; background:#F6F8FC; border-radius:8px; padding:10px 12px; color:var(--ink2);}
+  body.dark .stream-card .eg{background:#1A2138;}
+  .stream-card .eg b{display:block; font-size:10.5px; text-transform:uppercase; letter-spacing:.6px; color:var(--ink3); margin-bottom:3px;}
+
+  /* shelves */
+  .shelf{display:flex; gap:14px; align-items:flex-start; background:var(--card); border:1px solid var(--line); border-radius:10px; padding:14px 17px; margin-bottom:9px; box-shadow:var(--shadow);}
+  .shelf .ico{width:34px; height:34px; border-radius:9px; background:#E5EFF9; color:var(--blue); display:flex; align-items:center; justify-content:center; font-weight:bold; font-size:15px; flex-shrink:0;}
+  body.dark .shelf .ico{background:#14305C; color:#7FC0F5;}
+  .shelf h5{font-size:15px; margin-bottom:2px;}
+  .shelf p{font-size:13.5px; margin:0;}
+
+  /* step flow */
+  .flow{display:flex; flex-direction:column; gap:0; margin-bottom:18px;}
+  .step{display:flex; gap:16px; align-items:flex-start; position:relative; padding-bottom:20px;}
+  .step:last-child{padding-bottom:0;}
+  .step::before{content:""; position:absolute; left:15px; top:34px; bottom:0; width:2px; background:var(--line);}
+  .step:last-child::before{display:none;}
+  .step .sn{width:32px; height:32px; border-radius:50%; background:var(--card); border:2px solid var(--sky); color:var(--blue); display:flex; align-items:center; justify-content:center; font-weight:bold; font-size:13px; flex-shrink:0; z-index:1;}
+  .step .sb{flex:1; padding-top:3px;}
+  .step h5{font-size:16px; margin-bottom:4px;}
+  .step p{font-size:14px; margin-bottom:6px;}
+  .step .tech{font-size:12.5px; color:var(--ink2); background:#F6F8FC; border-radius:7px; padding:8px 11px; display:inline-block;}
+  body.dark .step .tech{background:#1A2138;}
+  .step .tech b{color:var(--ink); font-weight:bold;}
+
+  /* people */
+  .person{display:flex; gap:14px; align-items:flex-start; background:var(--card); border:1px solid var(--line); border-radius:10px; padding:15px 18px; margin-bottom:10px; box-shadow:var(--shadow);}
+  .person .av{width:38px; height:38px; border-radius:50%; background:var(--sky); color:#00253F; display:flex; align-items:center; justify-content:center; font-weight:bold; font-size:13px; flex-shrink:0;}
+  .person h5{font-size:15.5px; margin-bottom:3px;}
+  .person p{font-size:13.5px; margin:0 0 6px;}
+  .person .gg{font-size:12.5px; color:var(--ink2);}
+  .person .gg b{color:var(--ink);}
+
+  .door{background:var(--card); border:1px solid var(--line); border-left:4px solid var(--warn); border-radius:0 10px 10px 0; padding:15px 18px; margin-bottom:12px; box-shadow:var(--shadow);}
+  .door h5{font-size:15.5px; margin-bottom:5px;}
+  .door p{font-size:13.5px; margin:0;}
+
+  .fact3{display:grid; grid-template-columns:repeat(3,1fr); gap:0; border:1px solid var(--line); border-radius:var(--radius); overflow:hidden; background:var(--line); margin-bottom:16px;}
+  @media(max-width:760px){.fact3{grid-template-columns:1fr;}}
+  .fact3 > div{background:var(--card); padding:18px 20px;}
+  .fact3 h5{font-size:15px; margin-bottom:6px;}
+  .fact3 .who{font-size:11px; text-transform:uppercase; letter-spacing:.7px; color:var(--ink3); margin-bottom:8px;}
+  .fact3 p{font-size:13.5px; margin:0;}
+
+  table.t{width:100%; border-collapse:collapse; font-size:14px;}
+  table.t th{text-align:left; font-size:10.5px; text-transform:uppercase; letter-spacing:.7px; color:var(--ink3); font-weight:bold; padding:0 12px 9px 0; border-bottom:1px solid var(--line);}
+  table.t td{padding:11px 12px 11px 0; border-bottom:1px solid var(--line); color:var(--ink2); vertical-align:top;}
+  table.t tr:last-child td{border-bottom:0;}
+  table.t td b{color:var(--ink);}
+
+  details.tech{margin-top:14px; border-top:1px dashed var(--line); padding-top:12px;}
+  details.tech summary{cursor:pointer; color:var(--blue); font-weight:bold; font-size:13px; list-style:none;}
+  details.tech summary::-webkit-details-marker{display:none;}
+  details.tech summary::before{content:"▸ "; font-size:10px;}
+  details.tech[open] summary::before{content:"▾ ";}
+  details.tech .body{padding-top:10px; font-size:13.5px; color:var(--ink2);}
+  code{font-family:"SF Mono",Menlo,Consolas,monospace; font-size:12.5px; background:#EEF1F6; color:var(--blue); border-radius:4px; padding:1px 6px;}
+  body.dark code{background:#1E2740;}
+
+  /* answers one of the four stakeholder questions from the brief */
+  .answers{background:#EFF6FD; border-left:3px solid #8FBEE4; border-radius:0 9px 9px 0; padding:13px 17px; margin:14px 0;}
+  body.dark .answers{background:#13223D; border-left-color:#2E6BA8;}
+  .answers .alab{display:block; font-size:9.5px; text-transform:uppercase; letter-spacing:.9px; font-weight:bold; color:var(--blue); margin-bottom:6px;}
+  body.dark .answers .alab{color:#7FC0F5;}
+  .answers p{font-size:13.5px; margin:0; color:var(--ink2);}
+  .answers p + p{margin-top:8px;}
+  .person .answers{margin:12px 0 0;}
+  .needs{display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:16px;}
+  @media(max-width:760px){.needs{grid-template-columns:1fr;}}
+  .needs div{background:#EFF6FD; border-radius:9px; padding:11px 14px; font-size:13px; color:var(--ink2);}
+  body.dark .needs div{background:#13223D;}
+  .needs b{display:block; color:var(--ink); font-size:13.5px; margin-bottom:2px;}
+
+  .okbox{border-left:4px solid var(--good); background:#EEF7F1; border-radius:0 9px 9px 0; padding:13px 17px; font-size:14px; color:#14603A; margin-bottom:16px;}
+  body.dark .okbox{background:#12291C; color:#8FDDB2;}
+  .warnbox{border-left:4px solid var(--warn); background:#FDF6EE; border-radius:0 9px 9px 0; padding:13px 17px; font-size:14px; color:#7A4A08; margin-bottom:16px;}
+  body.dark .warnbox{background:#2A2013; color:#F0C58A;}
+  .quote{background:var(--card); border:1px solid var(--line); border-radius:var(--radius); padding:22px 26px; box-shadow:var(--shadow); font-size:19px; font-weight:bold; color:var(--navy); line-height:1.45; margin:20px 0;}
+  body.dark .quote{color:#BFE0FF;}
+
+  .glos{border-bottom:1px solid var(--line); padding:13px 0;}
+  .glos:last-child{border-bottom:0;}
+  .glos .w{font-weight:bold; font-size:15px;}
+  .glos .d{font-size:13.5px; color:var(--ink2); margin-top:2px;}
+  .footnote{margin-top:40px; font-size:12px; color:var(--ink3); border-top:1px solid var(--line); padding-top:16px; line-height:1.7;}
+
+  @media print{
+    .topbar,.sidebar{display:none!important;}
+    .main{max-width:none; padding:0;}
+    body{background:#fff; font-size:11.5px;}
+    .card,.shelf,.person,.stream-card{box-shadow:none; break-inside:avoid;}
+    section{break-inside:avoid-page;}
+    details.tech{display:none;}
+  }
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="brand">
+    <svg width="30" height="30" viewBox="0 0 30 30" aria-hidden="true">
+      <line x1="6" y1="22" x2="15" y2="8" stroke="#29ABE2" stroke-width="1.2"/>
+      <line x1="15" y1="8" x2="24" y2="18" stroke="#29ABE2" stroke-width="1.2"/>
+      <circle cx="6" cy="22" r="2.6" fill="#FFFFFF"/>
+      <circle cx="15" cy="8" r="3.2" fill="#29ABE2"/>
+      <circle cx="24" cy="18" r="2.6" fill="#005EB8" stroke="#7FB6E0" stroke-width="1"/>
+    </svg>
+    <div>
+      <h1>AI Market Radar</h1>
+      <div class="sub">Explained simply</div>
+    </div>
+  </div>
+  <span class="demo-badge">Plain english guide</span>
+  <div class="spacer"></div>
+  <nav class="toplinks">
+    <a href="radar-demo.html">Prototype</a>
+    <a href="radar-prd.html">PRD</a>
+    <a href="radar-explainer.html" class="here">Plain english</a>
+    <a href="radar-flow.html">How it works</a>
+  </nav>
+  <button class="iconbtn" onclick="window.print()" title="Print or save as PDF">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9V2h12v7M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2M6 14h12v8H6z"/></svg>
+  </button>
+  <button class="iconbtn" id="themebtn" onclick="setDark(!isDark())" title="Toggle night mode"></button>
+</header>
+
+<div class="layout">
+  <aside class="sidebar">
+    <div class="navlabel">Chapters</div>
+    <div class="toc" id="toc"></div>
+    <div class="sidefoot">
+      No jargon. Every technical word gets defined the first time it appears.<br><br>
+      Concept prototype for interview discussion. Not an Amadeus product.
+    </div>
+  </aside>
+
+  <main class="main">
+
+    <div class="hero">
+      <div class="doctype">The whole thing, in plain language</div>
+      <h2>What we built, and why each piece exists</h2>
+      <p class="lede">No background needed. If you have never seen the tool and do not know what a GDS is, start here and you will understand the entire system by the end.</p>
+      <div class="readmeta">
+        <span class="chip blue">8 minute read</span>
+        <span class="chip">No jargon</span>
+        <span class="chip">10 chapters</span>
+      </div>
+    </div>
+
+    <!-- 1 -->
+    <section id="what" data-title="What this thing is">
+      <div class="chnum">1</div>
+      <h3>What this thing is</h3>
+      <div class="oneline"><div class="l">In one line</div><div class="t">It is a newsroom for competitors, not a newsletter about them.</div></div>
+
+      <p>Amadeus sells the technology that airlines, hotels and travel agencies run on. Right now, AI assistants like ChatGPT and Gemini are starting to plan trips, and they are beginning to book them too. That matters enormously, because booking is the part Amadeus gets paid for.</p>
+
+      <div class="answers"><span class="alab">Answers Leadership · the strategic view</span>
+      <p>So somebody has to answer a simple question, every week, with evidence: <b>are these assistants getting closer to taking our business, and what do we do about it?</b> That is the whole job. Everything else in this guide is the machinery for answering it without guessing.</p></div>
+
+      <p>Today nobody owns that question. People notice things and mention them in a Teams chat. The message scrolls away. A salesperson hears a competitor's name in a meeting and tells nobody. Three months later the same fact gets discovered again by a different team.</p>
+
+      <p><b>AI Market Radar</b> is the system that fixes it. It collects what is happening, sorts it, decides what deserves attention, turns it into a recommendation, and puts that recommendation in front of the right person in the shape their job needs.</p>
+
+      <div class="quote">A dashboard nobody feeds is a graveyard. So the habit comes first, and the tool exists to make the habit cheap.</div>
+    </section>
+
+    <!-- 2 -->
+    <section id="parts" data-title="The parts, in order">
+      <div class="chnum">2</div>
+      <h3>The parts, in order</h3>
+      <div class="oneline"><div class="l">In one line</div><div class="t">Information comes in three doors, gets sorted onto five shelves, and leaves as five different views.</div></div>
+
+      <p>The whole system is four moves, in this order. Every chapter after this one is a zoom in on one of them.</p>
+
+      <div class="card">
+        <table class="t">
+          <thead><tr><th style="width:8%"></th><th style="width:26%">The part</th><th>What it does, plainly</th></tr></thead>
+          <tbody>
+            <tr><td><b>1</b></td><td><b>Getting information in</b></td><td>Three separate sources of news, kept separate on purpose so you always know how you learned something.</td></tr>
+            <tr><td><b>2</b></td><td><b>Sorting and storing it</b></td><td>Everything gets filed under one of five topics, and tagged with which door it came through.</td></tr>
+            <tr><td><b>3</b></td><td><b>Making sense of it</b></td><td>A robot reads and drafts. A human decides what it means and signs their name to it.</td></tr>
+            <tr><td><b>4</b></td><td><b>Getting it to people</b></td><td>Five different jobs, five different screens, plus regular summaries by email.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p>That ordering is the important bit. Most companies buy a tool first and then wonder why nobody uses it. Here the routine comes first and the software only removes the boring parts of a routine that already works.</p>
+    </section>
+
+    <!-- 3 -->
+    <section id="streams" data-title="How we find signals">
+      <div class="chnum">3</div>
+      <h3>How we find signals · the three doors</h3>
+      <div class="oneline"><div class="l">In one line</div><div class="t">Three reporters with three different beats. One overhears, one reads everything, one test drives the products.</div></div>
+
+      <p>A <b>signal</b> is just one thing we noticed. A headline, something a customer said, a test result. Every signal enters through exactly one of three doors, and the door is recorded permanently.</p>
+
+      <p>Why bother recording the door? Because it lets you say something powerful later: <b>our salespeople knew about this three weeks before the press did.</b> That single sentence is what convinces salespeople to keep contributing.</p>
+
+      <div class="grid3">
+        <div class="stream-card s1">
+          <div class="who">Door 1 · The field</div>
+          <h5>What our people hear</h5>
+          <p>Salespeople and solutions engineers sit in meetings with real customers. They hear which competitor got mentioned and which objection keeps coming up. Today that intelligence dies in the room.</p>
+          <div class="eg"><b>Example</b>An airline says a competitor demoed in chat booking last week.</div>
+        </div>
+        <div class="stream-card s2">
+          <div class="who">Door 2 · Published</div>
+          <h5>What the world announces</h5>
+          <p>News, press releases, product launches, funding rounds. Public and plentiful. Nobody has time to read all of it, which is exactly why a robot does this one.</p>
+          <div class="eg"><b>Example</b>Sabre opens its infrastructure to developers.</div>
+        </div>
+        <div class="stream-card s3">
+          <div class="who">Door 3 · The lab</div>
+          <h5>What we test ourselves</h5>
+          <p>Once a month we sit down and use the competing assistants ourselves. Same tasks every time. We score how well each one does.</p>
+          <div class="eg"><b>Example</b>Gemini scored 4 out of 5 on planning a multi city trip, up one point since June.</div>
+        </div>
+      </div>
+
+      <div class="okbox"><b>Why three and not one.</b> A press release tells you what a company wants you to think. A sales meeting tells you what customers actually believe. A hands on test tells you what is genuinely true. You need all three, and mixing them into one pile destroys the distinction.</div>
+
+      <p>Door 2 is fully automated and running today. Door 1 needs a form inside the tool salespeople already use. Door 3 is deliberately kept human, because judgement about whether a booking flow actually worked is the part a machine cannot fake.</p>
+    </section>
+
+    <!-- 4 -->
+    <section id="shelves" data-title="The five shelves">
+      <div class="chnum">4</div>
+      <h3>The five shelves</h3>
+      <div class="oneline"><div class="l">In one line</div><div class="t">Five topics, chosen because each one is a way we could get hurt.</div></div>
+
+      <p>Every signal gets filed under exactly one of five topics. These are not random categories. Each one is a distinct route by which Amadeus could lose relevance.</p>
+
+      <div class="shelf"><div class="ico">1</div><div><h5>AI assistant platforms</h5><p>ChatGPT, Gemini, Claude, Perplexity, Copilot, Mindtrip. We track what they can actually do from start to finish, not what they announce.</p></div></div>
+      <div class="shelf"><div class="ico">2</div><div><h5>Rails and infrastructure</h5><p>The other companies that move bookings around behind the scenes. Sabre, Travelport, Duffel. These are the direct competitors.</p></div></div>
+      <div class="shelf"><div class="ico">3</div><div><h5>Protocols and standards</h5><p>The plumbing standards that let an AI assistant talk to a booking system. Boring sounding, enormously consequential. Whoever sets the standard sets the terms.</p></div></div>
+      <div class="shelf"><div class="ico">4</div><div><h5>Suppliers going direct</h5><p>Airlines and hotels connecting straight to AI assistants and skipping the middle entirely. This is the route where we simply get bypassed.</p></div></div>
+      <div class="shelf"><div class="ico">5</div><div><h5>Payments and checkout</h5><p>Paying inside the chat. If an assistant can book but somebody else takes the payment, the win is hollow. So payments is a topic in its own right, not a footnote.</p></div></div>
+
+      <div class="card" style="margin-top:16px;">
+        <h4>Why this beats a single news feed</h4>
+        <div class="answers" style="margin-top:0;"><span class="alab">Answers Product · where is the market heading</span>
+        <p>A news feed answers the question <b>what happened</b>. Five shelves answer a much better question: <b>did anything move on a front where we are actually exposed?</b> Watch which shelves fill up over six months and you can see the direction the market is travelling, which is the thing a roadmap actually needs. If a shelf goes quiet, that is information too. A feed can never tell you that.</p></div>
+      </div>
+    </section>
+
+    <!-- 5 -->
+    <section id="agent" data-title="How the robot works">
+      <div class="chnum">5</div>
+      <h3>How the robot works</h3>
+      <div class="oneline"><div class="l">In one line</div><div class="t">A very fast intern who reads the news every morning, throws away almost all of it, and leaves you a short list.</div></div>
+
+      <p>This is the piece that is genuinely built and running. It is a small program called <code>radar_collector.py</code>. Here is exactly what it does, in order, with no steps hidden.</p>
+
+      <div class="flow">
+        <div class="step"><div class="sn">1</div><div class="sb">
+          <h5>It asks twelve specific questions</h5>
+          <p>Not one broad search for travel news. Twelve narrow searches, one per company or topic we care about. Each search already knows which shelf its results belong on.</p>
+          <div class="tech"><b>Why it matters:</b> results arrive pre sorted, before anything has to classify them.</div>
+        </div></div>
+        <div class="step"><div class="sn">2</div><div class="sb">
+          <h5>It fetches public news feeds</h5>
+          <p>Ordinary public news feeds over the internet. No passwords, no scraping, nothing private. If one search fails, the program keeps going with the rest.</p>
+          <div class="tech"><b>Why it matters:</b> a partial answer today beats a perfect answer never.</div>
+        </div></div>
+        <div class="step"><div class="sn">3</div><div class="sb">
+          <h5>It cleans up the text</h5>
+          <p>News feeds add clutter, like repeating the headline as the summary and gluing the publication name onto the end of every title. All of that gets stripped.</p>
+          <div class="tech"><b>Why it matters:</b> the result reads like a briefing instead of a feed dump.</div>
+        </div></div>
+        <div class="step"><div class="sn">4</div><div class="sb">
+          <h5>It throws away anything older than 45 days</h5>
+          <p>A hard cut off. Older than that is history, and history belongs in a different kind of document.</p>
+        </div></div>
+        <div class="step"><div class="sn">5</div><div class="sb">
+          <h5>It throws away anything unrelated</h5>
+          <p>A broad news search drags in stock tips and listicles. A simple word check removes the obvious junk. It is deliberately generous, because this is a noise filter, not the real thinking.</p>
+        </div></div>
+        <div class="step"><div class="sn">6</div><div class="sb">
+          <h5>It removes duplicates</h5>
+          <p>The same headline often arrives through several searches. It compares a simplified version of each title and keeps the first one.</p>
+          <div class="tech"><b>Honest limit:</b> it catches identical headlines, not two different articles about the same event. Step 8 fixes that.</div>
+        </div></div>
+        <div class="step"><div class="sn">7</div><div class="sb">
+          <h5>It tags each item twice</h5>
+          <p>First the shelf, correcting the default when the words say otherwise. Then something more interesting: it looks for three kinds of event. <b>Funding</b>, meaning somebody raised money or bought somebody. <b>Partnership</b>, meaning two companies joined up. <b>Launch</b>, meaning a real new capability shipped.</p>
+          <div class="tech"><b>Why it matters:</b> those three events are the ones that force us to reconsider how closely we watch a company. See chapter 6.</div>
+        </div></div>
+        <div class="step"><div class="sn">8</div><div class="sb">
+          <h5>Then Claude reads the whole batch</h5>
+          <p>This step is optional and it is where the quality jumps. The entire list goes to Claude in one go, with clear instructions. Claude throws out what the word matching wrongly kept, fixes shelves that got assigned incorrectly, rewrites every entry as a single sentence explaining why an analyst should care, and re tags the three events, this time only for things that really happened rather than articles discussing them.</p>
+          <div class="tech"><b>Safety net:</b> if Claude is unavailable for any reason at all, the program silently falls back to word matching and tells you which mode it used. It never breaks.</div>
+        </div></div>
+        <div class="step"><div class="sn">9</div><div class="sb">
+          <h5>It writes a small file, and the dashboard picks it up</h5>
+          <p>The results are saved next to the dashboard. Open the dashboard and the new items are already there, marked with a green pulsing <b>LIVE</b> badge so nobody confuses real collected news with the example data.</p>
+          <div class="tech"><b>Last real run:</b> 14 signals kept, 7 of them flagged as launches, including Mindtrip, Sabre, Navan and Travelport.</div>
+        </div></div>
+      </div>
+
+      <div class="warnbox"><b>The most important thing to understand about the robot.</b> It never decides anything. It gathers, filters, sorts and drafts. Every judgement, and every signature, belongs to a person. The machine buys coverage. It does not buy credibility.</div>
+
+      <details class="tech">
+        <summary>The technical version, for anyone who wants it</summary>
+        <div class="body">Python standard library only, so it runs anywhere with no installation. Twelve Google News RSS queries, a 45 day window, a maximum of 3 items per query and 14 overall. Recency, relevance and duplicate filters run in that order. Category and trigger tagging by keyword lists. The optional triage pass calls <code>claude-opus-5</code> with a strict JSON schema so the response shape is guaranteed, checks explicitly for a refusal, and catches every exception back to keyword mode. Output is a JavaScript file the dashboard loads if present and ignores if absent.</div>
+      </details>
+    </section>
+
+    <!-- 6 -->
+    <section id="focus" data-title="Deciding who to watch">
+      <div class="chnum">6</div>
+      <h3>Deciding who is worth watching</h3>
+      <div class="oneline"><div class="l">In one line</div><div class="t">Everyone gets a score out of six. The score sets how often we check on them. A doorbell can override the schedule.</div></div>
+
+      <p>You cannot watch everybody closely. Pretending otherwise is how intelligence teams end up knowing a little about a lot and nothing worth acting on. So attention gets rationed, out loud, using a rule anybody can inspect and argue with.</p>
+
+      <div class="card">
+        <h4>Step 1 · Three questions, two points each</h4>
+        <ul class="plain">
+          <li><b>Could this company change something we decide to build in the next three months?</b></li>
+          <li><b>Do they touch a part of the business we actually earn money from?</b></li>
+          <li><b>How fast are they shipping real things?</b></li>
+        </ul>
+        <p>Score each from 0 to 2. Add them up. Maximum six.</p>
+      </div>
+
+      <div class="card">
+        <h4>Step 2 · The score sets the rhythm</h4>
+        <table class="t">
+          <thead><tr><th style="width:16%">Score</th><th style="width:26%">Group</th><th>What that means in practice</th></tr></thead>
+          <tbody>
+            <tr><td><b>5 or 6</b></td><td><b>Always on</b></td><td>Constantly watched. Appears in every summary. Example: OpenAI, Google, Sabre, Mindtrip.</td></tr>
+            <tr><td><b>3 or 4</b></td><td><b>Weekly</b></td><td>Checked once a week. Example: Perplexity, Travelport, Duffel.</td></tr>
+            <tr><td><b>0 to 2</b></td><td><b>Monthly</b></td><td>A quick sweep once a month. Example: Expedia, regional players.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="card">
+        <h4>Step 3 · The doorbell</h4>
+        <p>Schedules are useless if something big happens on a Tuesday. So four events ring a doorbell and force an immediate review no matter which group a company sits in: <b>they raised money or got bought</b>, <b>they partnered with someone</b>, <b>they launched something that genuinely changes what they can do</b>, or <b>one of our own salespeople ran into them in a live deal</b>.</p>
+        <p>The last one outranks the other three. And this is where the robot connects to the rule: it spots the first three automatically and files them into a queue for review.</p>
+      </div>
+
+      <div class="grid2">
+        <div class="card">
+          <h4>Step 4 · Attention is not the same as depth</h4>
+          <p>Being watched closely does not automatically earn the full hands on testing treatment. That is expensive, so it is reserved for companies that could really change what we build. Sabre is watched constantly but tested lightly. Mindtrip is watched constantly and tested thoroughly.</p>
+        </div>
+        <div class="card">
+          <h4>Step 5 · Rescore every quarter</h4>
+          <p>Everyone gets rescored on the same three questions four times a year. The doorbell catches sudden events. The rescore catches the slow drift, which is the thing that quietly makes a watchlist wrong over time.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 7 -->
+    <section id="takeaways" data-title="Making takeaways">
+      <div class="chnum">7</div>
+      <h3>How a headline becomes a takeaway</h3>
+      <div class="oneline"><div class="l">In one line</div><div class="t">What happened, what it means, what to do about it. Three separate things, never mixed, never blurred.</div></div>
+
+      <p>This is the heart of the whole system. A headline is not intelligence. Intelligence is a headline that has been connected to other things, interpreted by somebody accountable, and turned into a recommendation.</p>
+
+      <div class="fact3">
+        <div><div class="who">Layer 1</div><h5>The fact</h5><p>What happened, with a source and a date. Never edited to fit a story. This is the only layer a machine is allowed to produce alone.</p></div>
+        <div><div class="who">Layer 2</div><h5>The meaning</h5><p>What we think it means, and how confident we are. Written by a person. AI can draft it. A person owns it.</p></div>
+        <div><div class="who">Layer 3</div><h5>The action</h5><p>What somebody should now do differently. If there is no action, it was news, not intelligence.</p></div>
+      </div>
+
+      <p>Every record in the system keeps these three in separate columns, so anybody reading can instantly tell which one they are looking at. Blurring fact and opinion is the single fastest way an intelligence function loses credibility.</p>
+
+      <div class="answers"><span class="alab">Answers all four teams · what do I do differently</span>
+      <p>Layer 3 is the one that matters to everyone reading this. The same event produces a different action depending on who you are. A competitor launching in-chat booking means one thing to Product, which is a gap in the roadmap. It means something else to marketing, which is a claim to test before anyone repeats it. To a salesperson it is an objection that will come up next week. To leadership it is a threat that either changes the plan or does not. One record, four actions, written down separately.</p></div>
+
+      <div class="card">
+        <h4>The journey, step by step</h4>
+        <table class="t">
+          <thead><tr><th style="width:22%">Stage</th><th>What happens</th></tr></thead>
+          <tbody>
+            <tr><td><b>Capture</b></td><td>Something comes through one of the three doors and gets its shelf and door tags.</td></tr>
+            <tr><td><b>Cluster</b></td><td>Several signals about the same underlying event get grouped into one story.</td></tr>
+            <tr><td><b>Connect</b></td><td>Check the other doors. Did our salespeople mention this first? Did our test scores move at the same time?</td></tr>
+            <tr><td><b>Assess</b></td><td>An analyst writes what it means. AI writes the first draft to save time.</td></tr>
+            <tr><td><b>Sign</b></td><td>The analyst puts their name on it. Until that moment, almost nobody can see it.</td></tr>
+            <tr><td><b>Deliver</b></td><td>The same conclusion reaches five different people in five different shapes.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="okbox"><b>Why the signature matters so much.</b> It is a byline. A machine can write the words, but a named person is accountable for them being right. That is what makes the difference between a summary people skim and a recommendation people act on.</div>
+
+      <h4 style="font-size:18px; margin:26px 0 12px;">What actually lands in your inbox</h4>
+      <div class="card">
+        <table class="t">
+          <thead><tr><th style="width:22%">Summary</th><th style="width:24%">Who writes it</th><th>What it contains</th></tr></thead>
+          <tbody>
+            <tr><td><b>Daily flash</b><br><span class="chip">08:00</span></td><td>The machine. Clearly labelled as unsigned, so nobody mistakes it for a considered view.</td><td>The newest items and any doorbells that rang.</td></tr>
+            <tr><td><b>Weekly</b></td><td>AI drafts it, an analyst signs it.</td><td>What moved, what it means, what changes as a result.</td></tr>
+            <tr><td><b>Monthly deep dive</b></td><td>Written and signed by an analyst.</td><td>Who moved groups, how test scores are trending, which shelves are heating up, and a section titled The call, which is an outright recommendation.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- 8 -->
+    <section id="who" data-title="Who sees what">
+      <div class="chnum">8</div>
+      <h3>Who we show signals to</h3>
+      <div class="oneline"><div class="l">In one line</div><div class="t">Same information, five different screens, because five different jobs need five different things from it.</div></div>
+
+      <p>A shared inbox fails because it makes every reader do the sorting themselves. So the system reshapes the same underlying records per role. Everybody also <b>gives</b> something back, which is what keeps it alive.</p>
+
+      <p>Four teams were named as the people who will use this. Each one asked for something different. Anywhere in this guide that a shaded blue box appears, that is where their specific question gets answered.</p>
+
+      <div class="needs">
+        <div><b>Product</b>Where is the market heading, so we know what to build.</div>
+        <div><b>Product marketing</b>Who is buying, how do we compare, what do we say.</div>
+        <div><b>Pre sales and solutions</b>Answers to objections, fast enough to win the deal.</div>
+        <div><b>Leadership</b>What is shifting, what threatens us, where the opening is.</div>
+      </div>
+
+      <div class="person"><div class="av">CI</div><div>
+        <h5>The intelligence analyst</h5>
+        <p>Runs the whole thing. Confirms what the machine tagged, writes what it means, signs what goes out.</p>
+        <div class="gg"><b>Gives:</b> judgement and a signature. &nbsp;<b>Gets:</b> the full system, including everything unfinished.</div>
+      </div></div>
+      <div class="person"><div class="av">PR</div><div>
+        <h5>Product</h5>
+        <p>Decides what gets built next. Opens the tool to see one thing: what changed since last time.</p>
+        <div class="gg"><b>Gives:</b> the questions worth investigating. &nbsp;<b>Gets:</b> capability differences and test results to defend a decision.</div>
+        <div class="answers"><span class="alab">Answers Product · where is the market heading</span>
+        <p>We run the same tests on the same assistants every month, so the scores move in a line you can read. Planning is finished, they are all good at it. Booking is moving about one step every three months. Servicing has barely started. That is the shape of the market, and it tells you what to build and what to leave alone.</p></div>
+      </div></div>
+      <div class="person"><div class="av">PM</div><div>
+        <h5>Product marketing</h5>
+        <p>Writes how we describe ourselves against competitors whose claims keep changing.</p>
+        <div class="gg"><b>Gives:</b> the gaps in our messaging. &nbsp;<b>Gets:</b> a claim versus reality view, where every competitor claim carries a verdict from our own testing.</div>
+        <div class="answers"><span class="alab">Answers Product marketing · buyers, positioning, messaging</span>
+        <p><b>Who is buying.</b> The person deciding used to be the distribution manager. Now there is usually someone in the room who owns AI or digital products, and they only want to know whether a bot can book through us without breaking, and who fixes it when it does.</p>
+        <p><b>How we compare.</b> The claims page puts what each competitor says next to what we measured ourselves.</p>
+        <p><b>What to say.</b> Anything with a verdict beside it can go straight into a deck, because there is a dated test behind it.</p></div>
+      </div></div>
+      <div class="person"><div class="av">PS</div><div>
+        <h5>Pre sales and solutions</h5>
+        <p>In front of customers, needing an answer to an objection right now, not next week.</p>
+        <div class="gg"><b>Gives:</b> what they hear in live deals. &nbsp;<b>Gets:</b> a searchable library of objections with tested answers.</div>
+        <div class="answers"><span class="alab">Answers Pre sales · objections, fast enough to win</span>
+        <p>Search the objection you are about to hear, get the answer that has already been tested, and copy it into an email before the meeting finishes. If it is something new, log it, and it comes back to you as a battlecard. Every answer says how many times it has been heard and which test backs it up.</p></div>
+      </div></div>
+      <div class="person"><div class="av">LD</div><div>
+        <h5>Leadership</h5>
+        <p>Needs the three things that matter this month, on one screen, in under two minutes.</p>
+        <div class="gg"><b>Gives:</b> direction. &nbsp;<b>Gets:</b> one screen by default, and full access to everything underneath it by choice.</div>
+        <div class="answers"><span class="alab">Answers Leadership · shifts, threats, opportunities</span>
+        <p>One screen. What moved, what is coming at us, and where the opening is. A strip across the top colours the five topics by how hot each one is, and every card ends with what we are already doing about it. If nothing has changed this month, the screen says so rather than filling itself up.</p></div>
+      </div></div>
+
+      <h4 style="font-size:18px; margin:26px 0 12px;">Only two things are locked</h4>
+
+      <div class="door">
+        <h5>Locked door 1 · What our salespeople told us</h5>
+        <p>The details of a signal from a live customer deal are visible to the analyst, to leadership, and to the team that reported it. Nobody else. If those details travelled freely, salespeople would stop reporting them within a quarter, and the most valuable door would close.</p>
+      </div>
+      <div class="door">
+        <h5>Locked door 2 · Anything not yet signed</h5>
+        <p>Draft conclusions are visible only to the analyst and leadership. Nothing unfinished circulates as though it were settled. The moment the analyst signs, it appears for everybody at once.</p>
+      </div>
+
+      <div class="okbox"><b>One deliberate detail.</b> Everybody can see that a locked item exists, including its title and date. They just cannot open it. A hidden wall feels like a system with secrets. A visible wall feels like a system with rules, and it costs far less trust.</div>
+    </section>
+
+    <!-- 9 -->
+    <section id="real" data-title="Real versus pretend">
+      <div class="chnum">9</div>
+      <h3>What is real and what is a mock up</h3>
+      <div class="oneline"><div class="l">In one line</div><div class="t">The robot is real and running. The dashboard is a working prototype with example data in most places.</div></div>
+
+      <p>Being precise about this is the point, not a disclaimer. Anyone can mock up a screenshot. The interesting question is always which parts actually run.</p>
+
+      <div class="grid2">
+        <div class="card">
+          <h4>Genuinely working</h4>
+          <ul class="plain">
+            <li>The collector program, end to end. Real headlines, collected from public sources, filtered and tagged.</li>
+            <li>The optional Claude reading pass, including the safety net when it is unavailable.</li>
+            <li>The dashboard itself. Six pages, five role views, both permission walls, night mode, sharing.</li>
+            <li>All five steps of the attention scoring rule, implemented rather than described.</li>
+            <li>The signing flow. Sign a draft and watch it appear for the other roles.</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h4>Designed, not built</h4>
+          <ul class="plain">
+            <li>Salespeople reporting through the tool they already use. That needs an administrator, not new invention.</li>
+            <li>Alerts pushed into Teams. Roughly ten lines of code once a channel exists.</li>
+            <li>Saving anything permanently. Signing and logging reset when you reload the page.</li>
+            <li>Automatic detection of when the field knew something first. Curated by hand today.</li>
+          </ul>
+        </div>
+      </div>
+
+      <p>There is one more honest limitation worth stating. When the word matching runs without Claude, it occasionally files something on the wrong shelf, and it does not merge two articles about the same event. Both happened in a real run. That is not a flaw to hide, it is the argument for the design: <b>the machine tags, the analyst confirms.</b></p>
+    </section>
+
+    <!-- 10 -->
+    <section id="words" data-title="Words you will hear">
+      <div class="chnum">10</div>
+      <h3>Words you will hear</h3>
+      <div class="oneline"><div class="l">In one line</div><div class="t">Every term this project uses, defined once, plainly.</div></div>
+
+      <div class="card">
+        <div class="glos"><div class="w">Signal</div><div class="d">One thing we noticed. A headline, a customer comment, a test result. The smallest unit in the system.</div></div>
+        <div class="glos"><div class="w">Stream, or door</div><div class="d">How a signal reached us. Field, published, or lab. Always recorded.</div></div>
+        <div class="glos"><div class="w">Category, or shelf</div><div class="d">Which of the five topics a signal belongs to.</div></div>
+        <div class="glos"><div class="w">Move</div><div class="d">Several signals about the same event, assembled into one story with facts, meaning and actions kept separate.</div></div>
+        <div class="glos"><div class="w">Assessment</div><div class="d">The written judgement about what something means. Always has an author.</div></div>
+        <div class="glos"><div class="w">Signed</div><div class="d">An analyst put their name on it. Unsigned things do not circulate.</div></div>
+        <div class="glos"><div class="w">Trigger, or doorbell</div><div class="d">An event important enough to override the normal review schedule.</div></div>
+        <div class="glos"><div class="w">Tier</div><div class="d">How often we check on a company. Always on, weekly, or monthly.</div></div>
+        <div class="glos"><div class="w">Assistant Lab</div><div class="d">Our own monthly hands on testing of competing AI assistants, using the same tasks each time.</div></div>
+        <div class="glos"><div class="w">Battlecard</div><div class="d">A one page cheat sheet for salespeople, covering how to talk about a specific competitor.</div></div>
+        <div class="glos"><div class="w">GDS</div><div class="d">Global Distribution System. The behind the scenes network connecting airlines and hotels to the places people book. Amadeus is one. Sabre and Travelport are the others.</div></div>
+        <div class="glos"><div class="w">MCP</div><div class="d">Model Context Protocol. An emerging standard for how AI assistants plug into outside systems. It matters because whoever sets the standard influences who gets connected to.</div></div>
+        <div class="glos"><div class="w">Agentic commerce</div><div class="d">An AI assistant completing a purchase on your behalf, payment included, without you leaving the conversation.</div></div>
+        <div class="glos"><div class="w">NDC</div><div class="d">New Distribution Capability. An airline industry standard for selling flights with richer content than older systems allowed.</div></div>
+      </div>
+
+      <div class="footnote">
+        Plain language companion to the AI Market Radar prototype. Concept work produced for interview discussion. Not an Amadeus product and not an Amadeus document. Data in the dashboard is illustrative, except the published stream feed, which contains real headlines collected from public sources.
+        <br><br>
+        For the full specification, see the <a href="radar-prd.html">product requirements document</a>. To use the system, open the <a href="radar-demo.html">prototype</a>.
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<script>
+const $=(s,r=document)=>r.querySelector(s);
+const $$=(s,r=document)=>Array.from(r.querySelectorAll(s));
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+const MOON='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>';
+const SUN='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>';
+function isDark(){return document.body.classList.contains('dark');}
+function setDark(v){
+  document.body.classList.toggle('dark',v);
+  $('#themebtn').innerHTML=v?SUN:MOON;
+  try{localStorage.setItem('radar-theme',v?'dark':'light');}catch(e){}
+}
+(function(){let t='light'; try{t=localStorage.getItem('radar-theme')||'light';}catch(e){} setDark(t==='dark');})();
+
+const SECS=$$('main section[data-title]');
+$('#toc').innerHTML=SECS.map((s,i)=>
+  '<a href="#'+s.id+'"><span class="n">'+(i+1)+'</span>'+esc(s.dataset.title)+'</a>').join('');
+const TOCLINKS=$$('#toc a');
+let ticking=false;
+function spy(){
+  ticking=false;
+  let idx=0;
+  SECS.forEach((s,i)=>{ if(s.getBoundingClientRect().top<=150) idx=i; });
+  TOCLINKS.forEach((a,i)=>a.classList.toggle('active',i===idx));
+}
+window.addEventListener('scroll',()=>{if(!ticking){ticking=true;requestAnimationFrame(spy);}},{passive:true});
+spy();
+</script>
+</body>
+</html>

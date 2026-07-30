@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AI Market Radar · How it works</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><circle cx='8' cy='24' r='4' fill='%23005EB8'/><circle cx='16' cy='8' r='5' fill='%2329ABE2'/><circle cx='26' cy='19' r='4' fill='%23000835'/></svg>">
+<!-- Concept prototype for interview discussion. Not an Amadeus product. -->
+<style>
+  :root{
+    --navy:#000835; --blue:#005EB8; --sky:#29ABE2;
+    --bg:#F3F5F9; --card:#FFFFFF;
+    --ink:#10182B; --ink2:#4A5568; --ink3:#8A94A6;
+    --line:#E3E8F0;
+    --radius:12px;
+    --shadow:0 1px 2px rgba(16,24,43,.05), 0 4px 14px rgba(16,24,43,.04);
+    --shadow-hover:0 2px 4px rgba(16,24,43,.07), 0 10px 26px rgba(16,24,43,.09);
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{font-family:Arial, Helvetica, sans-serif; background:var(--bg); color:var(--ink); font-size:14px; line-height:1.5; -webkit-font-smoothing:antialiased;}
+  ::selection{background:#BFE3F5;}
+  *:focus-visible{outline:2px solid var(--sky); outline-offset:2px; border-radius:4px;}
+
+  .topbar{position:sticky; top:0; z-index:60; height:64px; display:flex; align-items:center; gap:16px; padding:0 20px; color:#fff;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='430' height='64'%3E%3Cg stroke='%2329ABE2' stroke-opacity='.28'%3E%3Cline x1='40' y1='48' x2='120' y2='14'/%3E%3Cline x1='120' y1='14' x2='210' y2='40'/%3E%3Cline x1='210' y1='40' x2='300' y2='10'/%3E%3Cline x1='300' y1='10' x2='392' y2='44'/%3E%3C/g%3E%3Cg fill='%2329ABE2'%3E%3Ccircle cx='40' cy='48' r='2.5' fill-opacity='.55'/%3E%3Ccircle cx='120' cy='14' r='3' fill-opacity='.85'/%3E%3Ccircle cx='210' cy='40' r='2' fill-opacity='.5'/%3E%3Ccircle cx='300' cy='10' r='2.5' fill-opacity='.7'/%3E%3Ccircle cx='392' cy='44' r='3' fill-opacity='.6'/%3E%3C/g%3E%3C/svg%3E"), linear-gradient(115deg, #000835 0%, #001250 55%, #001E66 100%);
+    background-repeat:no-repeat, no-repeat; background-position:right -30px center, 0 0;}
+  .brand{display:flex; align-items:center; gap:11px; min-width:0;}
+  .brand h1{font-size:16px; font-weight:bold; letter-spacing:.2px; white-space:nowrap;}
+  .brand .sub{font-size:11px; color:#9FB3D9; white-space:nowrap;}
+  .demo-badge{font-size:10px; letter-spacing:.5px; text-transform:uppercase; color:#FFD9A0; border:1px solid #C98A2E; border-radius:999px; padding:4px 10px; white-space:nowrap;}
+  .spacer{flex:1;}
+  .iconbtn{width:34px; height:34px; border-radius:50%; background:rgba(255,255,255,.1); color:#C9D4EA; display:flex; align-items:center; justify-content:center; cursor:pointer; border:0; transition:background .15s, color .15s; flex-shrink:0;}
+  .iconbtn:hover{background:rgba(255,255,255,.2); color:#fff;}
+  .menuwrap{position:relative;}
+  .menu{position:absolute; right:0; top:calc(100% + 6px); background:var(--card); border:1px solid var(--line); border-radius:11px; box-shadow:var(--shadow-hover); min-width:216px; padding:6px; display:none; z-index:90;}
+  .menu.open{display:block;}
+  .menu button{display:flex; gap:10px; align-items:center; width:100%; text-align:left; border:0; background:none; font-family:inherit; font-size:13px; color:var(--ink); padding:9px 10px; border-radius:8px; cursor:pointer;}
+  .menu button:hover{background:#F0F4FA;}
+  body.dark .menu button:hover{background:#1A2340;}
+  .menu button svg{opacity:.7; flex-shrink:0;}
+  .menu .sep{height:1px; background:var(--line); margin:5px 4px;}
+
+  .wrap{padding:26px 30px 60px;}
+  .phead-row{display:flex; align-items:flex-start; justify-content:space-between; gap:20px; flex-wrap:wrap; margin-bottom:18px;}
+  .pagehead{margin-bottom:5px; font-size:22px; font-weight:bold; letter-spacing:-.2px;}
+  .pagesub{color:var(--ink2); font-size:13.5px; max-width:78ch;}
+  .btn{display:inline-flex; align-items:center; gap:7px; background:var(--blue); color:#fff; border:0; border-radius:9px; padding:9px 16px; font-size:13px; font-weight:bold; cursor:pointer; font-family:inherit; transition:background .14s, transform .1s, box-shadow .14s;}
+  .btn:hover{background:#004E99; box-shadow:0 3px 10px rgba(0,94,184,.25);}
+  .btn:active{transform:scale(.97);}
+  .btn.ghost{background:var(--card); color:var(--blue); border:1px solid var(--blue);}
+  .btn.ghost:hover{background:#F0F6FC; box-shadow:none;}
+  body.dark .btn.ghost{background:transparent; color:#7FC0F5; border-color:#2E4E79;}
+  body.dark .btn.ghost:hover{background:#16305A;}
+
+  .card{background:var(--card); border:1px solid var(--line); border-radius:var(--radius); padding:18px 20px; box-shadow:var(--shadow); margin-bottom:16px;}
+  .card h3{font-size:11.5px; text-transform:uppercase; letter-spacing:.8px; color:var(--ink3); margin-bottom:12px;}
+  .kicker{border-left:4px solid var(--sky); background:var(--card); padding:12px 16px; border-radius:0 var(--radius) var(--radius) 0; font-size:15px; font-weight:bold; color:var(--navy); margin-bottom:20px; box-shadow:var(--shadow);}
+  body.dark .kicker{color:#DCE7FF;}
+
+  .figure{background:var(--card); border:1px solid var(--line); border-radius:var(--radius); box-shadow:var(--shadow); padding:14px; margin-bottom:16px; overflow-x:auto;}
+  .figure svg{display:block; width:100%; min-width:1080px; height:auto;}
+
+  .beats{display:grid; grid-template-columns:repeat(3,1fr); gap:16px;}
+  .beat{background:var(--card); border:1px solid var(--line); border-radius:var(--radius); box-shadow:var(--shadow); padding:16px 18px;}
+  .beat .n{display:inline-flex; align-items:center; justify-content:center; width:24px; height:24px; border-radius:50%; background:#E3EFFB; color:var(--blue); font-size:12px; font-weight:bold; margin-bottom:9px;}
+  body.dark .beat .n{background:#16305A; color:#7FC0F5;}
+  .beat h4{font-size:14px; margin-bottom:5px;}
+  .beat p{font-size:12.5px; color:var(--ink2); line-height:1.6;}
+  .beat .say{font-size:12px; color:var(--ink3); margin-top:9px; padding-top:9px; border-top:1px solid var(--line); line-height:1.55;}
+  .beat .say b{color:var(--ink2);}
+  @media(max-width:1000px){ .beats{grid-template-columns:1fr;} }
+
+  .doclinks{display:flex; gap:10px; flex-wrap:wrap; margin-top:4px;}
+  .doclink{font-size:12.5px; color:var(--blue); text-decoration:none; padding:5px 11px; border-radius:7px; border:1px solid var(--line); background:var(--card);}
+  .doclink:hover{border-color:var(--sky);}
+  body.dark .doclink{color:#7FC0F5;}
+  .footnote{margin-top:24px; font-size:11.5px; color:var(--ink3); border-top:1px solid var(--line); padding-top:14px;}
+  #toast{position:fixed; bottom:26px; left:50%; transform:translateX(-50%) translateY(20px); background:var(--navy); color:#fff; padding:11px 20px; border-radius:10px; font-size:13px; opacity:0; transition:all .25s; z-index:200; pointer-events:none; max-width:80vw; text-align:center; box-shadow:0 8px 30px rgba(0,8,53,.35);}
+  #toast.show{opacity:1; transform:translateX(-50%) translateY(0);}
+  body.dark #toast{background:#1E2A4D;}
+
+  body.dark{
+    --bg:#0C1124; --card:#141A31; --ink:#E8ECF5; --ink2:#A9B4C9; --ink3:#6E7A93; --line:#232C47;
+    --shadow:0 1px 2px rgba(0,0,0,.35), 0 4px 14px rgba(0,0,0,.28);
+    --shadow-hover:0 2px 4px rgba(0,0,0,.4), 0 10px 26px rgba(0,0,0,.45);
+  }
+  @media print{
+    .topbar,.btn,.doclinks{display:none;}
+    body{background:#fff;}
+    .figure{border:0; box-shadow:none; padding:0;}
+    .figure svg{min-width:0;}
+  }
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="brand">
+    <svg width="30" height="30" viewBox="0 0 30 30" aria-hidden="true">
+      <line x1="6" y1="22" x2="15" y2="8" stroke="#29ABE2" stroke-width="1.2"/>
+      <line x1="15" y1="8" x2="24" y2="18" stroke="#29ABE2" stroke-width="1.2"/>
+      <circle cx="6" cy="22" r="2.6" fill="#FFFFFF"/>
+      <circle cx="15" cy="8" r="3.2" fill="#29ABE2"/>
+      <circle cx="24" cy="18" r="2.6" fill="#005EB8" stroke="#7FB6E0" stroke-width="1"/>
+    </svg>
+    <div>
+      <h1>AI Market Radar</h1>
+      <div class="sub">AI Assistant · Commercial &amp; Strategy</div>
+    </div>
+  </div>
+  <span class="demo-badge">Concept demo · illustrative data</span>
+  <div class="spacer"></div>
+  <div class="menuwrap">
+    <button class="iconbtn" id="docsbtn" onclick="toggleMenu(event,'docsmenu')" title="Prototype, PRD and plain english guide">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+    </button>
+    <div class="menu" id="docsmenu">
+      <button onclick="location.href='radar-demo.html'"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M9 9v11"/></svg><div><b>Prototype</b><div style="font-size:11px; color:var(--ink3);">The working tool</div></div></button>
+      <button onclick="location.href='radar-prd.html'"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M9 13h6M9 17h6"/></svg><div><b>Product requirements</b><div style="font-size:11px; color:var(--ink3);">The full spec, clickable</div></div></button>
+      <button onclick="location.href='radar-explainer.html'"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2zM22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg><div><b>Plain english guide</b><div style="font-size:11px; color:var(--ink3);">No jargon, 8 minute read</div></div></button>
+      <div class="sep"></div>
+      <button onclick="closeMenus()"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg><div><b>How it works</b><div style="font-size:11px; color:var(--ink3);">You are here</div></div></button>
+    </div>
+  </div>
+  <button class="iconbtn" id="themebtn" onclick="setDark(!isDark())" title="Toggle night mode"></button>
+</header>
+
+<div class="wrap">
+  <div class="phead-row">
+    <div>
+      <div class="pagehead">How it works</div>
+      <div class="pagesub">One picture of the whole system: what comes in, how it gets filed, who decides it matters, who signs it, where it lands, and how it comes back around.</div>
+      <div class="doclinks">
+        <a class="doclink" href="radar-demo.html">Prototype</a>
+        <a class="doclink" href="radar-prd.html">Product requirements</a>
+        <a class="doclink" href="radar-explainer.html">Plain english guide</a>
+      </div>
+    </div>
+    <div style="display:flex; gap:10px; flex-wrap:wrap">
+      <button class="btn ghost" onclick="window.print()">Print</button>
+      <button class="btn" onclick="downloadSvg()">Download SVG</button>
+    </div>
+  </div>
+
+  <div class="kicker">Three streams in. Five shelves. One analyst signature. Four teams out. Two loops back.</div>
+
+  <div class="figure" id="figure"></div>
+
+  <div class="beats" id="beats"></div>
+
+  <div class="footnote">Concept prototype built for interview discussion · not an Amadeus product · the diagram is generated in the browser, so Download SVG gives you a vector you can drop straight into a deck</div>
+</div>
+
+<div id="toast" role="status"></div>
+
+<script>
+"use strict";
+
+const $ = id => document.getElementById(id);
+
+function toast(msg){
+  const t = $("toast");
+  t.textContent = msg;
+  t.classList.add("show");
+  clearTimeout(t._h);
+  t._h = setTimeout(()=>t.classList.remove("show"), 3600);
+}
+function toggleMenu(e, id){
+  e.stopPropagation();
+  const m = $(id);
+  const wasOpen = m.classList.contains("open");
+  closeMenus();
+  if(!wasOpen) m.classList.add("open");
+}
+function closeMenus(){ document.querySelectorAll(".menu.open").forEach(m => m.classList.remove("open")); }
+document.addEventListener("click", e => { if(!e.target.closest(".menuwrap")) closeMenus(); });
+document.addEventListener("keydown", e => { if(e.key === "Escape") closeMenus(); });
+
+function isDark(){ return document.body.classList.contains("dark"); }
+function setDark(v){
+  document.body.classList.toggle("dark", !!v);
+  try{ localStorage.setItem("radar-theme", v ? "dark" : "light"); }catch(e){}
+  renderThemeBtn();
+  drawFigure();
+}
+function renderThemeBtn(){
+  const sun = '<svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><circle cx="10" cy="10" r="3.4"/><path d="M10 2.5v2M10 15.5v2M2.5 10h2M15.5 10h2M4.7 4.7l1.4 1.4M13.9 13.9l1.4 1.4M15.3 4.7l-1.4 1.4M6.1 13.9l-1.4 1.4"/></svg>';
+  const moon = '<svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M15.5 12.5A6.5 6.5 0 0 1 7.4 4.4a6.6 6.6 0 1 0 8.1 8.1z"/></svg>';
+  $("themebtn").innerHTML = isDark() ? sun : moon;
+}
+
+/* =========================================================================
+   The diagram is generated from data so the spacing stays honest and the
+   colours follow the theme. Literal hex, not CSS variables, so the exported
+   SVG still renders correctly outside this page.
+   ========================================================================= */
+
+function palette(){
+  return isDark()
+    ? {card:"#141A31", ink:"#E8ECF5", ink2:"#A9B4C9", ink3:"#6E7A93", line:"#2A3554",
+       band:"#0F1530", soft:"#101B36", blue:"#5EA9EF", sky:"#29ABE2", navy:"#0A1028",
+       field:"#41C3A4", lab:"#A093EF", pub:"#5EA9EF", warn:"#F0B769", warnbg:"#3A2A14",
+       good:"#4FC787", goodbg:"#0F2A1D", arrow:"#4A5B85", loop:"#6E7A93"}
+    : {card:"#FFFFFF", ink:"#10182B", ink2:"#4A5568", ink3:"#8A94A6", line:"#DCE3EE",
+       band:"#EDF1F7", soft:"#F7F9FC", blue:"#005EB8", sky:"#29ABE2", navy:"#000835",
+       field:"#0E7C66", lab:"#6B4FC8", pub:"#005EB8", warn:"#B85C00", warnbg:"#FBEDE0",
+       good:"#1D7A46", goodbg:"#E8F5EE", arrow:"#AEBACD", loop:"#B4BECE"};
+}
+
+/* --- column geometry --- */
+const COLW = 268, GAP = 62, X0 = 34;
+const CX = i => X0 + i * (COLW + GAP);
+const W = X0 * 2 + 5 * COLW + 4 * GAP;   /* 1414 */
+const H = 1035;
+const TOP = 150, BOT = 880;              /* content band */
+
+function esc(s){ return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+
+function txt(x, y, s, o){
+  o = o || {};
+  return '<text x="'+x+'" y="'+y+'" font-family="Arial, Helvetica, sans-serif" font-size="'+(o.size||12.5)+'"'
+    + ' fill="'+(o.fill||palette().ink2)+'"'
+    + (o.weight ? ' font-weight="'+o.weight+'"' : '')
+    + (o.anchor ? ' text-anchor="'+o.anchor+'"' : '')
+    + (o.ls ? ' letter-spacing="'+o.ls+'"' : '')
+    + '>'+esc(s)+'</text>';
+}
+function lines(x, y, arr, o){
+  o = o || {};
+  const lh = o.lh || 16.5;
+  return arr.map((s,i) => txt(x, y + i*lh, s, o)).join("");
+}
+function box(x, y, w, h, o){
+  o = o || {};
+  const p = palette();
+  return '<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" rx="'+(o.r||11)+'"'
+    + ' fill="'+(o.fill||p.card)+'" stroke="'+(o.stroke||p.line)+'" stroke-width="'+(o.sw||1.4)+'"'
+    + (o.dash ? ' stroke-dasharray="'+o.dash+'"' : '') + '/>';
+}
+function bandLabel(x, y, n, s){
+  const p = palette();
+  return '<circle cx="'+(x+11)+'" cy="'+(y-5)+'" r="11" fill="'+p.blue+'"/>'
+    + txt(x+11, y-1, String(n), {size:12, weight:"bold", fill:"#FFFFFF", anchor:"middle"})
+    + txt(x+30, y-1, s, {size:12.5, weight:"bold", fill:p.ink3, ls:"1.1"});
+}
+function arrow(x1, y1, x2, y2, o){
+  o = o || {};
+  const p = palette();
+  return '<path d="M '+x1+' '+y1+' L '+x2+' '+y2+'" fill="none" stroke="'+(o.stroke||p.arrow)+'"'
+    + ' stroke-width="'+(o.sw||2.6)+'" marker-end="url(#ah'+(o.m||"")+')"'
+    + (o.dash ? ' stroke-dasharray="'+o.dash+'"' : '') + '/>';
+}
+
+/* --- content --- */
+const STREAMS = [
+  {c:"field", tag:"Stream 1 · people", t:"Field Signal Capture",
+   b:["What our own people hear in", "prospect meetings, QBRs and events.", "Logged in thirty seconds from the", "Salesforce account record."],
+   foot:"Salesforce · Agentforce"},
+  {c:"pub", tag:"Stream 2 · machine", t:"Published Watchlist",
+   b:["A collector agent runs twelve", "standing queries across public news", "feeds, tags each hit to a shelf and", "flags anything that trips a trigger."],
+   foot:"radar_collector.py · runs daily"},
+  {c:"lab", tag:"Stream 3 · bench", t:"Assistant Lab",
+   b:["Once a month we sit down and make", "six real assistants do three real", "tasks. Scored 0-5 on Plan, Price,", "Book, Service. Recordings on file."],
+   foot:"Narrow on purpose · see coverage"}
+];
+
+/* cov: F, P, L  ·  2 = covered, 1 = partial, 0 = not covered */
+const SHELVES = [
+  {t:"AI Assistant Platforms", ex:"ChatGPT, Gemini, Perplexity, Copilot, Mindtrip", cov:[2,2,2]},
+  {t:"GDS / Travel Infrastructure", ex:"Sabre, Travelport, Duffel, us", cov:[2,2,0]},
+  {t:"Protocols & Standards", ex:"MCP, UCP, agentic commerce specs", cov:[2,2,0]},
+  {t:"Supplier Direct-to-Agent", ex:"Airlines and hotels going straight to agents", cov:[2,2,0]},
+  {t:"Payments & Agentic Commerce", ex:"PayPal, Stripe, Outpayce", cov:[2,2,1]}
+];
+
+const BEATS = [
+  {n:1, t:"Three ways in, and they are not the same kind of information",
+   p:"People, machine, bench. The field stream is the only one that hears things before they are announced. The collector is the only one that never sleeps. The Lab is the only one that produces evidence we own rather than a claim someone else made.",
+   say:"<b>The line:</b> our own people flagged the Sabre bundle sixteen days before the press release. No amount of news scraping gets you that."},
+  {n:2, t:"Five shelves, and the Lab only reaches two of them",
+   p:"Everything gets filed into one of five categories on the way in, so nothing lands in a general pile nobody reads. The coverage dots are the honest part: the Lab goes deep on platforms and partly on payments, and nowhere else. Depth is expensive, so it is spent where it can move a roadmap.",
+   say:"<b>If challenged:</b> yes, three of the shelves are covered by two streams, not three. That is a stated limit, not an oversight."},
+  {n:3, t:"Importance is scored, not argued",
+   p:"Every player gets three fixed questions worth 0-2 each. Five or six means daily attention, three or four weekly, nought to two monthly. Funding, a partnership, a launch or a direct field signal forces an immediate re-score regardless of where the cycle sits.",
+   say:"<b>Why it matters:</b> \"why isn't X on the always-on list\" gets a scored answer instead of a shrug."},
+  {n:4, t:"Two lanes out, and only one of them carries a signature",
+   p:"The daily flash is machine-generated, unsigned, and labelled as machine-made so nobody mistakes speed for judgment. Everything that carries a recommendation goes through the analyst, gets signed, and is versioned after that. Drafts are invisible outside the CI team until signed.",
+   say:"<b>The principle:</b> speed and judgment are different products. Mixing them is how a CI function loses trust."},
+  {n:5, t:"It lands as work, not as a newsletter",
+   p:"Each team gets a different shape of the same intelligence, and each one has somewhere to put it. Product gets roadmap cards that import to the Jira backlog. Marketing gets claims tested against Lab runs. Pre-Sales gets objection answers on the account record. Leadership gets one screen.",
+   say:"<b>The test:</b> if an item cannot name the team and the system it lands in, it is trivia and it should not have been published."},
+  {n:6, t:"Two loops back, which is what makes it a system",
+   p:"Pre-Sales log what they hear and get battlecards back, so contributing is self-interested rather than a favour. And a trigger does not just raise an alert, it re-scores the player, which changes what the collector asks tomorrow. The system re-aims its own sensors.",
+   say:"<b>The distinction:</b> a newsletter broadcasts. A system changes what it looks at based on what it found."}
+];
+
+function drawFigure(){
+  const p = palette();
+  const s = [];
+
+  s.push('<defs>'
+    + '<marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse">'
+    + '<path d="M 0 0 L 10 5 L 0 10 z" fill="'+p.arrow+'"/></marker>'
+    + '<marker id="ahl" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">'
+    + '<path d="M 0 0 L 10 5 L 0 10 z" fill="'+p.loop+'"/></marker>'
+    + '<marker id="ahb" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse">'
+    + '<path d="M 0 0 L 10 5 L 0 10 z" fill="'+p.blue+'"/></marker>'
+    + '<marker id="ahw" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse">'
+    + '<path d="M 0 0 L 10 5 L 0 10 z" fill="'+p.warn+'"/></marker>'
+    + '<marker id="ahf" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse">'
+    + '<path d="M 0 0 L 10 5 L 0 10 z" fill="'+p.field+'"/></marker>'
+    + '</defs>');
+
+  /* ---------- column 1: streams ---------- */
+  s.push(bandLabel(CX(0), TOP - 22, 1, "WHAT COMES IN"));
+  const sh = 168, sgap = 40;
+  const sy0 = TOP + ((BOT - TOP) - (3*sh + 2*sgap)) / 2;
+  STREAMS.forEach((st, i) => {
+    const y = sy0 + i * (sh + sgap), c = p[st.c];
+    s.push(box(CX(0), y, COLW, sh));
+    s.push('<rect x="'+CX(0)+'" y="'+y+'" width="4.5" height="'+sh+'" rx="2.2" fill="'+c+'"/>');
+    s.push(txt(CX(0)+20, y+26, st.tag.toUpperCase(), {size:10, weight:"bold", fill:c, ls:".9"}));
+    s.push(txt(CX(0)+20, y+50, st.t, {size:16, weight:"bold", fill:p.ink}));
+    s.push(lines(CX(0)+20, y+74, st.b, {size:12, fill:p.ink2, lh:16}));
+    s.push('<line x1="'+(CX(0)+20)+'" y1="'+(y+sh-30)+'" x2="'+(CX(0)+COLW-20)+'" y2="'+(y+sh-30)+'" stroke="'+p.line+'"/>');
+    s.push(txt(CX(0)+20, y+sh-13, st.foot, {size:11, fill:p.ink3}));
+    s.push(arrow(CX(0)+COLW, y+sh/2, CX(1)-10, y+sh/2, {sw:2.2}));
+  });
+
+  /* ---------- column 2: shelves ---------- */
+  s.push(bandLabel(CX(1), TOP - 22, 2, "WHERE IT GETS FILED"));
+  const bh = 84, bgap = 20;
+  const by0 = TOP + ((BOT - TOP) - (5*bh + 4*bgap) - 74) / 2;
+  SHELVES.forEach((sv, i) => {
+    const y = by0 + i * (bh + bgap);
+    s.push(box(CX(1), y, COLW, bh, {fill:p.soft}));
+    s.push(txt(CX(1)+18, y+28, sv.t, {size:14, weight:"bold", fill:p.ink}));
+    s.push(txt(CX(1)+18, y+47, sv.ex, {size:11, fill:p.ink3}));
+    /* coverage dots */
+    const dx = CX(1)+18, dy = y+65;
+    ["F","P","L"].forEach((lab, k) => {
+      const c = [p.field, p.pub, p.lab][k], v = sv.cov[k], x = dx + k*46;
+      if(v === 2)      s.push('<circle cx="'+(x+5)+'" cy="'+dy+'" r="5" fill="'+c+'"/>');
+      else if(v === 1) s.push('<circle cx="'+(x+5)+'" cy="'+dy+'" r="5" fill="'+c+'" fill-opacity=".28" stroke="'+c+'" stroke-width="1.6"/>');
+      else             s.push('<circle cx="'+(x+5)+'" cy="'+dy+'" r="5" fill="none" stroke="'+p.ink3+'" stroke-width="1.3" stroke-dasharray="2 2"/>');
+      s.push(txt(x+15, dy+4, lab, {size:10.5, weight:"bold", fill:(v?c:p.ink3)}));
+    });
+  });
+  const legY = by0 + 5*(bh+bgap) + 6;
+  s.push(box(CX(1), legY, COLW, 78, {fill:"none", stroke:p.line, dash:"4 4"}));
+  s.push(txt(CX(1)+18, legY+21, "COVERAGE, HONESTLY", {size:10, weight:"bold", fill:p.ink3, ls:".9"}));
+  s.push(txt(CX(1)+18, legY+41, "F field", {size:11.5, fill:p.field, weight:"bold"}));
+  s.push(txt(CX(1)+80, legY+41, "P published", {size:11.5, fill:p.pub, weight:"bold"}));
+  s.push(txt(CX(1)+178, legY+41, "L lab", {size:11.5, fill:p.lab, weight:"bold"}));
+  s.push(txt(CX(1)+18, legY+62, "● covered      ◐ partial      ○ not covered", {size:11.5, fill:p.ink2}));
+  s.push(arrow(CX(1)+COLW, (TOP+BOT)/2, CX(2)-10, (TOP+BOT)/2, {sw:3}));
+
+  /* ---------- column 3: judgment ---------- */
+  s.push(bandLabel(CX(2), TOP - 22, 3, "DOES IT MATTER"));
+  const j1 = TOP + ((BOT - TOP) - 450) / 2;
+  s.push(box(CX(2), j1, COLW, 186));
+  s.push(txt(CX(2)+20, j1+26, "THE FOCUS RUBRIC", {size:10, weight:"bold", fill:p.blue, ls:".9"}));
+  s.push(lines(CX(2)+20, j1+50, [
+    "Three fixed questions, 0-2 each:",
+    "1  Can they move a roadmap",
+    "    decision in 90 days?",
+    "2  Do they touch a core",
+    "    revenue line?",
+    "3  Are they moving fast,",
+    "    or dormant?"
+  ], {size:12, fill:p.ink2, lh:16.5}));
+  s.push('<line x1="'+(CX(2)+20)+'" y1="'+(j1+164)+'" x2="'+(CX(2)+COLW-20)+'" y2="'+(j1+164)+'" stroke="'+p.line+'"/>');
+  s.push(txt(CX(2)+20, j1+180, "Score 0-6 decides the tier", {size:11.5, weight:"bold", fill:p.ink}));
+
+  const j2 = j1 + 206;
+  s.push(box(CX(2), j2, COLW, 108, {fill:p.soft}));
+  s.push(txt(CX(2)+20, j2+25, "HOW OFTEN WE LOOK", {size:10, weight:"bold", fill:p.ink3, ls:".9"}));
+  [["5-6","Always-On · same day"],["3-4","Weekly · batched"],["0-2","Monthly · sweep"]].forEach((r,i)=>{
+    const y = j2 + 47 + i*20;
+    s.push(txt(CX(2)+20, y, r[0], {size:12, weight:"bold", fill:p.blue}));
+    s.push(txt(CX(2)+58, y, r[1], {size:12, fill:p.ink2}));
+  });
+
+  const j3 = j2 + 128;
+  s.push(box(CX(2), j3, COLW, 116, {fill:p.warnbg, stroke:"none"}));
+  s.push(txt(CX(2)+20, j3+25, "TRIGGERS OVERRIDE THE CYCLE", {size:10, weight:"bold", fill:p.warn, ls:".8"}));
+  s.push(lines(CX(2)+20, j3+47, [
+    "Funding · partnership · launch ·",
+    "a direct field signal.",
+    "Any one of them forces an",
+    "immediate re-score."
+  ], {size:12, fill:isDark()?"#E8C89A":"#7A4A10", lh:16}));
+
+  /* ---------- column 4: the line ---------- */
+  s.push(bandLabel(CX(3), TOP - 22, 4, "WHO STANDS BEHIND IT"));
+  const f1 = TOP + ((BOT - TOP) - 512) / 2;
+  s.push(box(CX(3), f1, COLW, 132, {stroke:p.warn, dash:"6 4"}));
+  s.push(txt(CX(3)+20, f1+26, "FAST LANE · NO SIGNATURE", {size:10, weight:"bold", fill:p.warn, ls:".9"}));
+  s.push(txt(CX(3)+20, f1+50, "Daily flash · 08:00", {size:15, weight:"bold", fill:p.ink}));
+  s.push(lines(CX(3)+20, f1+72, [
+    "Ten lines, machine-generated,",
+    "and labelled machine-made.",
+    "Speed is the whole product here."
+  ], {size:12, fill:p.ink2, lh:16}));
+
+  const f2 = f1 + 152;
+  s.push(box(CX(3), f2, COLW, 250, {stroke:p.blue, sw:2}));
+  s.push('<rect x="'+CX(3)+'" y="'+f2+'" width="'+COLW+'" height="30" rx="11" fill="'+p.blue+'"/>');
+  s.push('<rect x="'+CX(3)+'" y="'+(f2+18)+'" width="'+COLW+'" height="12" fill="'+p.blue+'"/>');
+  s.push(txt(CX(3)+20, f2+20, "JUDGMENT LANE · ANALYST SIGNS", {size:10, weight:"bold", fill:"#FFFFFF", ls:".9"}));
+  s.push(lines(CX(3)+20, f2+52, [
+    "The AI drafts. The analyst edits,",
+    "argues with it, and signs it."
+  ], {size:12, fill:p.ink2, lh:16}));
+  [["Weekly digest","Friday · the judgment product"],
+   ["Assessments","Fact, then meaning, then action"],
+   ["Battlecards","Built from Lab evidence"],
+   ["Monthly deep-dive","One strategic call"]].forEach((r,i)=>{
+    const y = f2 + 96 + i*36;
+    s.push('<circle cx="'+(CX(3)+26)+'" cy="'+(y+4)+'" r="4" fill="'+p.blue+'"/>');
+    s.push(txt(CX(3)+40, y+8, r[0], {size:12.5, weight:"bold", fill:p.ink}));
+    s.push(txt(CX(3)+40, y+23, r[1], {size:11, fill:p.ink3}));
+  });
+
+  const f3 = f2 + 268;
+  s.push(box(CX(3), f3, COLW, 92, {fill:p.soft}));
+  s.push(txt(CX(3)+20, f3+24, "THE PERMISSION GATE", {size:10, weight:"bold", fill:p.ink3, ls:".8"}));
+  s.push(lines(CX(3)+20, f3+45, [
+    "Field signal bodies never travel.",
+    "Deal-sensitive detail stays with CI,",
+    "leadership and the logging team."
+  ], {size:11.5, fill:p.ink2, lh:15.5}));
+
+  /* judgment feeds both lanes; only one of them carries a signature */
+  s.push(arrow(CX(2)+COLW, j1+120, CX(3)-10, f1+66, {sw:2.2}));
+  s.push(arrow(CX(2)+COLW, j2+54, CX(3)-10, f2+125, {sw:3}));
+  s.push(arrow(CX(3)+COLW, f1+66, CX(4)-10, 300, {sw:2, dash:"5 4", stroke:p.warn, m:"w"}));
+  s.push(arrow(CX(3)+COLW, f2+125, CX(4)-10, 515, {sw:3.4, stroke:p.blue, m:"b"}));
+
+  /* ---------- column 5: teams ---------- */
+  s.push(bandLabel(CX(4), TOP - 22, 5, "WHERE IT LANDS"));
+  const TEAMS = [
+    {t:"Product", w:"What changed, and what to build next", sysl:"Roadmap board → Jira backlog (AIA)"},
+    {t:"Product Marketing", w:"Their claims next to our Lab results", sysl:"Messaging + battlecard library"},
+    {t:"Pre-Sales & Solutions", w:"The objection, and the tested answer", sysl:"Salesforce account record"},
+    {t:"Leadership", w:"Tier-1 moves only, on one screen", sysl:"Board pack + strategy call"}
+  ];
+  const th = 148, tgap = 26;
+  const ty0 = TOP + ((BOT - TOP) - (4*th + 3*tgap)) / 2;
+  TEAMS.forEach((tm, i) => {
+    const y = ty0 + i * (th + tgap);
+    s.push(box(CX(4), y, COLW, th));
+    s.push('<rect x="'+CX(4)+'" y="'+y+'" width="4.5" height="'+th+'" rx="2.2" fill="'+p.sky+'"/>');
+    s.push(txt(CX(4)+20, y+30, tm.t, {size:16, weight:"bold", fill:p.ink}));
+    s.push(txt(CX(4)+20, y+52, tm.w, {size:12, fill:p.ink2}));
+    s.push(box(CX(4)+18, y+68, COLW-36, 34, {fill:p.band, stroke:"none", r:7}));
+    s.push(txt(CX(4)+30, y+90, tm.sysl, {size:11.5, weight:"bold", fill:p.ink2}));
+    s.push(txt(CX(4)+20, y+126, "then it becomes their work, not our newsletter", {size:11, fill:p.ink3}));
+  });
+
+  /* ---------- loop 1 (top): triggers re-aim the collector ----------
+     Both loops run down a corridor in the left margin so nothing crosses a box. */
+  const CORR1 = -54, CORR2 = -24, ly = 76;
+  const lx1 = CX(2) + COLW/2, s2mid = sy0 + sh + sgap + sh/2;
+  s.push('<path d="M '+lx1+' '+(TOP+30)+' L '+lx1+' '+ly+' L '+CORR1+' '+ly+' L '+CORR1+' '+s2mid+' L '+(CX(0)-11)+' '+s2mid+'"'
+    + ' fill="none" stroke="'+p.loop+'" stroke-width="2" stroke-dasharray="7 5" marker-end="url(#ahl)"/>');
+  s.push(box(lx1 - 322, ly - 22, 286, 44, {fill:p.card, stroke:p.line, dash:"4 4", r:8}));
+  s.push(txt(lx1 - 306, ly - 4, "LOOP 1 · THE SYSTEM RE-AIMS ITSELF", {size:10, weight:"bold", fill:p.ink3, ls:".8"}));
+  s.push(txt(lx1 - 306, ly + 13, "A promotion changes tomorrow's queries", {size:11.5, fill:p.ink2}));
+
+  /* ---------- loop 2 (bottom): give to get ---------- */
+  const gy = 968, gx1 = CX(4) + COLW/2, s1mid = sy0 + sh/2;
+  s.push('<path d="M '+gx1+' '+(ty0 + 4*th + 3*tgap - 6)+' L '+gx1+' '+gy+' L '+CORR2+' '+gy+' L '+CORR2+' '+s1mid+' L '+(CX(0)-11)+' '+s1mid+'"'
+    + ' fill="none" stroke="'+p.field+'" stroke-width="2.4" stroke-dasharray="7 5" marker-end="url(#ahf)"/>');
+  s.push(box(CX(0) + 40, gy - 23, 486, 46, {fill:p.card, stroke:p.field, r:8}));
+  s.push(txt(CX(0) + 58, gy - 4, "LOOP 2 · GIVE TO GET", {size:10, weight:"bold", fill:p.field, ls:".8"}));
+  s.push(txt(CX(0) + 58, gy + 14, "Pre-Sales log what they hear, and get a battlecard back within the week", {size:11.5, fill:p.ink2}));
+
+  const VX = -76, VW = W - VX;
+  $("figure").innerHTML = '<svg viewBox="'+VX+' 0 '+VW+' '+H+'" xmlns="http://www.w3.org/2000/svg" role="img"'
+    + ' aria-label="How the AI Market Radar works: three intake streams, five categories, a scoring rubric, an analyst signature, four stakeholder teams, and two feedback loops.">'
+    + '<rect x="'+VX+'" y="0" width="'+VW+'" height="'+H+'" fill="'+(isDark()?"#141A31":"#FFFFFF")+'"/>'
+    + s.join("") + '</svg>';
+}
+
+function drawBeats(){
+  $("beats").innerHTML = BEATS.map(b =>
+    '<div class="beat"><div class="n">'+b.n+'</div><h4>'+b.t+'</h4><p>'+b.p+'</p><div class="say">'+b.say+'</div></div>'
+  ).join("");
+}
+
+function downloadSvg(){
+  const svg = document.querySelector("#figure svg");
+  if(!svg){ toast("Nothing to export."); return; }
+  const src = '<?xml version="1.0" encoding="UTF-8"?>\n' + new XMLSerializer().serializeToString(svg);
+  const url = URL.createObjectURL(new Blob([src], {type:"image/svg+xml;charset=utf-8"}));
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "radar-how-it-works" + (isDark() ? "-dark" : "") + ".svg";
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url), 1000);
+  toast("Vector saved. Drops straight into the deck at any size.");
+}
+
+try{ if(localStorage.getItem("radar-theme") === "dark") document.body.classList.add("dark"); }catch(e){}
+renderThemeBtn();
+drawFigure();
+drawBeats();
+</script>
+</body>
+</html>
