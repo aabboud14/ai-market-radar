@@ -2121,6 +2121,7 @@ function reviewAssess(key){
   const item = reviewQueue().find(x => x.key === key);
   if(!item) return;
   REVIEWED[key] = {decision:"assessment"};
+  closeModal();   /* may have been launched from the read modal */
   const isCluster = item.kind === "cluster";
   MOVES.unshift({
     id: "rv" + Date.now(),
@@ -2139,6 +2140,55 @@ function reviewAssess(key){
   page = "moves";
   render();
   toast("Draft opened. Facts are prefilled. It will not sign until judgment and actions are written.");
+}
+
+/* You cannot answer "does this change what anyone should do" from a headline.
+   Read the thing, then decide, without leaving the queue. */
+function reviewReadModal(key){
+  const item = reviewQueue().find(x => x.key === key);
+  if(!item) return;
+  const act = '<div class="actions"><button class="btn ghost" onclick="closeModal()">Back to the queue</button>'
+    + '<button class="btn ghost" onclick="reviewRejectModal(\''+key.replace(/'/g,"\\'")+'\')">Not worth one</button>'
+    + '<button class="btn" onclick="reviewAssess(\''+key.replace(/'/g,"\\'")+'\')">Write an assessment</button></div>';
+
+  if(item.kind === "cluster"){
+    const c = item.cluster;
+    openModal(''
+    + '<h4>'+c.subject+'</h4>'
+    + '<div class="hint">In the review queue · '+TRIGGER_LABEL[item.trig]+'</div>'
+    + '<div class="kv"><div class="k">Why it is here</div><div>'+c.trigger.events+' distinct events from '+c.trigger.sources+' sources between '+c.trigger.from+' and '+c.trigger.to+'</div></div>'
+    + '<div class="kv"><div class="k">Funnel</div><div>'+c.signalCount+' signals → '+c.eventCount+' events'+(c.collapsed ? ' · '+c.collapsed+' collapsed as syndicated coverage' : '')+'</div></div>'
+    + '<div class="seclabel">Read the stories</div>'
+    + c.events.map(e => {
+        const locked = fieldAccess(e.lead) === "locked";
+        return '<div class="evrow"><div class="et">'
+        + (locked ? 'Field signal · restricted'
+                  : (e.lead.url ? '<a href="'+e.lead.url+'" target="_blank" rel="noopener">'+e.lead.title+' ↗</a>' : e.lead.title))
+        + '</div>'
+        + (e.lead.body ? '<div style="font-size:12.5px;color:var(--ink2);margin:3px 0 4px">'+e.lead.body+'</div>' : '')
+        + '<div class="em">'+e.lead.date+' · '+e.lead.source+'</div>'
+        + e.dupes.map(d => '<div class="dupe"><b>syndicated copy</b> · '+srcName(d)+' · '+d.date+'<br>'
+            + (d.url ? '<a href="'+d.url+'" target="_blank" rel="noopener">'+d.title+' ↗</a>' : d.title)+'</div>').join("")
+        + '</div>';
+      }).join("")
+    + act);
+    return;
+  }
+
+  const s = item.sig;
+  const locked = fieldAccess(s) === "locked";
+  openModal(''
+  + '<h4>'+(locked ? 'Field signal · restricted' : s.title)+'</h4>'
+  + '<div class="hint">In the review queue · '+TRIGGER_LABEL[item.trig]+'</div>'
+  + (locked
+      ? '<div class="lockcard" style="margin-bottom:10px">'+lockSvg+'<div>Body restricted to CI, leadership and the contributing team.</div></div>'
+      : '<div class="kv"><div class="k">What it says</div><div>'+(s.body || 'No body captured. The headline is all the collector pulled, which is itself worth knowing before you write anything on top of it.')+'</div></div>')
+  + '<div class="kv"><div class="k">Source</div><div>'+s.source
+  +   (s.url ? '<br><a href="'+s.url+'" target="_blank" rel="noopener">Open the original ↗</a>' : '')+'</div></div>'
+  + '<div class="kv"><div class="k">Filed as</div><div>'+streamBadge(s.stream)+' '+CATS[s.cat]+' · '+s.player+'</div></div>'
+  + '<div class="kv"><div class="k">Date</div><div>'+s.date+'</div></div>'
+  + '<div class="kv"><div class="k">The question</div><div><b>Does this change what anyone should do?</b><br><span style="color:var(--ink3);font-size:12px">Yes opens a draft with these facts prefilled. No gets logged with a reason against your name.</span></div></div>'
+  + act);
 }
 
 function reviewRejectModal(key){
@@ -2193,8 +2243,10 @@ function pageMoves(){
             '<div class="sig"><div class="when">'+q.date+'</div><div class="bodywrap">'
             + '<div class="meta"><span class="trig" title="'+TRIGGER_LABEL[q.trig]+'">⚡ '+TRIGGER_SHORT[q.trig]+'</span><span class="chip outline">'+q.player+'</span>'
             +   (q.kind==="cluster" ? '<span class="chip">cluster</span>' : '')+'</div>'
-            + '<div class="t">'+(fieldAccess(q.sig || {stream:"published"})==="locked" ? "Field signal · restricted" : q.title)+'</div>'
-            + '<div style="margin-top:8px;display:flex;gap:10px;flex-wrap:wrap">'
+            + '<div class="t" style="cursor:pointer" onclick="reviewReadModal(\''+q.key.replace(/'/g,"\\'")+'\')" title="Read it before you decide">'
+            +   (fieldAccess(q.sig || {stream:"published"})==="locked" ? "Field signal · restricted" : q.title)+'</div>'
+            + '<div style="margin-top:8px;display:flex;gap:10px;flex-wrap:wrap;align-items:center">'
+            +   '<button class="btn ghost" style="padding:6px 13px" onclick="reviewReadModal(\''+q.key.replace(/'/g,"\\'")+'\')">Read it</button>'
             +   '<button class="btn" style="padding:6px 13px" onclick="reviewAssess(\''+q.key.replace(/'/g,"\\'")+'\')">Write an assessment</button>'
             +   '<button class="btn ghost" style="padding:6px 13px" onclick="reviewRejectModal(\''+q.key.replace(/'/g,"\\'")+'\')">Not worth one</button>'
             + '</div></div></div>'
