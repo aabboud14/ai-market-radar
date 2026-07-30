@@ -11,7 +11,9 @@
   :root{
     --navy:#000835; --blue:#005EB8; --sky:#29ABE2;
     --bg:#F3F5F9; --card:#FFFFFF;
-    --ink:#10182B; --ink2:#4A5568; --ink3:#8A94A6;
+    /* ink3 carries most secondary copy, so it has to clear WCAG AA (4.5:1)
+       against both the card and the page background, not just look quiet. */
+    --ink:#10182B; --ink2:#4A5568; --ink3:#656E80;
     --line:#E3E8F0;
     --good:#1D7A46; --warn:#B85C00; --high:#B3261E;
     --seq0:#EAF1F8; --seq1:#C7DCF0; --seq2:#94BEE4; --seq3:#5395D2; --seq4:#1A6CBB; --seq5:#003E77;
@@ -350,7 +352,7 @@
 
   /* ---------- night mode ---------- */
   body.dark{
-    --bg:#0C1124; --card:#141A31; --ink:#E8ECF5; --ink2:#A9B4C9; --ink3:#6E7A93; --line:#232C47;
+    --bg:#0C1124; --card:#141A31; --ink:#E8ECF5; --ink2:#A9B4C9; --ink3:#7F8AA3; --line:#232C47;
     --shadow:0 1px 2px rgba(0,0,0,.35), 0 4px 14px rgba(0,0,0,.28);
     --shadow-hover:0 2px 4px rgba(0,0,0,.4), 0 10px 26px rgba(0,0,0,.45);
   }
@@ -395,6 +397,68 @@
   body.dark #toast{background:#1E2A4D;}
   body.dark .switch .sl{background:#33406A;}
 
+  /* ---------- accessibility & polish ---------- */
+  .skip{position:absolute; left:-9999px; top:8px; z-index:200; background:var(--card); color:var(--blue);
+    border:1px solid var(--blue); border-radius:8px; padding:9px 15px; font-size:13px; font-weight:bold; text-decoration:none;}
+  .skip:focus{left:14px;}
+  *:focus-visible{outline:2.5px solid var(--sky); outline-offset:2px; border-radius:5px;}
+  .topbar *:focus-visible{outline-color:#7FD3FF;}
+  /* anything given a button role by the a11y pass gets a real pressed state */
+  [role="button"]{cursor:pointer;}
+  [role="button"]:active{transform:translateY(1px);}
+  .tile[role="button"], .card[role="button"]{transition:transform .16s ease, box-shadow .16s ease, border-color .16s ease;}
+
+  .resultbar{display:flex; align-items:center; gap:12px; flex-wrap:wrap; padding:9px 0 12px; margin-bottom:4px;
+    border-bottom:1px solid var(--line); font-size:12.5px; color:var(--ink3);}
+  .resultbar b{color:var(--ink);}
+  .empty{padding:30px 18px; text-align:center; color:var(--ink2); font-size:13.5px;}
+  .empty .eh{font-size:15px; font-weight:bold; color:var(--ink); margin-bottom:5px;}
+  .empty .btn{margin-top:14px;}
+
+  .modalx{position:absolute; top:12px; right:13px; width:30px; height:30px; border-radius:8px; border:0;
+    background:transparent; color:var(--ink3); font-size:21px; line-height:1; cursor:pointer; font-family:inherit;}
+  .modalx:hover{background:#F0F4FA; color:var(--ink);}
+  body.dark .modalx:hover{background:#1A2340;}
+  .modal{position:relative;}
+  .modal h4{padding-right:34px;}
+
+  /* ---------- visual refinement ---------- */
+  .pagehead{font-size:23px; letter-spacing:-.35px;}
+  .tile{overflow:hidden;}
+  .tile.clickable::before{content:""; position:absolute; left:0; top:0; bottom:0; width:0; background:var(--sky); transition:width .16s ease;}
+  .tile.clickable:hover::before{width:3px;}
+  .kicker{background-image:linear-gradient(90deg, rgba(41,171,226,.07), rgba(41,171,226,0) 320px);}
+  .card h3{display:flex; align-items:center; gap:7px;}
+  .card h3::before{content:""; width:5px; height:5px; border-radius:50%; background:var(--sky); flex-shrink:0; opacity:.75;}
+  .sig .t{letter-spacing:-.1px;}
+  .nav a.active{box-shadow:inset 0 0 0 1px rgba(0,94,184,.09);}
+  .btn:focus-visible{outline-offset:3px;}
+
+  .kbdhint{font-size:11px; color:var(--ink3); margin-top:10px;}
+  .kbd{display:inline-block; border:1px solid var(--line); border-bottom-width:2px; border-radius:4px;
+    padding:0 5px; font-size:10.5px; font-family:inherit; background:var(--card); color:var(--ink2);}
+
+  @media (max-width: 900px){
+    .topbar{position:static; height:auto; flex-wrap:wrap; padding:10px 14px 12px; row-gap:10px; column-gap:8px;}
+    .brand{order:1;} .spacer{order:2; flex:1;}
+    .topbar .menuwrap, #themebtn{order:3;}
+    .demo-badge{display:none;}
+    .switcher{order:9; width:100%; overflow-x:auto; justify-content:flex-start; scrollbar-width:none;}
+    .switcher::-webkit-scrollbar{display:none;}
+    .switcher button{flex:0 0 auto;}
+    .iconbtn{width:32px; height:32px;}
+    .avatarbtn{padding:3px;}
+  }
+  @media (max-width: 430px){
+    .brand .sub{display:none;}
+    .brand h1{font-size:15px;}
+    .topbar{column-gap:6px;}
+    .layout{min-height:0;}
+    .board{grid-template-columns:1fr;}
+    .phead-row{flex-direction:column; align-items:stretch;}
+    .modal{width:100%; max-height:92vh;}
+  }
+
   @media (max-width: 960px){
     .avtxt{display:none;}
     .layout{flex-direction:column;}
@@ -410,6 +474,8 @@
 </style>
 </head>
 <body>
+
+<a class="skip" href="#main">Skip to content</a>
 
 <header class="topbar">
   <div class="brand">
@@ -968,7 +1034,16 @@ function renderNav(){
     : '<div class="datastatus demo">Demo data only.<br>Run <b>radar_collector.py</b> to pull a live published-stream feed.</div>';
 }
 
-function setRole(r){ role = r; page = "home"; render(); }
+/* Switching role keeps you on the page you were reading. The whole point of the
+   role switcher is comparing the same screen through two sets of permissions,
+   so bouncing to home every time destroyed the comparison. */
+function setRole(r){
+  if(r === role) return;
+  role = r;
+  render();
+  const v = ROLES[r];
+  toast("Now viewing as " + v.viewer + ", " + v.viewersub + ". Same page, their permissions.");
+}
 function go(p){ page = p; render(); }
 function goSignals(cat){
   catFilter = cat; sigFilter = "all"; page = "signals"; render();
@@ -982,6 +1057,7 @@ function render(){
   const fn = {home:pageHome, signals:pageSignals, lab:pageLab, watchlist:pageWatchlist, moves:pageMoves, battlecards:pageBattlecards}[page];
   $("main").innerHTML = '<div class="page">' + fn() + footnote() + '</div>';
   animateNums();
+  a11yPass($("main"));
   window.scrollTo(0,0);
 }
 
@@ -989,11 +1065,57 @@ function footnote(){
   return '<div class="footnote">Concept prototype built for interview discussion · curated data is illustrative · live items come from public news feeds via radar_collector.py · not an Amadeus product</div>';
 }
 
-/* =============== modal system =============== */
-function openModal(html){
-  $("modal-root").innerHTML = '<div class="overlay" onclick="if(event.target===this)closeModal()"><div class="modal" role="dialog">'+html+'</div></div>';
+/* =============== accessibility =============== */
+/* Most clickable surfaces here are divs, tds and bare anchors built from
+   template strings. Rather than touch forty call sites, promote anything with
+   an onclick to a real button after each render. */
+function a11yPass(root){
+  (root || document).querySelectorAll("[onclick]").forEach(el => {
+    if(el.matches("button, a[href], input, select, textarea, [tabindex]")) return;
+    el.setAttribute("tabindex", "0");
+    el.setAttribute("role", "button");
+  });
 }
-function closeModal(){ $("modal-root").innerHTML = ""; }
+document.addEventListener("keydown", e => {
+  if(e.key !== "Enter" && e.key !== " ") return;
+  const t = e.target;
+  if(t && t.getAttribute && t.getAttribute("role") === "button"
+     && !t.matches("button, a[href], input, select, textarea")){
+    e.preventDefault();
+    t.click();
+  }
+});
+
+/* =============== modal system =============== */
+let lastFocus = null;
+function openModal(html){
+  lastFocus = document.activeElement;
+  $("modal-root").innerHTML = '<div class="overlay" onclick="if(event.target===this)closeModal()">'
+    + '<div class="modal" role="dialog" aria-modal="true">'
+    + '<button class="modalx" onclick="closeModal()" aria-label="Close">&times;</button>'
+    + html + '</div></div>';
+  a11yPass($("modal-root"));
+  const first = $("modal-root").querySelector("input, textarea, select, .btn");
+  if(first) first.focus();
+}
+function closeModal(){
+  if(!$("modal-root").innerHTML) return;
+  $("modal-root").innerHTML = "";
+  if(lastFocus && lastFocus.focus) lastFocus.focus();
+  lastFocus = null;
+}
+/* keep tab focus inside an open dialog */
+document.addEventListener("keydown", e => {
+  if(e.key !== "Tab") return;
+  const modal = document.querySelector(".modal");
+  if(!modal) return;
+  const f = [...modal.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])')]
+    .filter(el => el.offsetParent !== null);
+  if(!f.length) return;
+  const first = f[0], last = f[f.length - 1];
+  if(e.shiftKey && document.activeElement === first){ e.preventDefault(); last.focus(); }
+  else if(!e.shiftKey && document.activeElement === last){ e.preventDefault(); first.focus(); }
+});
 document.addEventListener("keydown", e => { if(e.key === "Escape"){ closeModal(); closeMenus(); } });
 
 /* =============== pages =============== */
@@ -1101,12 +1223,14 @@ function copyObjection(i){
 }
 
 function objSearch(v){
+  const prev = document.querySelector(".search");
+  const pos = prev ? prev.selectionStart : v.length;   /* editing mid-string must not jump the caret to the end */
   objQuery = v;
   const scroll = window.scrollY;
   render();
   window.scrollTo(0, scroll);
   const inp = document.querySelector(".search");
-  if(inp){ inp.focus(); inp.setSelectionRange(inp.value.length, inp.value.length); }
+  if(inp){ inp.focus(); inp.setSelectionRange(pos, pos); }
 }
 
 /* ---- Leadership ---- */
@@ -1247,7 +1371,9 @@ function boardSection(){
     return '<div class="bcol" ondragover="boardOver(event,this)" ondragleave="this.classList.remove(\'over\')" ondrop="boardDrop(event,this,\''+c.k+'\')">'
       + '<div class="bcolh"><span>'+c.label+'</span><span class="bn">'+cards.length+'</span></div>'
       + cards.map(x =>
-          '<div class="jcard'+(x.col==="wont"?" wont":"")+'" draggable="true" ondragstart="boardDragStart(event,this,\''+x.k+'\')" ondragend="this.classList.remove(\'dragging\')" onclick="cardModal(\''+x.k+'\')">'
+          '<div class="jcard'+(x.col==="wont"?" wont":"")+'" data-k="'+x.k+'" draggable="true"'
+          + ' aria-label="'+x.k+' '+x.t+'. Column '+c.label+'. Arrow keys move it."'
+          + ' ondragstart="boardDragStart(event,this,\''+x.k+'\')" ondragend="this.classList.remove(\'dragging\')" onclick="cardModal(\''+x.k+'\')">'
           + '<div class="jkeyrow"><span class="jkey">'+x.k+'</span>'+(x.pts ? '<span class="jpts">'+x.pts+'</span>' : '')+'</div>'
           + '<div class="jt">'+x.t+'</div>'
           + '<div class="jmeta"><span class="jlabel">'+x.ep+'</span><span class="jpri p'+x.pri+'">'+PRI_LABEL[x.pri]+'</span></div>'
@@ -1268,9 +1394,29 @@ function boardSection(){
   +   '<button class="btn jirabtn" onclick="jiraModal()">'+uicon(UI.jira,14)+' Import to Jira backlog</button>'
   + '</div>'
   + '<div class="board">'+cols+'</div>'
-  + '<div class="signed" style="margin-top:12px">Board state is local to this demo. Phase 2 syncs it to the AIA project in Jira, two way, so a card moved here moves there.</div>'
+  + '<div class="kbdhint">Drag a card, or focus one and use <span class="kbd">←</span> <span class="kbd">→</span> to move it between columns. <span class="kbd">Enter</span> opens its evidence.</div>'
+  + '<div class="signed" style="margin-top:8px">Board state is local to this demo. Phase 2 syncs it to the AIA project in Jira, two way, so a card moved here moves there.</div>'
   + '</div>';
 }
+
+/* drag and drop alone would make this board mouse-only */
+document.addEventListener("keydown", e => {
+  const el = e.target;
+  if(!el || !el.classList || !el.classList.contains("jcard")) return;
+  if(e.key !== "ArrowLeft" && e.key !== "ArrowRight") return;
+  e.preventDefault();
+  const k = el.dataset.k;
+  const card = BOARD.find(x => x.k === k);
+  if(!card) return;
+  const i = BOARD_COLS.findIndex(x => x.k === card.col);
+  const ni = e.key === "ArrowLeft" ? Math.max(0, i-1) : Math.min(BOARD_COLS.length-1, i+1);
+  if(ni === i) return;
+  card.col = BOARD_COLS[ni].k;
+  keepScroll(render);
+  const moved = document.querySelector('.jcard[data-k="'+k+'"]');
+  if(moved) moved.focus();
+  toast(k + " moved to " + BOARD_COLS[ni].label.split(" · ")[0] + ".");
+});
 
 function boardDragStart(e, el, k){
   e.dataTransfer.setData("text/plain", k);
@@ -1362,12 +1508,24 @@ function pageSignals(){
         '<button class="catchip '+(catFilter===c?"active":"")+'" onclick="setCatFilter(\''+c+'\')">'+CAT_SHORT[c]+'</button>'
       ).join("")
   + '</div></div>'
-  + (list.length ? list.map(sigCard).join("") : '<div style="color:var(--ink3);padding:16px 0">Nothing matches this filter combination.</div>')
+  + '<div class="resultbar"><span><b>'+list.length+'</b> of '+SIGNALS.length+' signals'
+  +   (sigFilter!=="all" || catFilter!=="all" ? ' · filtered' : '')
+  +   (LIVE.length ? ' · '+LIVE.length+' live' : '')+'</span>'
+  +   (sigFilter!=="all" || catFilter!=="all"
+        ? '<button class="minibtn" onclick="clearFilters()">Clear filters</button>' : '')
+  + '</div>'
+  + (list.length ? list.map(sigCard).join("")
+      : '<div class="empty"><div class="eh">Nothing on this shelf yet</div>'
+        + 'No signal matches '+(catFilter==="all" ? "this stream" : CATS[catFilter])
+        + (sigFilter==="all" ? "" : " in the "+sigFilter+" stream")
+        + '. That is information too: a quiet category is a category nobody is moving in.'
+        + '<div><button class="btn ghost" onclick="clearFilters()">Clear filters</button></div></div>')
   + '</div>';
 }
 
 function setSigFilter(f){ sigFilter=f; render(); }
 function setCatFilter(c){ catFilter=c; render(); }
+function clearFilters(){ sigFilter="all"; catFilter="all"; render(); }
 
 function sigCard(s){
   const access = fieldAccess(s);
