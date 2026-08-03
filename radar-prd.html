@@ -312,7 +312,7 @@
     <div class="hero">
       <div class="doctype">Product Requirements Document</div>
       <h2>AI Market Radar</h2>
-      <p class="lede">A competitive intelligence system for the AI Assistant team. Three streams in, one system out. It turns a market that changes daily into a decision the roadmap can actually use.</p>
+      <p class="lede">A competitive intelligence system for the AI Assistant team. Three doors in, one gate, five ways out. It turns a market that changes daily into a decision the roadmap can actually use.</p>
       <div class="metastrip">
         <div><div class="k">Owner</div><div class="v">Alex Abboud</div></div>
         <div><div class="k">Function</div><div class="v">AI Strategy &amp; Market Intel</div></div>
@@ -333,11 +333,11 @@
 
     <div class="card">
       <h4>Build status at a glance</h4>
-      <p style="font-size:13.5px; color:var(--ink2); margin-bottom:14px;">Twenty one capabilities run today. Seven are specified and not built. Stated up front, because a PRD that cannot tell you which half is real is a wish list.</p>
+      <p style="font-size:13.5px; color:var(--ink2); margin-bottom:14px;">Twenty two capabilities run today. Seven are specified and not built. Stated up front, because a PRD that cannot tell you which half is real is a wish list.</p>
       <table class="t">
         <thead><tr><th style="width:40%">Capability</th><th style="width:15%">Status</th><th>Note</th></tr></thead>
         <tbody>
-          <tr data-status="built"><td><b>Published stream collector</b></td><td><span class="st built">built</span></td><td>Runs against 12 watchlist queries. Last run: 14 signals.</td></tr>
+          <tr data-status="built"><td><b>Published door collector</b></td><td><span class="st built">built</span></td><td>Runs against 12 watchlist queries. Last run: 14 signals.</td></tr>
           <tr data-status="built"><td><b>Promotion trigger detection</b></td><td><span class="st built">built</span></td><td>Five triggers: funding, partnership, launch, field hit, sustained volume. Last run flagged 7.</td></tr>
           <tr data-status="built"><td><b>LLM triage pass</b></td><td><span class="st built">built</span></td><td>Optional. Needs the SDK and a key, falls back silently without them.</td></tr>
           <tr data-status="built"><td><b>Dashboard, six pages</b></td><td><span class="st built">built</span></td><td>Self contained, no dependencies, works offline.</td></tr>
@@ -351,8 +351,9 @@
           <tr data-status="built"><td><b>Signal clustering</b></td><td><span class="st built">built</span></td><td>Groups by subject and collapses syndicated coverage. 25 signals resolve to 15 clusters and 24 distinct events.</td></tr>
           <tr data-status="built"><td><b>Syndication de-duplication</b></td><td><span class="st built">built</span></td><td>Headline similarity at 0.28, a threshold measured against the live feed rather than guessed.</td></tr>
           <tr data-status="built"><td><b>Sustained volume trigger</b></td><td><span class="st built">built</span></td><td>Trigger 5. Counts distinct events, not items, so press pickup cannot fire a tier review.</td></tr>
-          <tr data-status="built"><td><b>Review queue, two stage gate</b></td><td><span class="st built">built</span></td><td>Any of five triggers forces a human look. The review decides whether it becomes an assessment.</td></tr>
+          <tr data-status="built"><td><b>The Gate, two stage review</b></td><td><span class="st built">built</span></td><td>Any of five triggers forces a human look. The review decides whether it becomes an assessment.</td></tr>
           <tr data-status="built"><td><b>Reject log</b></td><td><span class="st built">built</span></td><td>Structured reason and reviewer name recorded for every no. Visible to CI and Leadership.</td></tr>
+          <tr data-status="built"><td><b>Signal to assessment linkage</b></td><td><span class="st built">built</span></td><td>Every signal that fed an assessment wears a tag that opens it. CI can log any signal as an assessment straight from the feed, no trigger required.</td></tr>
           <tr data-status="built"><td><b>Sign gate</b></td><td><span class="st built">built</span></td><td>An assessment with empty judgment or empty actions cannot be signed.</td></tr>
           <tr data-status="built"><td><b>Assessment revisions</b></td><td><span class="st built">built</span></td><td>Editing a published assessment publishes a numbered revision rather than overwriting it.</td></tr>
           <tr data-status="built"><td><b>Roadmap board</b></td><td><span class="st built">built</span></td><td>Product and Leadership only. Drag or keyboard, with a Jira import preview.</td></tr>
@@ -414,7 +415,7 @@
         <div class="card">
           <h4>Goals</h4>
           <ul class="tick">
-            <li><b>One system of record.</b> Three streams in, one system out.</li>
+            <li><b>One system of record.</b> Three doors in, five ways out.</li>
             <li><b>Coverage by category, not by volume.</b> Five named categories decide what counts as signal.</li>
             <li><b>Attention allocated by a published rubric.</b> Scored, re-scored quarterly, overridden in real time by triggers.</li>
             <li><b>A view per role, not a shared inbox.</b> Each consumer lands on what their job needs.</li>
@@ -452,9 +453,9 @@
             <tr>
               <td><b>CI Analyst</b><br><span class="chip">author</span></td>
               <td>Run the function. Confirm machine tags, write assessments, sign what circulates.</td>
-              <td>Ops overview: streams, open triggers, digest queue</td>
+              <td>Ops overview: doors, open triggers, digest queue</td>
               <td>Judgment and the signature</td>
-              <td>Full system, all streams, drafts, publishing rights</td>
+              <td>Full system, all doors, drafts, publishing rights</td>
             </tr>
             <tr>
               <td><b>Product</b></td>
@@ -501,9 +502,9 @@
 
       <div class="card">
         <h4>Two axis tagging</h4>
-        <p style="font-size:13.5px; color:var(--ink2); margin-bottom:12px;">Every record carries a <b>category</b> (what part of the market it belongs to) and a <b>stream</b> (how we came to know it). Filtering on both is what turns a feed into an answer. It also makes the honest gap visible: the Lab can only test platforms and part of payments, so rails, protocols and supplier moves are covered by the published and field streams only.</p>
+        <p style="font-size:13.5px; color:var(--ink2); margin-bottom:12px;">Every record carries a <b>category</b> (what part of the market it belongs to) and a <b>door</b> (how we came to know it). Filtering on both is what turns a feed into an answer. It also makes the honest gap visible: the Lab can only test platforms and part of payments, so rails, protocols and supplier moves are covered by the published and field doors only.</p>
         <table class="t">
-          <thead><tr><th>Category</th><th class="mono">key</th><th>What it tracks</th><th>Streams that can cover it</th></tr></thead>
+          <thead><tr><th>Category</th><th class="mono">key</th><th>What it tracks</th><th>Doors that can cover it</th></tr></thead>
           <tbody>
             <tr><td><b>AI Assistant Platforms</b></td><td class="mono">plat</td><td>What ChatGPT, Gemini, Claude, Perplexity, Copilot and Mindtrip actually do end to end, not what they announce</td><td><span class="stream published">pub</span> <span class="stream field">field</span> <span class="stream product">lab</span></td></tr>
             <tr><td><b>Rails and Infrastructure</b></td><td class="mono">rails</td><td>Sabre, Travelport, Duffel, NDC aggregators</td><td><span class="stream published">pub</span> <span class="stream field">field</span></td></tr>
@@ -609,7 +610,7 @@
     <section id="agent" data-title="The agent">
       <div class="snum">07</div>
       <h3>The agent</h3>
-      <p class="sub">The published stream is automated and running today. Click any stage for what it actually does.</p>
+      <p class="sub">The published door is automated and running today. Click any stage for what it actually does.</p>
 
       <div class="okbox" data-status="built"><span class="st built">built</span> &nbsp;<code>radar_collector.py</code>. Python standard library only, no dependencies for the base run. Last run produced 14 live signals with 7 promotion triggers, written to <code>radar-data.js</code> and picked up by the dashboard automatically.</div>
 
@@ -667,10 +668,10 @@ items, mode = claude_triage(items)   <span class="cm"># falls back to keywords o
         </div>
       </div>
 
-      <h4 class="sh">Agent roadmap by stream</h4>
+      <h4 class="sh">Agent roadmap by door</h4>
       <div class="card">
         <table class="t">
-          <thead><tr><th style="width:18%">Stream</th><th style="width:18%">Status</th><th>Automation stance</th></tr></thead>
+          <thead><tr><th style="width:18%">Door</th><th style="width:18%">Status</th><th>Automation stance</th></tr></thead>
           <tbody>
             <tr><td><span class="stream published">published</span></td><td><span class="st built">built</span></td><td>Fully automated. Collector runs on a schedule, writes the feed, flags triggers. No human in the loop until the analyst confirms tags.</td></tr>
             <tr data-status="p2"><td><span class="stream field">field</span></td><td><span class="st p2">phase 2</span></td><td>Structured intake as a Salesforce quick action, since the business already runs deep on Salesforce including Agentforce. Organizationally gated, not technically hard. Interim: any structured form.</td></tr>
@@ -690,9 +691,9 @@ items, mode = claude_triage(items)   <span class="cm"># falls back to keywords o
         <table class="t">
           <thead><tr><th style="width:14%">Step</th><th style="width:26%">What happens</th><th style="width:22%">Who or what does it</th><th>Output</th></tr></thead>
           <tbody>
-            <tr><td><b>1. Capture</b></td><td>An item enters through one of three streams and gets category plus stream tags.</td><td>Collector, field contributor, or Lab run</td><td>A <b>Signal</b>. Fact only.</td></tr>
+            <tr><td><b>1. Capture</b></td><td>An item enters through one of three doors and gets category plus door tags.</td><td>Collector, field contributor, or Lab run</td><td>A <b>Signal</b>. Fact only.</td></tr>
             <tr><td><b>2. Cluster</b></td><td>Signals about the same underlying event are grouped into one story.</td><td>Triage pass, analyst confirms</td><td>A <b>Move</b> with several sources.</td></tr>
-            <tr><td><b>3. Correlate</b></td><td>Cross stream check. Did the field see this before it was published? Do Lab scores move with it?</td><td>Intelligence layer</td><td>Field heard it first flag, benchmark link.</td></tr>
+            <tr><td><b>3. Correlate</b></td><td>Cross door check. Did the field see this before it was published? Do Lab scores move with it?</td><td>Intelligence layer</td><td>Field heard it first flag, benchmark link.</td></tr>
             <tr><td><b>4. Assess</b></td><td>Judgment gets written. So what, for whom, how confident.</td><td>AI drafts, analyst owns</td><td>An <b>Assessment</b>, still unsigned.</td></tr>
             <tr><td><b>5. Sign</b></td><td>The analyst puts their name on it. Only then is it visible beyond CI and Leadership.</td><td>CI Analyst only</td><td>A signed, circulating record.</td></tr>
             <tr><td><b>6. Route</b></td><td>The same record reaches each role in the shape their job needs.</td><td>Consumption layer</td><td>Battlecard, delta, verdict chip, one screen.</td></tr>
@@ -738,7 +739,7 @@ items, mode = claude_triage(items)   <span class="cm"># falls back to keywords o
       <div class="grid2">
         <div class="card">
           <h4>Wall 1 · Field signal bodies</h4>
-          <p style="font-size:13.5px; color:var(--ink2);">Visible to CI, Leadership, and the contributing team only. A pre-sales lead in EMEA sees EMEA bodies and sees that APAC signals exist without reading them. This protects the source and the deal. Remove the wall and the field stream dries up within a quarter.</p>
+          <p style="font-size:13.5px; color:var(--ink2);">Visible to CI, Leadership, and the contributing team only. A pre-sales lead in EMEA sees EMEA bodies and sees that APAC signals exist without reading them. This protects the source and the deal. Remove the wall and the field door goes quiet within a quarter.</p>
         </div>
         <div class="card">
           <h4>Wall 2 · Unsigned drafts</h4>
@@ -774,7 +775,7 @@ items, mode = claude_triage(items)   <span class="cm"># falls back to keywords o
         <table class="t">
           <thead><tr><th style="width:40%">Metric</th><th style="width:22%">Target by day 90</th><th>Source</th></tr></thead>
           <tbody>
-            <tr><td><b>Signals captured per week</b></td><td>40 or more across all streams</td><td>System count</td></tr>
+            <tr><td><b>Signals captured per week</b></td><td>40 or more across all doors</td><td>System count</td></tr>
             <tr><td><b>Field contribution rate</b></td><td>60 percent of pre-sales teams log at least one signal a month</td><td>Contributor field</td></tr>
             <tr><td><b>Lab coverage</b></td><td>6 players by 3 tasks monthly, no gap over 45 days</td><td>Benchmark run dates</td></tr>
             <tr><td><b>Trigger to tier review latency</b></td><td>Under 3 business days</td><td>Promotion log</td></tr>
@@ -831,7 +832,7 @@ items, mode = claude_triage(items)   <span class="cm"># falls back to keywords o
             <tr><td><b>Salesforce admin capacity for the field quick action.</b></td><td><span class="chip">likely available</span></td><td>the business already runs deep on Salesforce including Agentforce, so the platform is not in question. Admin time is.</td></tr>
             <tr><td><b>Teams channel and webhook for tier 1 alerts.</b></td><td><span class="chip">low risk</span></td><td>Microsoft 365 is named in the brief. Needs a channel and a webhook URL, roughly ten lines of code.</td></tr>
             <tr><td><b>Who signs when the CI analyst is out?</b></td><td><span class="chip">open</span></td><td>Name a deputy signer before go live. Unsigned records must never back up.</td></tr>
-            <tr><td><b>Retention and legal review on competitor claims captured from live deals.</b></td><td><span class="chip">open</span></td><td>Review before the field stream opens beyond a pilot team.</td></tr>
+            <tr><td><b>Retention and legal review on competitor claims captured from live deals.</b></td><td><span class="chip">open</span></td><td>Review before the field door opens beyond a pilot team.</td></tr>
           </tbody>
         </table>
       </div>
@@ -869,7 +870,7 @@ items, mode = claude_triage(items)   <span class="cm"># falls back to keywords o
           <thead><tr><th style="width:24%">File</th><th style="width:14%">Status</th><th>What it is</th></tr></thead>
           <tbody>
             <tr><td class="mono">radar-demo.html</td><td><span class="st built">runs</span></td><td>The working prototype. Single self contained file, vanilla JavaScript, zero dependencies, works offline from the file system. Six pages, five role views, permission walls, Lab evidence drill down, promotion queue, sign and publish flow.</td></tr>
-            <tr><td class="mono">radar_collector.py</td><td><span class="st built">runs</span></td><td>The published stream agent. Python standard library only. Optional Claude triage pass when the SDK and credentials are present.</td></tr>
+            <tr><td class="mono">radar_collector.py</td><td><span class="st built">runs</span></td><td>The published door agent. Python standard library only. Optional Claude triage pass when the SDK and credentials are present.</td></tr>
             <tr><td class="mono">radar-data.js</td><td><span class="st built">generated</span></td><td>The last collector run. 14 live signals, 7 promotion triggers. Regenerated by rerunning the collector.</td></tr>
             <tr><td class="mono">radar-prd.html</td><td><span class="st built">this file</span></td><td>This document.</td></tr>
             <tr><td class="mono">radar-explainer.html</td><td><span class="st built">runs</span></td><td>The same system explained in plain language, for anyone who needs the concept without the specification.</td></tr>
@@ -889,7 +890,7 @@ python3 radar_collector.py</pre>
       </div>
 
       <div class="footnote">
-        Concept prototype and concept document, produced for interview discussion. Not a commercial product and not a company document. Illustrative data throughout, except the published stream feed, which contains real headlines collected from public sources. Role names in the prototype are illustrative personas.
+        Concept prototype and concept document, produced for interview discussion. Not a commercial product and not a company document. Illustrative data throughout, except the published door feed, which contains real headlines collected from public sources. Role names in the prototype are illustrative personas.
       </div>
     </section>
 
@@ -939,22 +940,22 @@ spy();
 
 /* ---------- architecture layers ---------- */
 const LAYERS=[
- {c:'l1',n:'01',t:'Ingestion · three streams',
+ {c:'l1',n:'01',t:'Ingestion · the three doors',
   d:'Everything enters through exactly one of three doors, and the door is recorded. Provenance is not metadata trivia. It is what lets you say the field saw this before the press did.',
   tags:['<span class="stream field">field capture</span>','<span class="stream published">published ingest</span>','<span class="stream product">assistant lab</span>'],
-  detail:[['Field capture','Structured intake from pre-sales and solutions. Under a minute to log, from inside the tool they already have open. Fixes intelligence dying in Teams threads.'],
-          ['Published ingest','The collector. 12 watchlist queries, 45 day window, filtered, deduped, tagged. Automated and running today.'],
-          ['Assistant Lab','Monthly hands on benchmark. Same real tasks, same scoring across plan, price, book and service. Human by design.']]},
+  detail:[['Door 1 · What We Heard (The Field)','Structured intake from pre-sales and solutions. Under a minute to log, from inside the tool they already have open. Fixes intelligence dying in Teams threads.'],
+          ['Door 2 · What the World Tells Us (Published)','The collector. 12 watchlist queries, 45 day window, filtered, deduped, tagged. Automated and running today.'],
+          ['Door 3 · What We Test (The Lab)','Monthly hands on benchmark. Same real tasks, same scoring across plan, price, book and service. Human by design.']]},
  {c:'l2',n:'02',t:'Knowledge model · five entities',
-  d:'One shared vocabulary. Players, Signals, Moves, Benchmarks, Assessments. Two axis tagging on every record, category by stream. Fact and judgment kept in separate fields.',
+  d:'One shared vocabulary. Players, Signals, Moves, Benchmarks, Assessments. Two axis tagging on every record, category by door. Fact and judgment kept in separate fields.',
   tags:['<span class="chip">Players</span>','<span class="chip">Signals</span>','<span class="chip">Moves</span>','<span class="chip">Benchmarks</span>','<span class="chip">Assessments</span>'],
   detail:[['Why entities and not documents','A document can be read. A record can be queried, correlated and counted. The difference is whether you can answer a question you did not anticipate.'],
-          ['Two axis tagging','Category answers what part of the market. Stream answers how we know. Filtering on both is what makes coverage gaps visible instead of invisible.']]},
+          ['Two axis tagging','Category answers what part of the market. The door answers how we know. Filtering on both is what makes coverage gaps visible instead of invisible.']]},
  {c:'l3',n:'03',t:'Intelligence layer',
   d:'Where raw records become something worth someone’s attention. Triage, correlation, drafting. All of it produces drafts. None of it publishes.',
-  tags:['<span class="chip">LLM triage</span>','<span class="chip">cross stream correlation</span>','<span class="chip">field heard it first</span>','<span class="chip">AI drafts</span>'],
+  tags:['<span class="chip">LLM triage</span>','<span class="chip">cross door correlation</span>','<span class="chip">field heard it first</span>','<span class="chip">AI drafts</span>'],
   detail:[['Triage','Classify, drop, dedupe, summarize. Built and running in the collector.'],
-          ['Correlation','Same player surfacing across two streams inside a short window is a stronger signal than either alone.'],
+          ['Correlation','Same player surfacing through two doors inside a short window is a stronger signal than either alone.'],
           ['Field heard it first','When a field signal predates the published item on the same subject, the record gets flagged. It is the single best argument for why pre-sales should keep logging.'],
           ['Drafting','AI writes the first version of the weekly digest and move assessments. The analyst signs. Never the other way round.']]},
  {c:'l4',n:'04',t:'Consumption and access control',
@@ -981,7 +982,7 @@ const ENTITIES={
      ['score_revenue','0 to 2','Do they touch a core revenue line'],['score_velocity','0 to 2','How fast are they shipping'],
      ['depth','enum','lab | light. Rationed inside the tier'],['tier_history','array','Every move, with date and reason'],
      ['last_scored / next_score','date','Quarterly cycle. 1 Jul 2026, 1 Oct 2026'],['owner','user','Named analyst']]},
- Signals:{note:'The atom. One observed thing, from one stream, with a source. Fact only, never judgment.',
+ Signals:{note:'The atom. One observed thing, through one door, with a source. Fact only, never judgment.',
   f:[['id','string','Stable key'],['date / iso','date','Observed date'],['stream','enum','field | published | product'],
      ['category','enum','The five categories'],['player','ref','Links to Players'],['title','string','What happened'],
      ['body','text','Detail, or the analyst why it matters line after triage'],['source','string','Publication or contributor'],
@@ -1068,7 +1069,7 @@ function showStage(i){
 const ROLES=['CI Analyst','Product','Product Mktg','Pre-Sales','Leadership'];
 const PERMS=[
  ['Signal titles and metadata',['yes','yes','yes','yes','yes'],'Everyone sees that a record exists, including records they cannot open. A wall you cannot see reads as a system that hides things.'],
- ['Published stream bodies',['yes','yes','yes','yes','yes'],'Public sources. Nothing to protect, so nothing is locked.'],
+ ['Published door bodies',['yes','yes','yes','yes','yes'],'Public sources. Nothing to protect, so nothing is locked.'],
  ['Field signal bodies',['yes','no','no','part','yes'],'Wall 1. CI and Leadership always. Pre-sales sees their own team only, so EMEA reads EMEA and sees that APAC exists. This protects the source and the deal.'],
  ['Assistant Lab results',['yes','yes','yes','yes','yes'],'Our own testing. Shared deliberately and widely, because it is the most persuasive artifact the function produces.'],
  ['Unsigned drafts',['yes','no','no','no','yes'],'Wall 2. Nothing unsigned circulates as fact. Leadership is included because they are accountable for the call, not because rank grants access.'],
@@ -1109,7 +1110,7 @@ const PHASES=[
  {n:'Phase 3 · Role portals and correlation',tag:'the compounding part',
   goal:'Make the system answer questions nobody thought to ask when it was designed.',
   items:[['Role portals','Each role lands on their own view by default. Built in the prototype.'],
-         ['Cross stream correlation','Automatic field heard it first detection and benchmark linkage.'],
+         ['Cross door correlation','Automatic field heard it first detection and benchmark linkage.'],
          ['Decision briefs','A roadmap question becomes a structured query against the system rather than a research project.'],
          ['Trend intelligence','Lab trendlines and category heat over quarters, which is where a CI function stops reporting and starts predicting.']]}
 ];
@@ -1128,7 +1129,7 @@ showPhase(0);
 /* ---------- delivery tree ---------- */
 const EPICS=[
 {code:'EPIC 1',name:'Ingestion',goal:'Get signal in through three separate doors, and never lose which door it came through.',feats:[
-  {name:'Published stream collector',st:'built',stories:[
+  {name:'Published door collector',st:'built',stories:[
     {id:'RDR-101',st:'built',size:'S',role:'CI analyst',want:'twelve watchlist scoped queries instead of one broad travel query',so:'results arrive already attached to a category before anything has to classify them',ac:['One query per tracked subject','Default category travels with the query','Adding a subject is a one line change']},
     {id:'RDR-102',st:'built',size:'S',role:'CI analyst',want:'recency, relevance and duplicate filters applied in that order',so:'a run stays short enough that a human reads all of it',ac:['45 day window enforced','Maximum 3 per query and 14 per run','Duplicate detection on a normalized title']},
     {id:'RDR-103',st:'built',size:'M',role:'CI analyst',want:'funding, partnership and launch events detected automatically',so:'the promotion queue fills without me reading every headline',ac:['Three trigger types recognised','Trigger stored on the record','No trigger is a valid state']},
@@ -1144,7 +1145,7 @@ const EPICS=[
 {code:'EPIC 2',name:'Knowledge model',goal:'One shared vocabulary, with fact and judgment structurally separated.',feats:[
   {name:'Entity schema',st:'built',stories:[
     {id:'RDR-201',st:'built',size:'M',role:'CI analyst',want:'five defined entities rather than free form documents',so:'the system can answer questions nobody anticipated when it was designed',ac:['Players, Signals, Moves, Benchmarks, Assessments','Every record carries provenance','Fact fields can never hold judgment']},
-    {id:'RDR-202',st:'built',size:'S',role:'any user',want:'every record tagged with both category and stream',so:'I can filter by what part of the market and by how we know it',ac:['Both axes mandatory','Filtering combines the two independently']}]},
+    {id:'RDR-202',st:'built',size:'S',role:'any user',want:'every record tagged with both category and door',so:'I can filter by what part of the market and by how we know it',ac:['Both axes mandatory','Filtering combines the two independently']}]},
   {name:'Coverage visibility',st:'built',stories:[
     {id:'RDR-211',st:'built',size:'S',role:'CI analyst',want:'to see which categories a given stream cannot cover',so:'I never present the three stream model as evenly covering all five categories',ac:['Lab covers platforms and part of payments only','The gap is stated in the interface, not buried']}]},
   {name:'Persistence',st:'p2',stories:[
@@ -1237,5 +1238,7 @@ window.addEventListener('beforeprint',()=>treeAll(true));
 const _setDark=setDark;
 setDark=function(v){_setDark(v); const g=$('#phasebody .pgoal'); if(g)g.style.color=v?'#BFE0FF':'#000835';};
 </script>
+<!-- GoatCounter · privacy-friendly, cookieless analytics -->
+<script data-goatcounter="https://aimarketradar.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 </body>
 </html>

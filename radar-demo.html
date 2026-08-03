@@ -148,12 +148,18 @@
   .catchip:hover{color:var(--blue); background:#F0F6FC;}
   .catchip.active{color:var(--blue); background:#E3EFFB; font-weight:bold;}
   .trig{display:inline-block; font-size:10.5px; font-weight:bold; letter-spacing:.4px; text-transform:uppercase; color:var(--warn); background:#FBEDE0; border-radius:5px; padding:2.5px 8px;}
+  .promoted{display:inline-block; font-size:10.5px; font-weight:bold; letter-spacing:.4px; text-transform:uppercase; color:var(--good); background:#E8F5EE; border:0; border-radius:5px; padding:2.5px 8px; cursor:pointer; font-family:inherit;}
+  .promoted.isdraft{color:var(--warn); background:#FBEDE0;}
+  .promoted:hover{text-decoration:underline;}
+  .sigfoot{display:flex; gap:10px; align-items:center; justify-content:space-between; flex-wrap:wrap;}
   .depth{font-size:9.5px; font-weight:bold; color:var(--f-product); background:#EFEBFB; border-radius:4px; padding:1.5px 5px; letter-spacing:.5px; vertical-align:1px;}
   body.dark .seg{background:#1A2138;}
   body.dark .seg button.active{background:#26304F; color:var(--ink); box-shadow:none;}
   body.dark .catchip:hover{background:#16305A; color:#7FC0F5;}
   body.dark .catchip.active{background:#16305A; color:#7FC0F5;}
   body.dark .trig{background:#3A2A14; color:#F0B769;}
+  body.dark .promoted{background:#0F2A1D; color:#4FC787;}
+  body.dark .promoted.isdraft{background:#3A2A14; color:#F0B769;}
   body.dark .depth{background:#2A2350; color:#A093EF;}
 
   /* ---------- matrix ---------- */
@@ -789,7 +795,8 @@ let MOVES = [
    why:["First full-stack rails-plus-payments bundle behind a consumer AI travel assistant","Proves the thesis: booking without owning payment is a hollow win","Direct pressure on our rails positioning and on our payments business"],
    doing:["Accelerate the MCP-to-UCP protocol roadmap","Payments team briefed on agentic checkout gap","Pre-sales counter-positioning shipped (see battlecard)"],
    signed:"Published Jul 10 · signed A. Abboud, Market Intelligence",
-   sources:["Field signal · Jan 27 · Mindtrip payments chatter at partner event (pre-announcement)","Published · Feb 12 · partnership announcement","Lab · Jul 8 · run PAY-0708-MT, end-to-end settlement confirmed","Field · Jul 18 · renewal negotiation citation (APAC)"]},
+   sources:["Field signal · Jan 27 · Mindtrip payments chatter at partner event (pre-announcement)","Published · Feb 12 · partnership announcement","Lab · Jul 8 · run PAY-0708-MT, end-to-end settlement confirmed","Field · Jul 18 · renewal negotiation citation (APAC)"],
+   from:["Sabre / Mindtrip|Bundle cited as pricing lever in renewal","Mindtrip|Lab: Mindtrip in-chat checkout settles end to end"]},
   {id:"jump", status:"published", title:"Assistant booking capability jump",
    when:"Q2 → Q3 2026 Lab runs",
    ribbon:null,
@@ -797,7 +804,8 @@ let MOVES = [
    why:["Planning is commoditized. Booking is the frontier. Servicing is wide open.","The window to be the default booking rail behind agents is now, not later"],
    doing:["Agent-ready content APIs prioritized with Product","Servicing gap flagged as our defensible layer"],
    signed:"Published Jul 25 · signed A. Abboud, Market Intelligence",
-   sources:["Lab · quarterly comparison, Q1-Q3 2026 runs, recordings on file"]},
+   sources:["Lab · quarterly comparison, Q1-Q3 2026 runs, recordings on file"],
+   from:["Gemini|Lab: Gemini completed a 3-leg multi-city booking unassisted"]},
   {id:"pplx", status:"draft", title:"Perplexity travel checkout: threat or channel?",
    when:"Draft · publishes Friday",
    ribbon:null,
@@ -805,8 +813,18 @@ let MOVES = [
    why:["If they pick a rails partner, tier promotion fires. If they talk to us, channel opportunity."],
    doing:["Recommendation in review: open exploratory rails conversation before a competitor does"],
    signed:"DRAFT · unsigned · visible to CI and leadership only",
-   sources:["Published · Jul 11 · product changelog","Lab · checkout attempt scheduled Aug run"]}
+   sources:["Published · Jul 11 · product changelog","Lab · checkout attempt scheduled Aug run"],
+   from:["Perplexity|Perplexity adds hotel checkout for US inventory"]}
 ];
+
+/* signal → assessment linkage. from: keys of the signals an assessment was
+   built on, so the feed can show which signals already carry judgment and
+   which are still layer 1 only. */
+function sigKey(s){ return s.player + "|" + s.title; }
+function assessmentsFor(s){
+  const k = sigKey(s);
+  return MOVES.filter(m => m.from && m.from.indexOf(k) !== -1);
+}
 
 const CLAIMS = [
   {claim:"\"End-to-end booking for any trip\"", who:"Mindtrip", lab:"Books simple + multi-city on Sabre rails. Group 2/5, refunds untested.", verdict:"partial", vlabel:"Holds partially"},
@@ -846,7 +864,15 @@ function toast(msg){
 const lockSvg = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="flex-shrink:0;margin-top:2px"><rect x="5" y="10" width="14" height="10" rx="2" stroke="#8A94A6" stroke-width="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3" stroke="#8A94A6" stroke-width="2"/></svg>';
 
 function catChip(c){ return '<span class="chip">'+(CATS[c]||c)+'</span>'; }
-function streamBadge(s){ return '<span class="stream '+s+'">'+s+'</span>'; }
+/* the three doors. Internal keys stay field/published/product so nothing
+   else moves; only what the user reads changes. */
+const DOOR_LABEL = {field:"field", published:"published", product:"lab"};
+const DOOR_NAME = {
+  field:"Door 1 · What We Heard (The Field)",
+  published:"Door 2 · What the World Tells Us (Published)",
+  product:"Door 3 · What We Test (The Lab)"
+};
+function streamBadge(s){ return '<span class="stream '+s+'" title="'+DOOR_NAME[s]+'">'+(DOOR_LABEL[s]||s)+'</span>'; }
 function liveBadge(){ return '<span class="live"><span class="d"></span>LIVE</span>'; }
 
 function copyText(text, label){
@@ -955,7 +981,7 @@ function shareSummary(){
   } else {
     THREATS.forEach(t => lines.push("• " + CATS[t.cat] + ": " + t.lvl.toUpperCase() + " · " + t.why));
   }
-  const body = subject + "\n\n" + lines.join("\n") + "\n\n— Sent from AI Market Radar (concept demo · illustrative data)";
+  const body = subject + "\n\n" + lines.join("\n") + "\n\n· Sent from AI Market Radar (concept demo · illustrative data)";
   return {subject: subject, body: body};
 }
 function shareEmail(){
@@ -977,9 +1003,9 @@ function shareCopy(){
 
 /* --- profile & settings --- */
 const ACCESS = {
-  ci:[["Field bodies","Full · all teams, contributors visible"],["Drafts","Author · sign and publish rights"],["Signals","All streams, all categories"],["Watchlist","Edit tiers · confirm promotions"]],
-  product:[["Field bodies","Restricted · aggregate only"],["Drafts","Hidden until signed"],["Signals","All streams · field bodies locked"],["Default view","Capability deltas"]],
-  pmm:[["Field bodies","Restricted · aggregate only"],["Drafts","Hidden until signed"],["Signals","All streams · field bodies locked"],["Default view","Claims vs reality"]],
+  ci:[["Field bodies","Full · all teams, contributors visible"],["Drafts","Author · sign and publish rights"],["Signals","All doors, all categories"],["Watchlist","Edit tiers · confirm promotions"]],
+  product:[["Field bodies","Restricted · aggregate only"],["Drafts","Hidden until signed"],["Signals","All doors · field bodies locked"],["Default view","Capability deltas"]],
+  pmm:[["Field bodies","Restricted · aggregate only"],["Drafts","Hidden until signed"],["Signals","All doors · field bodies locked"],["Default view","Claims vs reality"]],
   presales:[["Field bodies","Own team (EMEA) only"],["Drafts","Hidden until signed"],["Log a signal","Enabled · routed to CI triage"],["Default view","Objection library"]],
   leadership:[["Workspace","Full access · every page, lands on one screen by default"],["Field bodies","Full · all teams"],["Drafts","Visible, including unsigned"],["Alerts","Same-day for tier-1 moves"]]
 };
@@ -1021,8 +1047,8 @@ function settingsModal(){
   + '<div class="seclabel">Data</div>'
   + '<div style="font-size:12.5px;color:var(--ink2);padding:10px 0">'
   + (LIVE_META
-      ? 'Live published-stream feed: <b>'+LIVE_META.count+' items</b>, updated '+LIVE_META.generated+' · triage: '+LIVE_META.triage+'.<br>Refresh with <b>python3 radar_collector.py</b>.'
-      : 'Demo data only. Run <b>python3 radar_collector.py</b> to pull a live published-stream feed.')
+      ? 'Live feed through the published door: <b>'+LIVE_META.count+' items</b>, updated '+LIVE_META.generated+' · triage: '+LIVE_META.triage+'.<br>Refresh with <b>python3 radar_collector.py</b>.'
+      : 'Demo data only. Run <b>python3 radar_collector.py</b> to pull a live feed through the published door.')
   + '</div>'
   + '<div class="actions"><button class="btn ghost" onclick="closeModal()">Close</button></div>');
 }
@@ -1072,7 +1098,7 @@ function renderNav(){
 
   $("datastatus").innerHTML = LIVE_META
     ? '<div class="datastatus live"><span class="live"><span class="d"></span>LIVE FEED</span><br>'+LIVE_META.count+' items from public feeds<br>Updated '+LIVE_META.generated+'</div>'
-    : '<div class="datastatus demo">Demo data only.<br>Run <b>radar_collector.py</b> to pull a live published-stream feed.</div>';
+    : '<div class="datastatus demo">Demo data only.<br>Run <b>radar_collector.py</b> to pull a live feed through the published door.</div>';
 }
 
 /* Switching role keeps you on the page you were reading. The whole point of the
@@ -1175,7 +1201,7 @@ function pageHome(){
 function homeCI(){
   return ''
   + header("Ops overview", "The week at a glance: what came in, what needs judgment, what ships Friday.")
-  + '<div class="kicker">Three streams in. One system out.</div>'
+  + '<div class="kicker">Three doors in. One gate before anything carries a name. Five ways out.</div>'
   + '<div class="grid4">'
   +   '<div class="tile clickable" onclick="sigView=\'feed\';go(\'signals\')"><div class="num" data-n="'+SIGNALS.length+'">0</div><div class="lbl">Signals in the system</div><div class="note">'+(LIVE.length? LIVE.length+' live · ':'')+'field + lab + published</div></div>'
   +   '<div class="tile clickable" onclick="sigFilter=\'published\';catFilter=\'all\';go(\'signals\')"><div class="num" data-n="3">0</div><div class="lbl">Pending triage</div><div class="note">Auto-tagged, awaiting confirm</div></div>'
@@ -1260,7 +1286,7 @@ function homePresales(){
 
 function copyObjection(i){
   const o = OBJECTIONS[i];
-  copyText('"'+o.q+'" — ' + o.a, "Objection response");
+  copyText('"'+o.q+'" · ' + o.a, "Objection response");
 }
 
 function objSearch(v){
@@ -1531,13 +1557,13 @@ function pageSignals(){
   );
   const canLog = role==="presales" || role==="ci";
   return ''
-  + header("Signals", "Atomic intel items, every one tagged by category and stream, every one carrying its source.")
+  + header("Signals", "Layer 1. What happened, with a source and a date. The only layer a machine may produce alone.")
   + (role==="ci" ? '<div class="kicker">Field heard the Sabre bundle 16 days before the press did. The loop works.</div>' : '')
   + (LIVE_META ? '<div class="livebar"><span class="live"><span class="d"></span>LIVE</span> '+LIVE_META.count+' items pulled from public news feeds · updated '+LIVE_META.generated+' · triage: '+LIVE_META.triage+'</div>' : '')
   + '<div class="card">'
-  + '<div class="fgroup" style="margin-bottom:9px"><span class="flabel">Stream</span>'
+  + '<div class="fgroup" style="margin-bottom:9px"><span class="flabel">Door</span>'
   + '<div class="seg">'
-  +   [["all","All streams",""],["field","Field","var(--f-field)"],["product","Product","var(--f-product)"],["published","Published","var(--f-published)"]].map(f =>
+  +   [["all","All doors",""],["field","Field","var(--f-field)"],["product","Lab","var(--f-product)"],["published","Published","var(--f-published)"]].map(f =>
         '<button class="'+(sigFilter===f[0]?"active":"")+'" onclick="setSigFilter(\''+f[0]+'\')">'+(f[2]?'<span class="sdot" style="background:'+f[2]+'"></span>':'')+f[1]+'</button>'
       ).join("")
   + '</div>'
@@ -1571,8 +1597,8 @@ function feedView(list){
   + '</div>'
   + (sorted.length ? sorted.map(sigCard).join("")
       : '<div class="empty"><div class="eh">Nothing on this shelf yet</div>'
-        + 'No signal matches '+(catFilter==="all" ? "this stream" : CATS[catFilter])
-        + (sigFilter==="all" ? "" : " in the "+sigFilter+" stream")
+        + 'No signal matches '+(catFilter==="all" ? "this door" : CATS[catFilter])
+        + (sigFilter==="all" ? "" : " through the "+(DOOR_LABEL[sigFilter]||sigFilter)+" door")
         + '. That is information too: a quiet category is a category nobody is moving in.'
         + '<div><button class="btn ghost" onclick="clearFilters()">Clear filters</button></div></div>');
 }
@@ -1595,7 +1621,7 @@ function clustersView(list){
   + (clusters.length ? clusters.map(clusterCard).join("")
       : '<div class="empty"><div class="eh">Nothing to cluster</div>Clear the filters to see the whole feed grouped.'
         + '<div><button class="btn ghost" onclick="clearFilters()">Clear filters</button></div></div>')
-  + '<div class="limitbox"><b>A cluster is not a correlation flag.</b> A cluster is one subject over time. A correlation flag is one event seen independently by two different streams. Different questions, both worth asking.<br><br>'
+  + '<div class="limitbox"><b>A cluster is not a correlation flag.</b> A cluster is one subject over time. A correlation flag is one event seen independently through two different doors. Different questions, both worth asking.<br><br>'
   + '<b>Honest about what this is.</b> Grouping runs on the subject tag the collector already applied, plus headline similarity to fold syndicated coverage into one event. It catches wire copy of the same announcement, but not an independent rewrite: two outlets covering one launch in completely different words still read as two events. It also does not work out that two differently named players are the same story, and it does not link a field signal to a published one by meaning. That correlation is still analyst judgment, and it sits in Phase 2.</div>';
 }
 
@@ -1606,10 +1632,22 @@ function clearFilters(){ sigFilter="all"; catFilter="all"; render(); }
 
 function sigCard(s){
   const access = fieldAccess(s);
+  /* the promoted tag: a signal that already carries judgment says so.
+     Published assessments show for everyone; drafts only for the roles
+     allowed to see drafts, since the tag would otherwise leak that one exists. */
+  const seesDrafts = role === "ci" || role === "leadership";
+  const linked = assessmentsFor(s);
+  const shown = linked.filter(m => m.status === "published" || seesDrafts);
+  const tag = shown.length
+    ? (function(){ const m = shown[0], d = m.status === "draft";
+        return '<button class="promoted'+(d?' isdraft':'')+'" onclick="moveModal(\''+m.id+'\')" title="Open the assessment built on this signal">'
+        + (d ? '▸ draft assessment' : '▸ in assessment')+'</button>'; })()
+    : '';
   const meta = '<div class="meta">'+streamBadge(s.stream)+catChip(s.cat)
     + '<span class="chip outline">'+s.player+'</span>'
     + (s.trigger ? '<span class="trig">⚡ '+s.trigger+'</span>' : '')
     + (s.live ? liveBadge() : '')
+    + tag
     + '</div>';
   if(access==="locked"){
     return '<div class="sig lockedsig"><div class="when">'+s.date+'</div><div class="bodywrap">'+meta
@@ -1624,9 +1662,41 @@ function sigCard(s){
   const title = s.url
     ? '<a href="'+s.url+'" target="_blank" rel="noopener">'+s.title+' ↗</a>'
     : s.title;
+  /* the analyst can answer the gate's question straight from the feed. No
+     trigger required: judgment does not wait for a rule to fire. */
+  const si = SIGNALS.indexOf(s);
+  const logBtn = (role === "ci" && !linked.length && si !== -1)
+    ? '<button class="minibtn" onclick="assessFromSignal('+si+')" title="Open a draft assessment with this signal prefilled">Log as assessment</button>'
+    : '';
   return '<div class="sig"><div class="when">'+s.date+'</div><div class="bodywrap">'+meta
-  + '<div class="t">'+title+'</div>'+(s.body?'<div class="b">'+s.body+'</div>':'')+'<div class="src">'+src+'</div>'
+  + '<div class="t">'+title+'</div>'+(s.body?'<div class="b">'+s.body+'</div>':'')
+  + '<div class="sigfoot"><div class="src">'+src+'</div>'+logBtn+'</div>'
   + '</div></div>';
+}
+
+function assessFromSignal(i){
+  const s = SIGNALS[i];
+  if(!s || role !== "ci") return;
+  /* if a trigger already put it in The Gate, this counts as the review:
+     the analyst looked and said yes. Untriggered signals never touch the
+     review stats, or the reject ratio would stop meaning anything. */
+  if(s.trigger) REVIEWED[reviewKey("s", s.player, s.title)] = {decision:"assessment"};
+  MOVES.unshift({
+    id: "sg" + Date.now(),
+    status: "draft",
+    title: s.player + ": " + s.title,
+    when: "Draft · logged from the feed",
+    ribbon: s.trigger ? "Analyst-logged · trigger: " + TRIGGER_LABEL[s.trigger] : "Analyst-logged · no trigger, judgment call",
+    what: [s.title + (s.body ? ". " + s.body : "")],
+    why: [],
+    doing: [],
+    signed: "DRAFT · unsigned · visible to CI and leadership only",
+    sources: [s.date + " · " + s.source],
+    from: [sigKey(s)]
+  });
+  page = "moves";
+  render();
+  toast("Draft opened from the signal. Layer 1 is prefilled. What it means and what to do about it are yours, and it will not sign until both are written.");
 }
 
 /* =============== sorting ===============
@@ -1636,7 +1706,7 @@ function sigCard(s){
    than merged, so dates ran down and then jumped back up. */
 
 const SORTS = {
-  signals: {def:"new",   opts:[["new","Newest first"],["old","Oldest first"],["player","Player A-Z"],["stream","Stream"],["cat","Category"]]},
+  signals: {def:"new",   opts:[["new","Newest first"],["old","Oldest first"],["player","Player A-Z"],["stream","Door"],["cat","Category"]]},
   clusters:{def:"trig",  opts:[["trig","Triggered first"],["events","Most events"],["new","Newest activity"],["player","Player A-Z"]]},
   queue:   {def:"prio",  opts:[["prio","Trigger priority"],["new","Newest first"],["old","Oldest first"],["player","Player A-Z"]]},
   moves:   {def:"new",   opts:[["new","Newest first"],["old","Oldest first"],["draft","Drafts first"]]},
@@ -1844,11 +1914,11 @@ function clusterModal(i){
   + '<div class="kv"><div class="k">Funnel</div><div><b>'+c.signalCount+'</b> signals → <b>'+c.eventCount+'</b> distinct '
   +   (c.eventCount===1?'event':'events')+(c.collapsed ? ' · '+c.collapsed+' collapsed as syndicated coverage' : ' · nothing collapsed')+'</div></div>'
   + '<div class="kv"><div class="k">Sources</div><div>'+[...c.sources].join(" · ")+'</div></div>'
-  + '<div class="kv"><div class="k">Streams</div><div>'+[...c.streams].map(s=>streamBadge(s)).join(" ")+'</div></div>'
+  + '<div class="kv"><div class="k">Doors</div><div>'+[...c.streams].map(s=>streamBadge(s)).join(" ")+'</div></div>'
   + '<div class="kv"><div class="k">Trigger 5</div><div>'
   +   (t.fires
         ? '<span class="trig">⚡ fires</span> '+t.events+' events from '+t.sources+' sources, '+t.from+' to '+t.to
-          +'<br><span style="color:var(--ink3);font-size:12px">Assessment candidate. Detection is built; the forced-assessment gate is still spec.</span>'
+          +'<br><span style="color:var(--ink3);font-size:12px">Sits in The Gate on the Assessments page until a human answers the one question.</span>'
         : '<span style="color:var(--ink3)">Does not fire. Needs 3+ distinct events from 2+ sources inside 7 days.</span>')
   + '</div></div>'
   + '<div class="seclabel">What is in it</div>'
@@ -1883,7 +1953,8 @@ function draftFromCluster(i){
     why: [],
     doing: [],
     signed: "DRAFT · unsigned · visible to CI and leadership only",
-    sources: c.events.map(e => e.lead.date + " · " + srcName(e.lead) + " · " + e.lead.title)
+    sources: c.events.map(e => e.lead.date + " · " + srcName(e.lead) + " · " + e.lead.title),
+    from: c.events.map(e => sigKey(e.lead))
   });
   closeModal();
   page = "moves";
@@ -1988,7 +2059,7 @@ function pageWatchlist(){
   +   '<ol style="padding-left:18px;color:var(--ink2);font-size:13px">'
   +   '<li style="margin-bottom:6px">Can they move a roadmap decision in the next 90 days? <b>0–2</b></li>'
   +   '<li style="margin-bottom:6px">Do they touch a core revenue line: distribution, IT solutions, hospitality, payments? <b>0–2</b></li>'
-  +   '<li>Are they moving fast — funding, hiring, shipping — or dormant? <b>0–2</b></li></ol>'
+  +   '<li>Are they moving fast (funding, hiring, shipping) or dormant? <b>0-2</b></li></ol>'
   +   '<div style="margin-top:10px;font-size:13px;font-weight:bold">5–6 → Always-On · 3–4 → Weekly · 0–2 → Monthly</div>'
   +   '<div class="signed" style="margin-top:8px">Fixed criteria keep the list defensible. "Why isn\'t X on always-on" gets a scored answer, not a shrug.</div>'
   + '</div>'
@@ -2131,9 +2202,9 @@ function moveCard(m, inModal){
   + '</div>'
   + (m.ribbon ? '<div class="ribbon">⚡ '+m.ribbon+'</div>' : '')
   + '<div class="cols">'
-  +   '<div><h5>What happened · fact</h5><ul>'+m.what.map(x=>'<li>'+x+'</li>').join("")+'</ul></div>'
-  +   '<div><h5>Why it matters · assessment</h5><ul>'+m.why.map(x=>'<li>'+x+'</li>').join("")+'</ul></div>'
-  +   '<div><h5>What we are doing</h5><ul>'+m.doing.map(x=>'<li>'+x+'</li>').join("")+'</ul></div>'
+  +   '<div><h5>What happened · signal</h5><ul>'+m.what.map(x=>'<li>'+x+'</li>').join("")+'</ul></div>'
+  +   '<div><h5>What it means · human assessment</h5><ul>'+m.why.map(x=>'<li>'+x+'</li>').join("")+'</ul></div>'
+  +   '<div><h5>What to do about it · functional action</h5><ul>'+m.doing.map(x=>'<li>'+x+'</li>').join("")+'</ul></div>'
   + '</div>'
   + '<details class="sources"><summary>Sources ('+m.sources.length+')</summary><ul>'+m.sources.map(s=>'<li>'+s+'</li>').join("")+'</ul></details>'
   + '<div class="signed" style="margin-top:10px">'+m.signed+'</div>'
@@ -2211,7 +2282,7 @@ function reviewAssess(key){
     id: "rv" + Date.now(),
     status: "draft",
     title: isCluster ? item.player + ": sustained activity" : item.player + ": " + item.title,
-    when: "Draft · from the review queue",
+    when: "Draft · from The Gate",
     ribbon: "Forced by a trigger · " + TRIGGER_LABEL[item.trig],
     what: isCluster ? item.cluster.events.slice(0,5).map(e => e.lead.title)
                     : [item.title + (item.sig && item.sig.body ? ". " + item.sig.body : "")],
@@ -2219,7 +2290,8 @@ function reviewAssess(key){
     doing: [],
     signed: "DRAFT · unsigned · visible to CI and leadership only",
     sources: isCluster ? item.cluster.events.map(e => e.lead.date + " · " + srcName(e.lead) + " · " + e.lead.title)
-                       : [item.date + " · " + (item.sig ? item.sig.source : "review queue")]
+                       : [item.date + " · " + (item.sig ? item.sig.source : "The Gate")],
+    from: isCluster ? item.cluster.events.map(e => sigKey(e.lead)) : (item.sig ? [sigKey(item.sig)] : [])
   });
   page = "moves";
   render();
@@ -2239,7 +2311,7 @@ function reviewReadModal(key){
     const c = item.cluster;
     openModal(''
     + '<h4>'+c.subject+'</h4>'
-    + '<div class="hint">In the review queue · '+TRIGGER_LABEL[item.trig]+'</div>'
+    + '<div class="hint">In The Gate · '+TRIGGER_LABEL[item.trig]+'</div>'
     + '<div class="kv"><div class="k">Why it is here</div><div>'+c.trigger.events+' distinct events from '+c.trigger.sources+' sources between '+c.trigger.from+' and '+c.trigger.to+'</div></div>'
     + '<div class="kv"><div class="k">Funnel</div><div>'+c.signalCount+' signals → '+c.eventCount+' events'+(c.collapsed ? ' · '+c.collapsed+' collapsed as syndicated coverage' : '')+'</div></div>'
     + '<div class="seclabel">Read the stories</div>'
@@ -2263,7 +2335,7 @@ function reviewReadModal(key){
   const locked = fieldAccess(s) === "locked";
   openModal(''
   + '<h4>'+(locked ? 'Field signal · restricted' : s.title)+'</h4>'
-  + '<div class="hint">In the review queue · '+TRIGGER_LABEL[item.trig]+'</div>'
+  + '<div class="hint">In The Gate · '+TRIGGER_LABEL[item.trig]+'</div>'
   + (locked
       ? '<div class="lockcard" style="margin-bottom:10px">'+lockSvg+'<div>Body restricted to CI, leadership and the contributing team.</div></div>'
       : '<div class="kv"><div class="k">What it says</div><div>'+(s.body || 'No body captured. The headline is all the collector pulled, which is itself worth knowing before you write anything on top of it.')+'</div></div>')
@@ -2316,11 +2388,11 @@ function pageMoves(){
   const assessed = Object.keys(REVIEWED).filter(k => REVIEWED[k].decision === "assessment").length;
 
   return ''
-  + header("Assessments", "Curated significant events. Facts first, judgment layered on top, every claim drills to its source.")
-  + '<div class="kicker">Signals are evidence. Assessments are judgment. The line between them is the product.</div>'
+  + header("Assessments", "Layer 2. What we think it means and how confident we are. AI can draft it. A person owns it.")
+  + '<div class="kicker">What happened, what it means, what to do about it. Three separate things, never blurred.</div>'
 
   + (role === "ci"
-      ? '<div class="card"><div class="listhead"><h3>Review queue · five events force a look, no tier exemption</h3>'+(queue.length?sortControl("queue"):"")+'</div>'
+      ? '<div class="card"><div class="listhead"><h3>The Gate · five triggers force a human in the loop, no tier exemption</h3>'+(queue.length?sortControl("queue"):"")+'</div>'
         + '<div style="font-size:13px;color:var(--ink2);margin-bottom:12px">A trigger forces the review, never the assessment. The question at this stage is only: does this change what anyone should do?</div>'
         + '<div class="limitbox" style="margin:0 0 14px"><b>Why this queue is mostly launches.</b> The collector can detect that a launch happened. It cannot judge whether the launch changed real capability, which is what the criterion actually asks. That gap is the reason the review stage exists rather than the trigger firing an assessment directly.</div>'
         + (queue.length ? queue.map(q =>
@@ -2335,7 +2407,7 @@ function pageMoves(){
             +   '<button class="btn ghost" style="padding:6px 13px" onclick="reviewRejectModal(\''+q.key.replace(/'/g,"\\'")+'\')">Not worth one</button>'
             + '</div></div></div>'
           ).join("")
-          : '<div class="empty"><div class="eh">Queue clear</div>Every triggered item has been through a human. Nothing is sitting in the gap between detected and decided.</div>')
+          : '<div class="empty"><div class="eh">The Gate is clear</div>Every triggered item has been through a human. Nothing is sitting in the gap between detected and decided.</div>')
         + (reviewedCount ? '<div class="signed" style="margin-top:12px"><b>'+reviewedCount+'</b> reviewed this session · <b>'+assessed+'</b> became assessments · <b>'+(reviewedCount-assessed)+'</b> did not</div>' : '')
         + '</div>'
       : '')
@@ -2371,8 +2443,8 @@ function signMove(id){
      drafts with the action column deliberately empty. */
   if(!m.doing || !m.doing.length || !m.why || !m.why.length){
     const missing = [];
-    if(!m.why || !m.why.length) missing.push("Why it matters");
-    if(!m.doing || !m.doing.length) missing.push("What we are doing");
+    if(!m.why || !m.why.length) missing.push("What it means");
+    if(!m.doing || !m.doing.length) missing.push("What to do about it");
     toast("Cannot sign. " + missing.join(" and ") + " still empty. An assessment that asks nothing of anyone is a signal, not an assessment.");
     editMove(id);
     return;
@@ -2543,9 +2615,9 @@ function editMove(id){
   + (draft ? '' : '<div class="revnote">Published assessments are versioned. Saving publishes revision '+((m.rev||1)+1)+' and re-notifies everyone who received the original. The previous revision stays on file.</div>')
   + '<form onsubmit="saveMove(event,\''+id+'\')">'
   + '<label>Title</label><input id="e-title" value="'+m.title.replace(/"/g,"&quot;")+'" required>'
-  + ta("What happened · fact · one per line", "e-what", m.what)
-  + ta("Why it matters · assessment · one per line", "e-why", m.why)
-  + ta("What we are doing · one per line", "e-doing", m.doing)
+  + ta("What happened · signal · one per line", "e-what", m.what)
+  + ta("What it means · human assessment · one per line", "e-why", m.why)
+  + ta("What to do about it · functional action · one per line", "e-doing", m.doing)
   + '<div class="actions"><button type="button" class="btn ghost" onclick="closeModal()">Cancel</button>'
   + '<button type="submit" class="btn'+(draft?'':' good')+'">'+(draft ? 'Save draft' : 'Save and publish revision '+((m.rev||1)+1))+'</button></div>'
   + '</form>');
@@ -2584,5 +2656,7 @@ render();
 /* the collector does not stop while you are reading: one signal lands live */
 setTimeout(incomingNotif, 9000);
 </script>
+<!-- GoatCounter · privacy-friendly, cookieless analytics -->
+<script data-goatcounter="https://aimarketradar.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 </body>
 </html>

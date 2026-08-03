@@ -142,7 +142,7 @@
     </div>
   </div>
 
-  <div class="kicker">Three streams in. Five shelves. One analyst signature. Four teams out. Two loops back.</div>
+  <div class="kicker">Three doors in. Five categories. One gate before anything carries a name. Five ways out. Two loops back.</div>
 
   <div class="figure" id="figure"></div>
 
@@ -252,14 +252,15 @@ function arrow(x1, y1, x2, y2, o){
 }
 
 /* --- content --- */
-const STREAMS = [
-  {c:"field", tag:"Stream 1 · people", t:"Field Signal Capture",
+/* the three doors: one overhears, one reads everything, one test-drives */
+const DOORS = [
+  {c:"field", tag:"Door 1 · The Field", t:"What We Heard",
    b:["What our own people hear in", "prospect meetings, QBRs and events.", "Logged in thirty seconds from the", "Salesforce account record."],
    foot:"Salesforce · Agentforce"},
-  {c:"pub", tag:"Stream 2 · machine", t:"Published Watchlist",
-   b:["A collector agent runs twelve", "standing queries across public news", "feeds, tags each hit to a shelf and", "flags anything that trips a trigger."],
+  {c:"pub", tag:"Door 2 · Published", t:"What the World Tells Us",
+   b:["A collector agent runs twelve", "standing queries across public news", "feeds, tags each hit to a category and", "flags anything that trips a trigger."],
    foot:"radar_collector.py · runs daily"},
-  {c:"lab", tag:"Stream 3 · bench", t:"Assistant Lab",
+  {c:"lab", tag:"Door 3 · The Lab", t:"What We Test",
    b:["Once a month we sit down and make", "six real assistants do three real", "tasks. Scored 0-5 on Plan, Price,", "Book, Service. Recordings on file."],
    foot:"Narrow on purpose · see coverage"}
 ];
@@ -274,20 +275,20 @@ const SHELVES = [
 ];
 
 const BEATS = [
-  {n:1, t:"Three ways in, and they are not the same kind of information",
-   p:"People, machine, bench. The field stream is the only one that hears things before they are announced. The collector is the only one that never sleeps. The Lab is the only one that produces evidence we own rather than a claim someone else made.",
+  {n:1, t:"Three doors in, and they are not the same kind of information",
+   p:"One overhears, one reads everything, one test-drives the product. The field door is the only one that hears things before they are announced. The collector is the only one that never sleeps. The Lab is the only one that produces evidence we own rather than a claim someone else made.",
    say:"<b>The line:</b> our own people flagged the Sabre bundle sixteen days before the press release. No amount of news scraping gets you that."},
-  {n:2, t:"Five shelves, and the Lab only reaches two of them",
+  {n:2, t:"Five categories, and the Lab only reaches two of them",
    p:"Everything gets filed into one of five categories on the way in, so nothing lands in a general pile nobody reads. The coverage dots are the honest part: the Lab goes deep on platforms and partly on payments, and nowhere else. Depth is expensive, so it is spent where it can move a roadmap.",
-   say:"<b>If challenged:</b> yes, three of the shelves are covered by two streams, not three. That is a stated limit, not an oversight."},
-  {n:3, t:"Importance is scored, not argued",
-   p:"Every player gets three fixed questions worth 0-2 each. Five or six means daily attention, three or four weekly, nought to two monthly. Funding, a partnership, a launch or a direct field signal forces an immediate re-score regardless of where the cycle sits.",
-   say:"<b>Why it matters:</b> \"why isn't X on the always-on list\" gets a scored answer instead of a shrug."},
+   say:"<b>If challenged:</b> yes, three of the categories are covered by two doors, not three. That is a stated limit, not an oversight."},
+  {n:3, t:"Importance is scored, and five triggers force a human in the loop",
+   p:"Every player gets three fixed questions worth 0-2 each. Five or six means daily attention, three or four weekly, nought to two monthly. Funding, a partnership, a capability launch, a field hit or sustained volume overrides the cycle: the tier moves, and the item goes to The Gate, where a human answers one question. Does this change what anyone should do? The no gets logged too, with a name and a reason.",
+   say:"<b>Why it matters:</b> a trigger forces the review, never the assessment. Eight of ten queue items are press releases, and the reject log proves someone looked."},
   {n:4, t:"Two lanes out, and only one of them carries a signature",
    p:"The daily flash is machine-generated, unsigned, and labelled as machine-made so nobody mistakes speed for judgment. Everything that carries a recommendation goes through the analyst, gets signed, and is versioned after that. Drafts are invisible outside the CI team until signed.",
-   say:"<b>The principle:</b> speed and judgment are different products. Mixing them is how a CI function loses trust."},
-  {n:5, t:"It lands as work, not as a newsletter",
-   p:"Each team gets a different shape of the same intelligence, and each one has somewhere to put it. Product gets roadmap cards that import to the Jira backlog. Marketing gets claims tested against Lab runs. Pre-Sales gets objection answers on the account record. Leadership gets one screen.",
+   say:"<b>The principle:</b> AI can draft it. A person owns it. Mixing the two is how a CI function loses trust."},
+  {n:5, t:"Five ways out, and every one lands as work, not as reading",
+   p:"An alert that rings the same day. A screen shaped to the role, where one event arrives as a different sentence for each team, or not at all. A digest on a fixed cadence. Forwarding that carries permissions with it. And tool integration: roadmap cards into the Jira backlog, tested answers onto the account record, claims-vs-reality into the battlecard library.",
    say:"<b>The test:</b> if an item cannot name the team and the system it lands in, it is trivia and it should not have been published."},
   {n:6, t:"Two loops back, which is what makes it a system",
    p:"Pre-Sales log what they hear and get battlecards back, so contributing is self-interested rather than a favour. And a trigger does not just raise an alert, it re-scores the player, which changes what the collector asks tomorrow. The system re-aims its own sensors.",
@@ -311,11 +312,11 @@ function drawFigure(){
     + '<path d="M 0 0 L 10 5 L 0 10 z" fill="'+p.field+'"/></marker>'
     + '</defs>');
 
-  /* ---------- column 1: streams ---------- */
+  /* ---------- column 1: the three doors ---------- */
   s.push(bandLabel(CX(0), TOP - 22, 1, "WHAT COMES IN"));
   const sh = 168, sgap = 40;
   const sy0 = TOP + ((BOT - TOP) - (3*sh + 2*sgap)) / 2;
-  STREAMS.forEach((st, i) => {
+  DOORS.forEach((st, i) => {
     const y = sy0 + i * (sh + sgap), c = p[st.c];
     s.push(box(CX(0), y, COLW, sh));
     s.push('<rect x="'+CX(0)+'" y="'+y+'" width="4.5" height="'+sh+'" rx="2.2" fill="'+c+'"/>');
@@ -357,7 +358,7 @@ function drawFigure(){
 
   /* ---------- column 3: judgment ---------- */
   s.push(bandLabel(CX(2), TOP - 22, 3, "DOES IT MATTER"));
-  const j1 = TOP + ((BOT - TOP) - 450) / 2;
+  const j1 = TOP + ((BOT - TOP) - 590) / 2;
   s.push(box(CX(2), j1, COLW, 186));
   s.push(txt(CX(2)+20, j1+26, "THE FOCUS RUBRIC", {size:10, weight:"bold", fill:p.blue, ls:".9"}));
   s.push(lines(CX(2)+20, j1+50, [
@@ -383,19 +384,30 @@ function drawFigure(){
 
   const j3 = j2 + 128;
   s.push(box(CX(2), j3, COLW, 116, {fill:p.warnbg, stroke:"none"}));
-  s.push(txt(CX(2)+20, j3+25, "TRIGGERS OVERRIDE THE CYCLE", {size:10, weight:"bold", fill:p.warn, ls:".8"}));
+  s.push(txt(CX(2)+20, j3+25, "FIVE TRIGGERS OVERRIDE THE CYCLE", {size:10, weight:"bold", fill:p.warn, ls:".8"}));
   s.push(lines(CX(2)+20, j3+47, [
-    "Funding · partnership · launch ·",
-    "a direct field signal.",
-    "Any one of them forces an",
-    "immediate re-score."
+    "Funding or acquisition · new",
+    "partnership · capability launch ·",
+    "field hit · sustained volume.",
+    "Any one forces a human review."
   ], {size:12, fill:isDark()?"#E8C89A":"#7A4A10", lh:16}));
 
+  const j4 = j3 + 136;
+  s.push(box(CX(2), j4, COLW, 120, {stroke:p.blue, sw:2}));
+  s.push(txt(CX(2)+20, j4+25, "THE GATE · HUMAN IN THE LOOP", {size:10, weight:"bold", fill:p.blue, ls:".8"}));
+  s.push(lines(CX(2)+20, j4+47, [
+    "One question: does this change",
+    "what anyone should do?",
+    "Yes → a draft assessment.",
+    "No → the reject log, with a",
+    "name and a reason."
+  ], {size:11.5, fill:p.ink2, lh:15}));
+
   /* ---------- column 4: the line ---------- */
-  s.push(bandLabel(CX(3), TOP - 22, 4, "WHO STANDS BEHIND IT"));
+  s.push(bandLabel(CX(3), TOP - 22, 4, "WHO SIGNS"));
   const f1 = TOP + ((BOT - TOP) - 512) / 2;
   s.push(box(CX(3), f1, COLW, 132, {stroke:p.warn, dash:"6 4"}));
-  s.push(txt(CX(3)+20, f1+26, "FAST LANE · NO SIGNATURE", {size:10, weight:"bold", fill:p.warn, ls:".9"}));
+  s.push(txt(CX(3)+20, f1+26, "UNSIGNED · MACHINE-MADE", {size:10, weight:"bold", fill:p.warn, ls:".9"}));
   s.push(txt(CX(3)+20, f1+50, "Daily flash · 08:00", {size:15, weight:"bold", fill:p.ink}));
   s.push(lines(CX(3)+20, f1+72, [
     "Ten lines, machine-generated,",
@@ -407,7 +419,7 @@ function drawFigure(){
   s.push(box(CX(3), f2, COLW, 250, {stroke:p.blue, sw:2}));
   s.push('<rect x="'+CX(3)+'" y="'+f2+'" width="'+COLW+'" height="30" rx="11" fill="'+p.blue+'"/>');
   s.push('<rect x="'+CX(3)+'" y="'+(f2+18)+'" width="'+COLW+'" height="12" fill="'+p.blue+'"/>');
-  s.push(txt(CX(3)+20, f2+20, "JUDGMENT LANE · ANALYST SIGNS", {size:10, weight:"bold", fill:"#FFFFFF", ls:".9"}));
+  s.push(txt(CX(3)+20, f2+20, "SIGNED · A HUMAN OWNS IT", {size:10, weight:"bold", fill:"#FFFFFF", ls:".9"}));
   s.push(lines(CX(3)+20, f2+52, [
     "The AI drafts. The analyst edits,",
     "argues with it, and signs it."
@@ -431,31 +443,37 @@ function drawFigure(){
     "leadership and the logging team."
   ], {size:11.5, fill:p.ink2, lh:15.5}));
 
-  /* judgment feeds both lanes; only one of them carries a signature */
-  s.push(arrow(CX(2)+COLW, j1+120, CX(3)-10, f1+66, {sw:2.2}));
-  s.push(arrow(CX(2)+COLW, j2+54, CX(3)-10, f2+125, {sw:3}));
-  s.push(arrow(CX(3)+COLW, f1+66, CX(4)-10, 300, {sw:2, dash:"5 4", stroke:p.warn, m:"w"}));
+  /* the cadence feeds the unsigned lane; the gate feeds the signed one */
+  s.push(arrow(CX(2)+COLW, j2+54, CX(3)-10, f1+66, {sw:2.2}));
+  s.push(arrow(CX(2)+COLW, j4+60, CX(3)-10, f2+125, {sw:3}));
+  s.push(arrow(CX(3)+COLW, f1+66, CX(4)-10, 239, {sw:2, dash:"5 4", stroke:p.warn, m:"w"}));
   s.push(arrow(CX(3)+COLW, f2+125, CX(4)-10, 515, {sw:3.4, stroke:p.blue, m:"b"}));
 
-  /* ---------- column 5: teams ---------- */
+  /* ---------- column 5: five ways out ---------- */
   s.push(bandLabel(CX(4), TOP - 22, 5, "WHERE IT LANDS"));
-  const TEAMS = [
-    {t:"Product", w:"What changed, and what to build next", sysl:"Roadmap board → Jira backlog (AIA)"},
-    {t:"Product Marketing", w:"Their claims next to our Lab results", sysl:"Messaging + battlecard library"},
-    {t:"Pre-Sales & Solutions", w:"The objection, and the tested answer", sysl:"Salesforce account record"},
-    {t:"Leadership", w:"Tier-1 moves only, on one screen", sysl:"Board pack + strategy call"}
+  const WAYS = [
+    {t:"Alerts", w:["Bell with an unread count, routed", "by role. Rings only when it must."],
+     sysl:"Same-day for tier-1 triggers"},
+    {t:"Tailored Screen", w:["Five roles, five homes. One event,", "a different sentence for each, or none."],
+     sysl:"Product · PMM · Pre-Sales · Leadership"},
+    {t:"Digest", w:["Daily flash unsigned. Weekly signed.", "Monthly carries one strategic call."],
+     sysl:"Email + Teams · fixed cadence"},
+    {t:"Forwarding", w:["Assessments travel to email or Teams.", "Field bodies never travel."],
+     sysl:"Permissions go with it"},
+    {t:"Tool Integration", w:["Lands as work items in the tools", "where the work already lives."],
+     sysl:"Jira AIA · battlecards · Salesforce"}
   ];
-  const th = 148, tgap = 26;
-  const ty0 = TOP + ((BOT - TOP) - (4*th + 3*tgap)) / 2;
-  TEAMS.forEach((tm, i) => {
+  const th = 118, tgap = 20;
+  const ty0 = TOP + ((BOT - TOP) - (5*th + 4*tgap)) / 2;
+  WAYS.forEach((tm, i) => {
     const y = ty0 + i * (th + tgap);
     s.push(box(CX(4), y, COLW, th));
     s.push('<rect x="'+CX(4)+'" y="'+y+'" width="4.5" height="'+th+'" rx="2.2" fill="'+p.sky+'"/>');
-    s.push(txt(CX(4)+20, y+30, tm.t, {size:16, weight:"bold", fill:p.ink}));
-    s.push(txt(CX(4)+20, y+52, tm.w, {size:12, fill:p.ink2}));
-    s.push(box(CX(4)+18, y+68, COLW-36, 34, {fill:p.band, stroke:"none", r:7}));
-    s.push(txt(CX(4)+30, y+90, tm.sysl, {size:11.5, weight:"bold", fill:p.ink2}));
-    s.push(txt(CX(4)+20, y+126, "then it becomes their work, not our newsletter", {size:11, fill:p.ink3}));
+    s.push(txt(CX(4)+20, y+30, "0"+(i+1), {size:12, weight:"bold", fill:p.sky}));
+    s.push(txt(CX(4)+48, y+30, tm.t, {size:15.5, weight:"bold", fill:p.ink}));
+    s.push(lines(CX(4)+20, y+52, tm.w, {size:11.5, fill:p.ink2, lh:15}));
+    s.push(box(CX(4)+18, y+80, COLW-36, 27, {fill:p.band, stroke:"none", r:7}));
+    s.push(txt(CX(4)+30, y+98, tm.sysl, {size:11, weight:"bold", fill:p.ink2}));
   });
 
   /* ---------- loop 1 (top): triggers re-aim the collector ----------
@@ -470,7 +488,7 @@ function drawFigure(){
 
   /* ---------- loop 2 (bottom): give to get ---------- */
   const gy = 968, gx1 = CX(4) + COLW/2, s1mid = sy0 + sh/2;
-  s.push('<path d="M '+gx1+' '+(ty0 + 4*th + 3*tgap - 6)+' L '+gx1+' '+gy+' L '+CORR2+' '+gy+' L '+CORR2+' '+s1mid+' L '+(CX(0)-11)+' '+s1mid+'"'
+  s.push('<path d="M '+gx1+' '+(ty0 + 5*th + 4*tgap - 6)+' L '+gx1+' '+gy+' L '+CORR2+' '+gy+' L '+CORR2+' '+s1mid+' L '+(CX(0)-11)+' '+s1mid+'"'
     + ' fill="none" stroke="'+p.field+'" stroke-width="2.4" stroke-dasharray="7 5" marker-end="url(#ahf)"/>');
   s.push(box(CX(0) + 40, gy - 23, 486, 46, {fill:p.card, stroke:p.field, r:8}));
   s.push(txt(CX(0) + 58, gy - 4, "LOOP 2 · GIVE TO GET", {size:10, weight:"bold", fill:p.field, ls:".8"}));
@@ -478,7 +496,7 @@ function drawFigure(){
 
   const VX = -76, VW = W - VX;
   $("figure").innerHTML = '<svg viewBox="'+VX+' 0 '+VW+' '+H+'" xmlns="http://www.w3.org/2000/svg" role="img"'
-    + ' aria-label="How the AI Market Radar works: three intake streams, five categories, a scoring rubric, an analyst signature, four stakeholder teams, and two feedback loops.">'
+    + ' aria-label="How the AI Market Radar works: three doors in, five categories, a scoring rubric, a human review gate, an analyst signature, five ways out, and two feedback loops.">'
     + '<rect x="'+VX+'" y="0" width="'+VW+'" height="'+H+'" fill="'+(isDark()?"#141A31":"#FFFFFF")+'"/>'
     + s.join("") + '</svg>';
 }
@@ -509,5 +527,7 @@ renderThemeBtn();
 drawFigure();
 drawBeats();
 </script>
+<!-- GoatCounter · privacy-friendly, cookieless analytics -->
+<script data-goatcounter="https://aimarketradar.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 </body>
 </html>
